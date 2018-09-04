@@ -42,3 +42,7 @@ Thumbs.db~
 data
 input
 output
+
+# Files #
+#########
+transfer_annotations.py
