@@ -15,6 +15,7 @@ from token_sequence_annotator import TokenSequenceAnnotator
 from detokenizer import Detokenizer
 from spacy.symbols import LEMMA
 
+
 class DSHAnnotator:
 
     def __init__(self):
@@ -55,7 +56,7 @@ class DSHAnnotator:
         return self.nlp(text)
 
     def annotate_file(self, path):
-        #TODO check for file in input
+        # TODO check for file in input
         self.text = open(path, 'r').read()
         doc = self.nlp(self.text)
         
@@ -68,7 +69,6 @@ class DSHAnnotator:
                 print(string, file=fout)
                 print(string)
         fout.close()
-
 
     def print_spans(self, doc):
         s = '\n'

@@ -15,6 +15,7 @@ from spacy.symbols import LEMMA
 # TODO factorise these classes into a single AnnotatorSequence parent and 
 # various child classes that implement load_lexicon and other methods
 
+
 class LexicalAnnotatorSequence(object):
     """
     Creates a set of new pipeline components that annotate tokens accoring to
@@ -173,7 +174,8 @@ if __name__ == '__main__':
     print('Lexical Sequence Annotator')
     print('--------------------------')
     
-    text = 'This patient, made an attempt to commit suicide, but shows signs of self-harm, but denies deliberate self-harm. However, see she has been cutting herself.'
+    text = 'This patient, made an attempt to commit suicide, but shows signs of self-harm, but denies deliberate ' \
+           'self-harm. However, see she has been cutting herself.'
     pin = 'T:/Andre Bittar/workspace/ka_dsh/resources/dsh_lex.txt'
     lsa = LexicalAnnotatorSequence(nlp, pin, 'is_dsh')
     lsa.load_lexicon()

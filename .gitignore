@@ -46,3 +46,8 @@ output
 # Files #
 #########
 transfer_annotations.py
+
+# Miscellaaneous #
+##################
+__pycache__
+.idea

@@ -11,6 +11,7 @@ import sys
 
 from spacy.symbols import LEMMA, ORTH, POS, TAG
 
+
 class Detokenizer(object):
     def __init__(self, nlp):
         self.nlp = nlp
