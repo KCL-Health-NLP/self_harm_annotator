@@ -9,7 +9,6 @@ import spacy
 import sys
 
 from spacy.matcher import Matcher
-from spacy.symbols import LEMMA, POS
 from spacy.tokens import Token
 
 

@@ -15,11 +15,12 @@ from spacy.symbols import LEMMA, ORTH, POS, TAG
 class Detokenizer(object):
     def __init__(self, nlp):
         self.nlp = nlp
-           
+
     def load_detokenization_rules(self, path, verbose=False):
         """
         Load rules to undo tokenization.
         :param path: the path to the rule file
+        :param verbose: print all messages
         :return: None
         """
         lines = [line.split('\t') for line in open(path, 'r').read().split('\n') if not line.startswith('#') and line != '']

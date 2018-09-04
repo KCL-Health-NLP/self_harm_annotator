@@ -9,11 +9,11 @@ import spacy
 import sys
 
 from spacy.matcher import PhraseMatcher, Matcher
-from spacy.tokens import Doc, Span, Token
+from spacy.tokens import Span, Token
 from spacy.symbols import LEMMA
 
-# TODO factorise these classes into a single AnnotatorSequence parent and 
-# various child classes that implement load_lexicon and other methods
+# TODO factorise these classes into a single AnnotatorSequence parent and  various child classes that implement
+# load_lexicon and other methods
 
 
 class LexicalAnnotatorSequence(object):

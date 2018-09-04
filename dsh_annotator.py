@@ -9,8 +9,8 @@ import os
 import spacy
 import sys
 
-from lexical_annotator import LexicalAnnotatorSequence, LexicalAnnotator
-from lexical_annotator import LemmaAnnotatorSequence, LemmaAnnotator
+from lexical_annotator import LexicalAnnotatorSequence
+from lexical_annotator import LemmaAnnotatorSequence
 from token_sequence_annotator import TokenSequenceAnnotator
 from detokenizer import Detokenizer
 from spacy.symbols import LEMMA
