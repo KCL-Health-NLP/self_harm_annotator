@@ -1,0 +1,5 @@
+start-up	start-up	_	_
+linear-time	linear-time	JJ	ADJ
+self-harm	self-harm	NN	NOUN
+#£[0-9]+bn	£[0-9]+bn	DT	DET
+10-20	10-20	DT	DET
