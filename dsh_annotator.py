@@ -110,9 +110,9 @@ if __name__ == "__main__":
     dsha.load_detokenizer(os.path.join('resources', 'detokenization_rules.txt'))
     
     # Load lexical annotators
-    dsha.load_lexicon('T:/Andre Bittar/workspace/ka_dsh/resources/dsh_lex.txt', None, 'WA')
-    dsha.load_lexicon('T:/Andre Bittar/workspace/ka_dsh/resources/body_part_lex.txt', LEMMA, 'LA')
-    dsha.load_lexicon('T:/Andre Bittar/workspace/ka_dsh/resources/harm_V_lex.txt', LEMMA, 'LA')
+    dsha.load_lexicon('./resources/dsh_lex.txt', None, 'WA')
+    dsha.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
+    dsha.load_lexicon('./resources/harm_V_lex.txt', LEMMA, 'LA')
 
     # Load token sequence annotators
     dsha.load_token_sequence_annotator(None)
