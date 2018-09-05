@@ -12,6 +12,17 @@ from spacy.matcher import Matcher
 from spacy.tokens import Token
 
 
+# This is an ad hoc workaround to avoid trying to overwrite default attributes
+# TODO Find a better, cleaner solution
+DEFAULT_ATTRIBUTES = ['DEP', 'HEAD', 'IS_ALPHA', 'IS_ASCII', 'IS_BRACKET', 
+                      'IS_CURRENCY', 'IS_DIGIT', 'IS_LEFT_PUNCT', 'IS_LOWER',
+                      'IS_OOV', 'IS_PUNCT', 'IS_QUOTE', 'IS_RIGHT_PUNCT',
+                      'IS_SPACE', 'IS_STOP', 'IS_TITLE', 'IS_UPPER', 'LEMMA',
+                      'LENGTH', 'LIKE_EMAIL', 'LIKE_NUM', 'LIKE_URL', 'LOWER',
+                      'ORTH', 'POS', 'PREFIX', 'SENT_START', 'SHAPE', 'SUFFIX',
+                      'TAG']
+
+
 class TokenSequenceAnnotator(object):
 
     def __init__(self, nlp):
@@ -44,6 +55,8 @@ class TokenSequenceAnnotator(object):
     
     def load_rules(self):
         # TODO this is where we need to parse the rule file - specify path as an argument
+        # NB spaCy cannot use custom extension attributes in rule matching!
+        # See https://github.com/explosion/spaCy/issues/1499
         print('-- Loading rules')
         
         rules = []
@@ -70,10 +83,11 @@ class TokenSequenceAnnotator(object):
                 for attr in avm[token_id]:
                     attr_int = self.nlp.vocab.strings[attr]
                     print('attr:', attr, attr_int)
-                    if not Token.has_extension(attr):
-                        # TODO also make sure this is not a standard token attribute, e.g. LEMMA or POS
+                    if not Token.has_extension(attr) and attr not in DEFAULT_ATTRIBUTES:
                         Token.set_extension(attr, default=False)
                         print('-- Added custom attribute', attr, file=sys.stderr)
+                    elif attr in DEFAULT_ATTRIBUTES:
+                        print('-- Attribute', attr, 'is default. Skipping.', file=sys.stderr)
                     else:
                         print('-- Attribute', attr, 'exists. Skipping.', file=sys.stderr)
         
@@ -97,7 +111,12 @@ class TokenSequenceAnnotator(object):
                     if new_annotations is not None:
                         for new_attr in new_annotations:
                             token = doc[start:end][j]
-                            token._.set(new_attr, new_annotations[new_attr])
+                            val = new_annotations[new_attr]
+                            if new_attr in DEFAULT_ATTRIBUTES:
+                                # TODO check if modification of built-in attributes is possible
+                                print('-- Warning: cannot modify default attribute', new_attr, file=sys.stderr)
+                            else:
+                                token._.set(new_attr, val)
 
     def print_spans(self, doc):
         s = '\n'

@@ -12,7 +12,7 @@ from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, Token
 from spacy.symbols import LEMMA
 
-# TODO factorise these classes into a single AnnotatorSequence parent and  various child classes that implement
+# TODO factorise these classes into a single AnnotatorSequence parent and various child classes that implement
 # load_lexicon and other methods
 
 
