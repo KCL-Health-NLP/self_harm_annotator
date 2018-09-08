@@ -8,6 +8,7 @@ Created on Fri Aug  3 15:44:07 2018
 import spacy
 import sys
 
+from resources.token_sequence_rules import RULES
 from spacy.matcher import Matcher
 from spacy.tokens import Token
 
@@ -42,7 +43,7 @@ class TokenSequenceAnnotator(object):
             name = rule['name']
             avm = rule['avm']
 
-            self.matcher = Matcher(self.nlp.vocab) # Need to do this for each rule separately unfortunately
+            self.matcher = Matcher(self.nlp.vocab)  # Need to do this for each rule separately unfortunately
             self.matcher.add(name, None, pattern)
 
             matches = self.matcher(doc)
@@ -60,22 +61,8 @@ class TokenSequenceAnnotator(object):
         print('-- Loading rules')
         
         rules = []
-        rules.append({
-                'name': 'RULE_1',
-                'pattern': [{'LEMMA': 'elizabeth'}, {'LEMMA': 'callaghan'}],
-                'avm': {0: {'TSA': 'LIZ', 'TSA': 'FIRST_NAME'}, 1: {'TSA': 'CALLA', 'TSA': 'SURNAME'}}
-                })
-        rules.append({
-                'name': 'RULE_2',
-                'pattern': [{'LEMMA': 'have'}, {'LEMMA': 'not'}, {'POS': 'VERB'}],
-                'avm': {0: {'TSA': 'NEG'}, 2: {'TSA': 'NEG'}}
-                })
-        rules.append({
-                'name': 'RULE_3',
-                'pattern': [{'TSA': 'NEG'}],
-                'avm': {0: {'WA': 'TSA', 'LEMMA': 'gohu'}}
-                })
-        
+        rules.extend(RULES)
+
         # Declare (custom) attributes specified in each rule of the rule file
         for rule in rules:
             avm = rule['avm']
@@ -114,7 +101,7 @@ class TokenSequenceAnnotator(object):
                             val = new_annotations[new_attr]
                             if new_attr in DEFAULT_ATTRIBUTES:
                                 # TODO check if modification of built-in attributes is possible
-                                print('-- Warning: cannot modify default attribute', new_attr, file=sys.stderr)
+                                print('-- Warning: cannot modify built-in attribute', new_attr, file=sys.stderr)
                             else:
                                 token._.set(new_attr, val)
 
@@ -151,7 +138,7 @@ class TokenSequenceAnnotator(object):
 if __name__ == '__main__':
     nlp = spacy.load('en')
 
-    text = 'This has not been done by Elizabeth Callaghan.'
+    text = 'This has not been done by Elizabeth Callaghan who cut her arm.'
 
     tsa = TokenSequenceAnnotator(nlp)
     nlp.add_pipe(tsa)
