@@ -31,7 +31,7 @@ class TokenSequenceAnnotator(object):
         self.nlp = nlp
         self.matcher = None
         self.matches = []
-        self.rules = self.load_rules()
+        self.rules = RULES
 
     def __call__(self, doc):
         """
@@ -56,33 +56,12 @@ class TokenSequenceAnnotator(object):
     
     def load_rules(self):
         # TODO this is where we need to parse the rule file - specify path as an argument
-        # NB spaCy cannot use custom extension attributes in rule matching!
-        # See https://github.com/explosion/spaCy/issues/1499
-        print('-- Loading rules')
-        
-        rules = []
-        rules.extend(RULES)
+        pass
 
-        # Declare (custom) attributes specified in each rule of the rule file
-        for rule in rules:
-            avm = rule['avm']
-            for token_id in avm:
-                for attr in avm[token_id]:
-                    attr_int = self.nlp.vocab.strings[attr]
-                    print('attr:', attr, attr_int)
-                    if not Token.has_extension(attr) and attr not in DEFAULT_ATTRIBUTES:
-                        Token.set_extension(attr, default=False)
-                        print('-- Added custom attribute', attr, file=sys.stderr)
-                    elif attr in DEFAULT_ATTRIBUTES:
-                        print('-- Attribute', attr, 'is default. Skipping.', file=sys.stderr)
-                    else:
-                        print('-- Attribute', attr, 'exists. Skipping.', file=sys.stderr)
-        
-        return rules
-    
     def add_annotation(self, doc, matches, rule_avm):
         """
-        Add annotations to the specified tokens in a match
+        Add annotations to the specified tokens in a match.
+        Does not work with operators.
         :param doc: the spaCy document object
         :param matches: the matches
         :param rule_avm: the attribute-value pair dictionary specified in the annotation rule
@@ -91,13 +70,13 @@ class TokenSequenceAnnotator(object):
         for match in matches:
             start = match[1]
             end = match[2]
-            span = doc[start:end]
+            span = doc[start:end + 1]
             for j in range(len(span)):
                 if j in rule_avm.keys():
                     new_annotations = rule_avm.get(j, None)
                     if new_annotations is not None:
                         for new_attr in new_annotations:
-                            token = doc[start:end][j]
+                            token = span[j]
                             val = new_annotations[new_attr]
                             if new_attr in DEFAULT_ATTRIBUTES:
                                 # TODO check if modification of built-in attributes is possible
@@ -138,7 +117,7 @@ class TokenSequenceAnnotator(object):
 if __name__ == '__main__':
     nlp = spacy.load('en')
 
-    text = 'This has not been done by Elizabeth Callaghan who cut her arm.'
+    text = 'This self-harm has not been done by Elizabeth Callaghan who cut her arm.I will be very very very happy.'
 
     tsa = TokenSequenceAnnotator(nlp)
     nlp.add_pipe(tsa)
