@@ -117,7 +117,7 @@ class TokenSequenceAnnotator(object):
 if __name__ == '__main__':
     nlp = spacy.load('en')
 
-    text = 'This self-harm has not been done by Elizabeth Callaghan who cut her arm.I will be very very very happy.'
+    text = 'This self-harm has not been done by Elizabeth Callaghan who cut her arm and cut her legs. I will be very very very happy. I have apple and banana'
 
     tsa = TokenSequenceAnnotator(nlp)
     nlp.add_pipe(tsa)

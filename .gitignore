@@ -51,3 +51,4 @@ transfer_annotations.py
 ##################
 __pycache__
 .idea
+test.py
