@@ -22,16 +22,20 @@ class DSHAnnotator:
         self.nlp = spacy.load('en')
         self.text = None
 
-    def load_lexicon(self, path, source_attribute, target_attribute):
+    def load_lexicon(self, path, source_attribute, target_attribute, merge=False):
         """
         Load a lexicon/terminology file for annotation.
         """
         if source_attribute == LEMMA:
-            lsa = LemmaAnnotatorSequence(self.nlp, path, target_attribute)
+            lsa = LemmaAnnotatorSequence(self.nlp, path, target_attribute, merge=merge)
         else:
-            lsa = LexicalAnnotatorSequence(self.nlp, path, target_attribute)
+            lsa = LexicalAnnotatorSequence(self.nlp, path, target_attribute, merge=merge)
         lsa.load_lexicon()
         self.nlp = lsa.add_components()
+
+    def load_pronoun_lemma_corrector(self):
+        component = PronounLemmaCorrector()
+        self.nlp.add_pipe(component, last=True)
 
     def load_detokenizer(self, path):
         """
@@ -61,6 +65,17 @@ class DSHAnnotator:
         doc = self.nlp(self.text)
         
         return doc
+
+    def calculate_dsh_mention_attributes(self, doc):
+        # Hack: get attributes from window of 5 tokens before DSH mention
+        for i in range(len(doc)):
+            if doc[i]._.DSH == 'DSH':
+                window = doc[i-5:i]
+                for token in window:
+                    if token._.NEG == 'NEG':
+                        doc[i]._.NEG = 'NEG'
+                    if token._.TIME == 'TIME':
+                        doc[i]._.TIME = 'TIME'
 
     def print_tokens(self, doc):
         with open('T:/Andre Bittar/workspace/ka_dsh/output/report.txt', 'w') as fout:
@@ -101,16 +116,33 @@ class DSHAnnotator:
                 s += '{:10}'.format(val or '_')
             print(s, file=sys.stderr)
 
+    def build_ehost_output(self, doc):
+        pass
+
+
+class PronounLemmaCorrector(object):
+    def __call__(self, doc):
+        for token in doc:
+            if token.lower_ in ['she', 'her', 'herself']:
+                token.lemma_ = token.lower_
+        return doc
+
 
 if __name__ == "__main__":
     dsha = DSHAnnotator()
     pin = 'input/test.txt'
 
+    # Load pronoun lemma corrector
+    dsha.load_pronoun_lemma_corrector()
+
     # Load detokenizer
     dsha.load_detokenizer(os.path.join('resources', 'detokenization_rules.txt'))
     
     # Load lexical annotators
-    dsha.load_lexicon('./resources/dsh_lex.txt', None, 'WA')
+    dsha.load_lexicon('./resources/dsh_sequence_lex.txt', LEMMA, 'DSH', merge=True)
+    dsha.load_lexicon('./resources/dsh_lex.txt', None, 'DSH', merge=True)
+    dsha.load_lexicon('./resources/time_lex.txt', None, 'TIME')
+    dsha.load_lexicon('./resources/negation_lex.txt', LEMMA, 'NEG')
     dsha.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
     dsha.load_lexicon('./resources/harm_V_lex.txt', LEMMA, 'LA')
 
@@ -119,4 +151,7 @@ if __name__ == "__main__":
 
     # Annotate and print results
     doc = dsha.annotate_file(pin)
+
+    dsha.calculate_dsh_mention_attributes(doc)
+
     dsha.print_spans(doc)

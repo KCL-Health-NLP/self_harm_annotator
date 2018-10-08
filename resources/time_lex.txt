@@ -1,0 +1,6 @@
+ago	TIME
+since	TIME
+when	TIME
+history	TIME
+Hx	TIME
+used to	TIME

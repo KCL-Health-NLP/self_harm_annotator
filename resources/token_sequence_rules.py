@@ -5,21 +5,14 @@ from spacy.tokens import Token
 #################################
 
 Token.set_extension('DSH', default=False)
+Token.set_extension('TIME', default=False)
+
+""" TESTS
 Token.set_extension('TEST1', default=False)
 Token.set_extension('TEST2', default=False)
 Token.set_extension('TEST3', default=False)
 Token.set_extension('TEST4', default=False)
 
-####################
-# Rule definitions #
-####################
-
-RULES = [
-    {
-        'name': 'CUT_HER_X_ARM',
-        'pattern': [{'LOWER': 'cut'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
-        'avm': {0: {'DSH': 'TRUE'}, 1: {'DSH': 'TRUE'}, 2: {'DSH': 'TRUE'}}
-    },
     {
         'name': 'TEST_1',
         'pattern': [{'LEMMA': 'be'}, {'POS': 'ADV', 'OP': '*'}, {'POS': 'ADJ'}],
@@ -29,5 +22,63 @@ RULES = [
         'name': 'TEST_2',
         'pattern': [{'_': {'DSH': 'TRUE'}}],
         'avm': {0: {'TEST4': 'TRUE'}}
+    }
+"""
+
+""" NOT WORKING IN THIS VERSION OF SPACY
+    {
+        'name': 'CUT_HER_X_ARM',
+        'pattern': [{'LEMMA': 'cut'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
+        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
+    },
+    {
+        'name': 'BURN_HER_X_ARM',
+        'pattern': [{'LEMMA': 'burn'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
+        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
+    },
+    {
+        'name': 'SLASH_HER_X_ARM',
+        'pattern': [{'LEMMA': 'slash'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
+        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
+    },
+    {
+        'name': 'LACERATE_HER_X_ARM',
+        'pattern': [{'LEMMA': 'lacerate'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
+        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
+    },
+    {
+        'name': 'HIT_HER_X_ARM',
+        'pattern': [{'LEMMA': 'hit'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
+        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
+    },
+    {
+        'name': 'PUNCH_HER_X_ARM',
+        'pattern': [{'LEMMA': 'punch'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
+        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
+    },
+    {
+        'name': 'HIT_HERSELF_IN_X_ARM',
+        'pattern': [{'LEMMA': 'hit'}, {'LOWER': 'herself'}, {'POS': 'ADP'}, {'POS': 'DET'},
+                    {'REGEX': '^(arms?|hands?|legs?|chest|breasts|stomach|face)'}],
+        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
+    },
+    {
+        'name': 'PUNCH_HERSELF_IN_X_ARM',
+        'pattern': [{'LEMMA': 'punch'}, {'LOWER': 'herself'}, {'POS': 'ADP'}, {'POS': 'DET'},
+                    {'REGEX': '^(arms?|hands?|legs?|chest|breasts|stomach|face)'}],
+        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
+    },
+"""
+
+
+####################
+# Rule definitions #
+####################
+
+RULES = [
+    {
+        'name': 'IN_YEAR',
+        'pattern': [{'POS': 'ADP'}, {'SHAPE': 'dddd'}],
+        'avm': {0: {'TIME': 'TRUE'}, 1: {'TIME': 'TRUE'}}
     }
 ]

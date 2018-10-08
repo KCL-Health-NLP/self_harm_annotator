@@ -1,5 +1,9 @@
 attempt suicide	DSH
 attempt to commit suicide	DSH
+attempted suicide	DSH
+attempted to commit suicide	DSH
+attempts suicide	DSH
+attempts to commit suicide	DSH
 automutilate	DSH
 auto-mutilation	DSH
 auto-mutilate	DSH
@@ -8,6 +12,8 @@ auto mutilate	DSH
 d.s.h	DSH
 d.s.h.	DSH
 DSH	DSH
+D.S.H	DSH
+D.S.H.	DSH
 deliberately self harm	DSH
 deliberately self harming	DSH
 deliberate self harm	DSH
@@ -103,6 +109,8 @@ poisons herself	DSH
 poisoned herself	DSH
 poisoning	DSH
 poisoning herself	DSH
+risk to herself	DSH
+risk to self	DSH
 scratch	DSH
 scratches on her	DSH
 scratching	DSH

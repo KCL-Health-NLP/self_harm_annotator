@@ -1,0 +1,60 @@
+cut her arm	DSH
+cut her hand	DSH
+cut her leg	DSH
+cut her chest	DSH
+cut her breast	DSH
+cut her face	DSH
+cut her body	DSH
+cut her cheek	DSH
+scratch her arm	DSH
+scratch her hand	DSH
+scratch her leg	DSH
+scratch her chest	DSH
+scratch her breast	DSH
+scratch her face	DSH
+scratch her body	DSH
+scratch her cheek	DSH
+scratched her arm	DSH
+scratched her hand	DSH
+scratched her leg	DSH
+scratched her chest	DSH
+scratched her breast	DSH
+scratched her face	DSH
+scratched her body	DSH
+scratched her cheek	DSH
+scratches her arm	DSH
+scratches her hand	DSH
+scratches her leg	DSH
+scratches her chest	DSH
+scratches her breast	DSH
+scratches her face	DSH
+scratches her body	DSH
+scratches her cheek	DSH
+lacerate her arm	DSH
+lacerate her hand	DSH
+lacerate her leg	DSH
+lacerate her chest	DSH
+lacerate her breast	DSH
+lacerate her face	DSH
+lacerate her body	DSH
+lacerate her cheek	DSH
+burn her arm	DSH
+burn her hand	DSH
+burn her leg	DSH
+burn her chest	DSH
+burn her breast	DSH
+burn her face	DSH
+burn her body	DSH
+burn her cheek	DSH
+punch herself in the face	DSH
+punch herself in the chest	DSH
+punch herself in the breast	DSH
+punch herself in the stomach	DSH
+hit herself in the face	DSH
+hit herself in the chest	DSH
+hit herself in the breast	DSH
+hit herself in the stomach	DSH
+smack herself in the face	DSH
+smack herself in the chest	DSH
+smack herself in the breast	DSH
+smack herself in the stomach	DSH
