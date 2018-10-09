@@ -129,7 +129,7 @@ class LemmaAnnotatorSequence(object):
                 try:
                     term, label = line.split('\t')
                 except Exception as e:
-                    print('-- Warning: syntax error in rule file ' + self.pin + ' at line', n, file=sys.stderr)
+                    raise ValueError('-- Error: syntax error in rule file ' + self.pin + ' at line', n)
                 term = term.strip()
                 label = label.strip()
                 terms = self.annotation_rules.get(label, [])

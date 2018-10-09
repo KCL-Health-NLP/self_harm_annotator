@@ -2,3 +2,4 @@ not	NEG
 no	NEG
 never	NEG
 deny	NEG
+denies	NEG

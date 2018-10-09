@@ -34,6 +34,12 @@ harming herself	DSH
 harm to herself	DSH
 harm to self	DSH
 harm to themselves	DSH
+harm toward herself	DSH
+harm toward self	DSH
+harm toward themselves	DSH
+harm towards herself	DSH
+harm towards self	DSH
+harm towards themselves	DSH
 hit herself	DSH
 hits herself	DSH
 hitting herself	DSH
@@ -97,6 +103,7 @@ mutilate herself	DSH
 mutilates herself	DSH
 mutilated herself	DSH
 mutilating herself	DSH
+OD	DSH
 overdose	DSH
 overdoses	DSH
 overdosed	DSH

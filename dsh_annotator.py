@@ -76,6 +76,8 @@ class DSHAnnotator:
                         doc[i]._.NEG = 'NEG'
                     if token._.TIME == 'TIME':
                         doc[i]._.TIME = 'TIME'
+                    if token._.MODALITY == 'MODALITY':
+                        doc[i]._.MODALITY = 'MODALITY'
 
     def print_tokens(self, doc):
         with open('T:/Andre Bittar/workspace/ka_dsh/output/report.txt', 'w') as fout:
@@ -117,8 +119,90 @@ class DSHAnnotator:
             print(s, file=sys.stderr)
 
     def build_ehost_output(self, doc):
-        pass
+        mentions = {}
+        n = 1
+        for token in doc:
+            if token._.DSH == 'DSH':
+                mention_id = 'EHOST_Instance_' + str(n)
+                annotator = 'SYSTEM'
+                mclass = 'SELF-HARM'
+                comment = None
+                start = token.idx
+                end = token.idx + len(token.text)
+                polarity = 'POSITIVE'
+                status = 'RELEVANT'
+                temporality = 'CURRENT'
+                text = token.text
+                if token._.NEG == 'NEG':
+                    polarity = 'NEGATIVE'
+                    status = 'NON_RELEVANT'
+                if token._.MODALITY == 'MODALITY':
+                    status = 'NON_RELEVANT'
+                if token._.TIME == 'TIME':
+                    temporality = 'HISTORICAL'
+                n += 1
+                mentions[mention_id] = {'annotator': annotator,
+                                        'class': mclass,
+                                        'comment': comment,
+                                        'end': end,
+                                        'polarity': polarity,
+                                        'start': start,
+                                        'status': status,
+                                        'temporality': temporality,
+                                        'text': text
+                                        }
+        return mentions
 
+    def process(self, path, verbose=False):
+        # Load pronoun lemma corrector
+        self.load_pronoun_lemma_corrector()
+
+        # Load detokenizer
+        self.load_detokenizer(os.path.join('resources', 'detokenization_rules.txt'))
+
+        # Load lexical annotators
+        self.load_lexicon('./resources/dsh_sequence_lex.txt', LEMMA, 'DSH', merge=True)
+        self.load_lexicon('./resources/dsh_lex.txt', None, 'DSH', merge=True)
+        self.load_lexicon('./resources/time_lex.txt', None, 'TIME')
+        self.load_lexicon('./resources/negation_lex.txt', LEMMA, 'NEG')
+        self.load_lexicon('./resources/modality_lex.txt', LEMMA, 'MODALITY')
+        self.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
+        self.load_lexicon('./resources/harm_V_lex.txt', LEMMA, 'LA')
+
+        # Load token sequence annotators
+        dsha.load_token_sequence_annotator(None)
+
+        global_mentions = {}
+
+        if os.path.isdir(path):
+            files = os.listdir(path)
+            
+            for f in files:
+                pin = os.path.join(path, f)
+                print('-- Processing file:', pin, file=sys.stderr)
+                # Annotate and print results
+                doc = self.annotate_file(pin)
+                self.calculate_dsh_mention_attributes(doc)
+                
+                if verbose:
+                    self.print_spans(doc)
+                
+                mentions = self.build_ehost_output(doc)
+                global_mentions[f + '.knowtator.xml'] = mentions
+                
+        elif os.path.isfile(path):
+            print('-- Processing file:', path, file=sys.stderr)
+            doc = self.annotate_file(path)
+            self.calculate_dsh_mention_attributes(doc)
+            
+            if verbose:
+                self.print_spans(doc)
+            
+            mentions = self.build_ehost_output(doc)
+            key = os.path.basename(path)
+            global_mentions[key] = mentions
+        
+        return global_mentions
 
 class PronounLemmaCorrector(object):
     def __call__(self, doc):
@@ -130,28 +214,4 @@ class PronounLemmaCorrector(object):
 
 if __name__ == "__main__":
     dsha = DSHAnnotator()
-    pin = 'input/test.txt'
-
-    # Load pronoun lemma corrector
-    dsha.load_pronoun_lemma_corrector()
-
-    # Load detokenizer
-    dsha.load_detokenizer(os.path.join('resources', 'detokenization_rules.txt'))
-    
-    # Load lexical annotators
-    dsha.load_lexicon('./resources/dsh_sequence_lex.txt', LEMMA, 'DSH', merge=True)
-    dsha.load_lexicon('./resources/dsh_lex.txt', None, 'DSH', merge=True)
-    dsha.load_lexicon('./resources/time_lex.txt', None, 'TIME')
-    dsha.load_lexicon('./resources/negation_lex.txt', LEMMA, 'NEG')
-    dsha.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
-    dsha.load_lexicon('./resources/harm_V_lex.txt', LEMMA, 'LA')
-
-    # Load token sequence annotators
-    dsha.load_token_sequence_annotator(None)
-
-    # Annotate and print results
-    doc = dsha.annotate_file(pin)
-
-    dsha.calculate_dsh_mention_attributes(doc)
-
-    dsha.print_spans(doc)
+    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train/corpus')

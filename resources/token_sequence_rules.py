@@ -4,8 +4,8 @@ from spacy.tokens import Token
 # Custom attribute declarations #
 #################################
 
-Token.set_extension('DSH', default=False)
-Token.set_extension('TIME', default=False)
+Token.set_extension('DSH', default=False, force=True)
+Token.set_extension('TIME', default=False, force=True)
 
 """ TESTS
 Token.set_extension('TEST1', default=False)
