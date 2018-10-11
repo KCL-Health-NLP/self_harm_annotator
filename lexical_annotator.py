@@ -59,8 +59,11 @@ class LexicalAnnotatorSequence(object):
             if name in self.nlp.pipe_names:
                 name += '_'
 
-            component = LexicalAnnotator(self.nlp, terms, self.attribute, label, name, merge=self.merge)
-            self.nlp.add_pipe(component, last=True)
+            if name not in self.nlp.pipe_names:
+                component = LexicalAnnotator(self.nlp, terms, self.attribute, label, name, merge=self.merge)
+                self.nlp.add_pipe(component, last=True)
+            else:
+                print('-- ', name, 'exists already. Component not added.')
         
         return self.nlp
 
@@ -155,8 +158,11 @@ class LemmaAnnotatorSequence(object):
             if name in self.nlp.pipe_names:
                 name += '_'
 
-            component = LemmaAnnotator(self.nlp, lemma_sequences, self.attribute, label, name, merge=self.merge)
-            self.nlp.add_pipe(component, last=True)
+            if name not in self.nlp.pipe_names:
+                component = LemmaAnnotator(self.nlp, lemma_sequences, self.attribute, label, name, merge=self.merge)
+                self.nlp.add_pipe(component, last=True)
+            else:
+                print('-- ', name, 'exists already. Component not added.')
         
         return self.nlp
 
@@ -223,7 +229,7 @@ if __name__ == '__main__':
     
     text = 'This patient, made an attempt to commit suicide, but shows signs of self-harm, but denies deliberate ' \
            'self-harm. However, see she has been cutting herself.'
-    pin = 'T:/Andre Bittar/workspace/ka_dsh/resources/dsh_lex.txt'
+    pin = 'T:/Andre Bittar/workspace/dsh_annotator/resources/dsh_lex.txt'
     lsa = LexicalAnnotatorSequence(nlp, pin, 'is_dsh')
     lsa.load_lexicon()
     nlp = lsa.add_components()
@@ -237,7 +243,7 @@ if __name__ == '__main__':
     print('------------------------')
        
     text = 'This patient scratches herself and cuts up her arms.'
-    pin = 'T:/Andre Bittar/workspace/ka_dsh/resources/harm_V_lex.txt'
+    pin = 'T:/Andre Bittar/workspace/dsh_annotator/resources/harm_V_lex.txt'
     lem_sa = LemmaAnnotatorSequence(nlp, pin, 'is_harm_action')
     lem_sa.load_lexicon()
     nlp = lem_sa.add_components()

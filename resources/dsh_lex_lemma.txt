@@ -1,0 +1,87 @@
+attempt suicide	DSH
+attempt to commit suicide	DSH
+auto mutilate	DSH
+auto mutilation	DSH
+auto-mutilate	DSH
+auto-mutilation	DSH
+automutilate	DSH
+d.s.h	DSH
+d.s.h.	DSH
+deliberate injury	DSH
+deliberate self harm	DSH
+deliberate self-harm	DSH
+deliberate self-injury	DSH
+deliberately injure herself	DSH
+deliberately self harm	DSH
+deliberately self harming	DSH
+deliberately self-injure	DSH
+deliberately self-injure herself	DSH
+dsh	DSH
+electrocute herself	DSH
+electrocution	DSH
+hang herself	DSH
+harm herself	DSH
+harm to herself	DSH
+harm to self	DSH
+harm to themselves	DSH
+harm toward herself	DSH
+harm toward self	DSH
+harm toward themselves	DSH
+harm towards herself	DSH
+harm towards self	DSH
+harm towards themselves	DSH
+hit herself	DSH
+immolate herself	DSH
+injure herself deliberately	DSH
+injure herself intentionally	DSH
+injure herself on purpose	DSH
+intentional injury	DSH
+intentional self-injury	DSH
+intentionally injure herself	DSH
+intentionally self-injure herself	DSH
+jump from	DSH
+jump in front of	DSH
+jump off	DSH
+lacerate herself	DSH
+laceration	DSH
+mutilate herself	DSH
+o.d	DSH
+o.d.	DSH
+od	DSH
+overdose	DSH
+parasuicidal	DSH
+parasuicidality	DSH
+parasuicide	DSH
+poison herself	DSH
+risk to herself	DSH
+risk to self	DSH
+scratch	DSH
+scratch on her	DSH
+self cut	DSH
+self harm	DSH
+self harmer	DSH
+self hit	DSH
+self immolate	DSH
+self immolation	DSH
+self lacerate	DSH
+self laceration	DSH
+self poison	DSH
+self-cutting	DSH
+self-harm	DSH
+self-harmer	DSH
+self-harming	DSH
+self-harming behaviour	DSH
+self-hitting	DSH
+self-immolating	DSH
+self-immolation	DSH
+self-injuries	DSH
+self-injurious behaviour	DSH
+self-injury	DSH
+self-laceration	DSH
+self-mutilation	DSH
+self-poisoning	DSH
+slit her wrist	DSH
+suicidal behaviour	DSH
+suicidal gesture	DSH
+suicide attempt	DSH
+try to commit suicide	DSH

@@ -35,7 +35,12 @@ class DSHAnnotator:
 
     def load_pronoun_lemma_corrector(self):
         component = PronounLemmaCorrector()
-        self.nlp.add_pipe(component, last=True)
+        pipe_name = component.name
+
+        if not pipe_name in self.nlp.pipe_names:
+            self.nlp.add_pipe(component, last=True)
+        else:
+            print('-- ', pipe_name, 'exists already. Component not added.')
 
     def load_detokenizer(self, path):
         """
@@ -50,7 +55,8 @@ class DSHAnnotator:
         TODO activate path argument.
         """
         tsa = TokenSequenceAnnotator(self.nlp)
-        self.nlp.add_pipe(tsa)
+        if tsa.name not in self.nlp.pipe_names:
+            self.nlp.add_pipe(tsa)
 
     def get_text(self):
         return self.text
@@ -162,7 +168,7 @@ class DSHAnnotator:
 
         # Load lexical annotators
         self.load_lexicon('./resources/dsh_sequence_lex.txt', LEMMA, 'DSH', merge=True)
-        self.load_lexicon('./resources/dsh_lex.txt', None, 'DSH', merge=True)
+        self.load_lexicon('./resources/dsh_lex_lemma.txt', LEMMA, 'DSH', merge=True)
         self.load_lexicon('./resources/time_lex.txt', None, 'TIME')
         self.load_lexicon('./resources/negation_lex.txt', LEMMA, 'NEG')
         self.load_lexicon('./resources/modality_lex.txt', LEMMA, 'MODALITY')
@@ -201,10 +207,25 @@ class DSHAnnotator:
             mentions = self.build_ehost_output(doc)
             key = os.path.basename(path)
             global_mentions[key] = mentions
+        else:
+            print('-- Processing text string:', path, file=sys.stderr)
+            doc = self.nlp(path)
+            self.calculate_dsh_mention_attributes(doc)
+
+            if verbose:
+                self.print_spans(doc)
+
+            mentions = self.build_ehost_output(doc)
+            key = os.path.basename(path)
+            global_mentions[key] = mentions
         
         return global_mentions
 
+
 class PronounLemmaCorrector(object):
+    def __init__(self):
+        self.name = 'pronoun_lemma_corrector'
+
     def __call__(self, doc):
         for token in doc:
             if token.lower_ in ['she', 'her', 'herself']:
@@ -214,4 +235,4 @@ class PronounLemmaCorrector(object):
 
 if __name__ == "__main__":
     dsha = DSHAnnotator()
-    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train/corpus')
+    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/test/files/corpus')
