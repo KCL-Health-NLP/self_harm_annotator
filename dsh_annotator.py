@@ -8,12 +8,15 @@ Created on Mon Mar 12 14:27:31 2018
 import os
 import spacy
 import sys
+import xml.etree.ElementTree as ET
 
+from datetime import datetime
 from lexical_annotator import LexicalAnnotatorSequence
 from lexical_annotator import LemmaAnnotatorSequence
 from token_sequence_annotator import TokenSequenceAnnotator
 from detokenizer import Detokenizer
 from spacy.symbols import LEMMA
+from xml.dom.minidom import parseString
 
 
 class DSHAnnotator:
@@ -158,6 +161,75 @@ class DSHAnnotator:
                                         'text': text
                                         }
         return mentions
+
+    def write_ehost_output(self, pin, annotations, verbose=False):
+        ehost_pout = os.path.splitext(pin)[0] + '.txt.knowtator.xml'
+
+        root = ET.Element('annotations')
+        root.attrib['textSource'] = os.path.basename(os.path.splitext(pin.replace('.knowtatot.xml', ''))[0] + '.txt')
+
+        for annotation_id in sorted(annotations.keys()):
+            annotation = annotations[annotation_id]
+
+            annotation_node = ET.SubElement(root, 'annotation')
+            mention = ET.SubElement(annotation_node, 'mention')
+            mention.attrib['id'] = annotation_id
+            annotator = ET.SubElement(annotation_node, 'annotator')
+            annotator.attrib['id'] = 'eHOST_2010'
+            annotator.text = annotation['annotator']
+            spanned_text = ET.SubElement(annotation_node, 'spannedText')
+
+            if annotation.get('comment', None) is not None:
+                comment = ET.SubElement(annotation_node, 'annotationComment')
+                comment.text = annotation['comment']
+
+            creation_date = ET.SubElement(annotation_node, 'creationDate')
+            creation_date.text = datetime.now().strftime('%a %b %d %H:%M:%S %Z%Y')
+
+            span = ET.SubElement(annotation_node, 'spans')
+            span.attrib['start'] = annotation['start']
+            span.attrib['end'] = annotation['end']
+
+            spanned_text.text = annotation['text']
+
+            class_mention = ET.SubElement(root, 'classMention')
+            class_mention.attrib['id'] = annotation_id
+            mention_class_node = ET.SubElement(class_mention, 'mentionClass')
+            mention_class_node.attrib['id'] = annotation['class']
+            mention_class_node.text = annotation['text']
+
+        # Create Adjudication status with default values
+        adj_status = ET.SubElement(root, 'eHOST_Adjudication_Status')
+        adj_status.attrib['version'] = '1.0'
+        adj_sa = ET.SubElement(adj_status, 'Adjudication_Selected_Annotators')
+        adj_sa.attrib['version'] = '1.0'
+        adj_sc = ET.SubElement(adj_status, 'Adjudication_Selected_Classes')
+        adj_sc.attrib['version'] = '1.0'
+        adj_o = ET.SubElement(adj_status, 'Adjudication_Others')
+        check_s = ET.SubElement(adj_o, 'CHECK_OVERLAPPED_SPANS')
+        check_s.text = 'false'
+        check_a = ET.SubElement(adj_o, 'CHECK_ATTRIBUTES')
+        check_a.text = 'false'
+        check_r = ET.SubElement(adj_o, 'CHECK_RELATIONSHIP')
+        check_r.text = 'false'
+        check_cl = ET.SubElement(adj_o, 'CHECK_CLASS')
+        check_cl.text = 'false'
+        check_co = ET.SubElement(adj_o, 'CHECK_COMMENT')
+        check_co.text = 'false'
+
+        # Print to screen
+        xmlstr = ET.tostring(root, encoding='utf8', method='xml')
+        pxmlstr = parseString(xmlstr)
+
+        if verbose:
+            print(pxmlstr.toprettyxml(indent='\t'), file=sys.stderr)
+
+        # Write to file
+        tree = ET.ElementTree(root)
+        tree.write(ehost_pout, encoding="utf-8", xml_declaration=True)
+        print('-- Wrote EHOST file: ' + ehost_pout, file=sys.stderr)
+
+        return root
 
     def process(self, path, verbose=False):
         # Load pronoun lemma corrector
