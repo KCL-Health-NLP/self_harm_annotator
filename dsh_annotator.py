@@ -79,14 +79,28 @@ class DSHAnnotator:
         # Hack: get attributes from window of 5 tokens before DSH mention
         for i in range(len(doc)):
             if doc[i]._.DSH == 'DSH':
+                curr_sent = doc[i].sent
                 window = doc[i-5:i]
                 for token in window:
-                    if token._.NEG == 'NEG':
-                        doc[i]._.NEG = 'NEG'
-                    if token._.TIME == 'TIME':
-                        doc[i]._.TIME = 'TIME'
-                    if token._.MODALITY == 'MODALITY':
-                        doc[i]._.MODALITY = 'MODALITY'
+                    if token.sent == curr_sent:
+                        if token._.NEG == 'NEG':
+                            doc[i]._.NEG = 'NEG'
+                        if token._.TIME == 'TIME':
+                            doc[i]._.TIME = 'TIME'
+                        if token._.MODALITY == 'MODALITY':
+                            doc[i]._.MODALITY = 'MODALITY'
+
+        # Hack: get attributes from window of 5 tokens after DSH mention in the same sentence
+        for i in range(len(doc)):
+            if doc[i]._.DSH == 'DSH':
+                curr_sent = doc[i].sent
+                window = doc[i:i+5]
+                for token in window:
+                    if token.sent == curr_sent:
+                        if token._.TIME == 'TIME':
+                            doc[i]._.TIME = 'TIME'
+                        if token._.MODALITY == 'MODALITY':
+                            doc[i]._.MODALITY = 'MODALITY'
 
     def print_tokens(self, doc):
         with open('T:/Andre Bittar/workspace/ka_dsh/output/report.txt', 'w') as fout:
@@ -153,9 +167,9 @@ class DSHAnnotator:
                 mentions[mention_id] = {'annotator': annotator,
                                         'class': mclass,
                                         'comment': comment,
-                                        'end': end,
+                                        'end': str(end),
                                         'polarity': polarity,
-                                        'start': start,
+                                        'start': str(start),
                                         'status': status,
                                         'temporality': temporality,
                                         'text': text
@@ -163,17 +177,19 @@ class DSHAnnotator:
         return mentions
 
     def write_ehost_output(self, pin, annotations, verbose=False):
-        ehost_pout = os.path.splitext(pin)[0] + '.txt.knowtator.xml'
+        ehost_pout = os.path.splitext(pin.replace('corpus', 'saved'))[0] + '.txt.knowtator.xml'
 
         root = ET.Element('annotations')
         root.attrib['textSource'] = os.path.basename(os.path.splitext(pin.replace('.knowtatot.xml', ''))[0] + '.txt')
 
+        n = 1
         for annotation_id in sorted(annotations.keys()):
             annotation = annotations[annotation_id]
 
             annotation_node = ET.SubElement(root, 'annotation')
             mention = ET.SubElement(annotation_node, 'mention')
-            mention.attrib['id'] = annotation_id
+            mention_id = 'EHOST_Instance_' + str(n)
+            mention.attrib['id'] = mention_id
             annotator = ET.SubElement(annotation_node, 'annotator')
             annotator.attrib['id'] = 'eHOST_2010'
             annotator.text = annotation['annotator']
@@ -186,17 +202,53 @@ class DSHAnnotator:
             creation_date = ET.SubElement(annotation_node, 'creationDate')
             creation_date.text = datetime.now().strftime('%a %b %d %H:%M:%S %Z%Y')
 
-            span = ET.SubElement(annotation_node, 'spans')
+            span = ET.SubElement(annotation_node, 'span')
             span.attrib['start'] = annotation['start']
             span.attrib['end'] = annotation['end']
 
             spanned_text.text = annotation['text']
 
             class_mention = ET.SubElement(root, 'classMention')
-            class_mention.attrib['id'] = annotation_id
+            class_mention.attrib['id'] = mention_id
             mention_class_node = ET.SubElement(class_mention, 'mentionClass')
             mention_class_node.attrib['id'] = annotation['class']
             mention_class_node.text = annotation['text']
+
+            # polarity
+            n += 1
+            val = annotation.get('polarity', 'POSITIVE')
+            slot_mention_node = ET.SubElement(root, 'stringSlotMention')
+            slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(n)
+            mention_slot_node = ET.SubElement(slot_mention_node, 'mentionSlot')
+            mention_slot_node.attrib['id'] = 'polarity'
+            string_mention_value_node = ET.SubElement(slot_mention_node, 'stringSlotMentionValue')
+            string_mention_value_node.attrib['value'] = val
+            has_slot_mention_node = ET.SubElement(class_mention, 'hasSlotMention')
+            has_slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(n)
+
+            # status
+            n += 1
+            val = annotation.get('status', 'NON-RELEVANT')
+            slot_mention_node = ET.SubElement(root, 'stringSlotMention')
+            slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(n)
+            mention_slot_node = ET.SubElement(slot_mention_node, 'mentionSlot')
+            mention_slot_node.attrib['id'] = 'status'
+            string_mention_value_node = ET.SubElement(slot_mention_node, 'stringSlotMentionValue')
+            string_mention_value_node.attrib['value'] = val
+            has_slot_mention_node = ET.SubElement(class_mention, 'hasSlotMention')
+            has_slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(n)
+
+            # temporality
+            n += 1
+            val = annotation.get('temporality', 'CURRENT')
+            slot_mention_node = ET.SubElement(root, 'stringSlotMention')
+            slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(n)
+            mention_slot_node = ET.SubElement(slot_mention_node, 'mentionSlot')
+            mention_slot_node.attrib['id'] = 'temporality'
+            string_mention_value_node = ET.SubElement(slot_mention_node, 'stringSlotMentionValue')
+            string_mention_value_node.attrib['value'] = val
+            has_slot_mention_node = ET.SubElement(class_mention, 'hasSlotMention')
+            has_slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(n)
 
         # Create Adjudication status with default values
         adj_status = ET.SubElement(root, 'eHOST_Adjudication_Status')
@@ -225,8 +277,9 @@ class DSHAnnotator:
             print(pxmlstr.toprettyxml(indent='\t'), file=sys.stderr)
 
         # Write to file
-        tree = ET.ElementTree(root)
-        tree.write(ehost_pout, encoding="utf-8", xml_declaration=True)
+        #tree = ET.ElementTree(root)
+        #tree.write(ehost_pout, encoding="utf-8", xml_declaration=True)
+        open(ehost_pout, 'w').write(pxmlstr.toprettyxml(indent='\t'))
         print('-- Wrote EHOST file: ' + ehost_pout, file=sys.stderr)
 
         return root
@@ -279,6 +332,8 @@ class DSHAnnotator:
             mentions = self.build_ehost_output(doc)
             key = os.path.basename(path)
             global_mentions[key] = mentions
+            self.write_ehost_output(path, mentions, verbose=verbose)
+
         else:
             print('-- Processing text string:', path, file=sys.stderr)
             doc = self.nlp(path)
@@ -290,6 +345,7 @@ class DSHAnnotator:
             mentions = self.build_ehost_output(doc)
             key = os.path.basename(path)
             global_mentions[key] = mentions
+            self.write_ehost_output('test.txt', mentions, verbose=verbose)
         
         return global_mentions
 
@@ -307,4 +363,4 @@ class PronounLemmaCorrector(object):
 
 if __name__ == "__main__":
     dsha = DSHAnnotator()
-    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/test/files/corpus')
+    dsh_annotations = dsha.process('input/000000000/corpus/test_1.txt')

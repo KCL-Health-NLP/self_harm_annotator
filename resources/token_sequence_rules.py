@@ -79,6 +79,6 @@ RULES = [
     {
         'name': 'IN_YEAR',
         'pattern': [{'POS': 'ADP'}, {'SHAPE': 'dddd'}],
-        'avm': {0: {'TIME': 'TRUE'}, 1: {'TIME': 'TRUE'}}
+        'avm': {0: {'TIME': 'TIME'}, 1: {'TIME': 'TIME'}}
     }
 ]
