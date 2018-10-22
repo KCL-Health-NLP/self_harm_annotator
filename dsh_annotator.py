@@ -321,6 +321,8 @@ class DSHAnnotator:
                 mentions = self.build_ehost_output(doc)
                 global_mentions[f + '.knowtator.xml'] = mentions
                 
+                self.write_ehost_output(pin, mentions, verbose=verbose)
+                
         elif os.path.isfile(path):
             print('-- Processing file:', path, file=sys.stderr)
             doc = self.annotate_file(path)
@@ -363,4 +365,4 @@ class PronounLemmaCorrector(object):
 
 if __name__ == "__main__":
     dsha = DSHAnnotator()
-    dsh_annotations = dsha.process('input/000000000/corpus/test_1.txt')
+    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
