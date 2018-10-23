@@ -81,7 +81,10 @@ class DSHAnnotator:
             if doc[i]._.DSH == 'DSH':
                 curr_sent = doc[i].sent
                 window = doc[i-5:i]
+                if len(window) == 0:
+                    window = doc[curr_sent.start:i]
                 for token in window:
+                    print('----->', token, file=sys.stderr)
                     if token.sent == curr_sent:
                         if token._.NEG == 'NEG':
                             doc[i]._.NEG = 'NEG'
@@ -95,6 +98,8 @@ class DSHAnnotator:
             if doc[i]._.DSH == 'DSH':
                 curr_sent = doc[i].sent
                 window = doc[i:i+5]
+                if len(window) == 0:
+                    window = doc[i:curr_sent.end]
                 for token in window:
                     if token.sent == curr_sent:
                         if token._.TIME == 'TIME':
@@ -158,7 +163,7 @@ class DSHAnnotator:
                 text = token.text
                 if token._.NEG == 'NEG':
                     polarity = 'NEGATIVE'
-                    status = 'NON_RELEVANT'
+                    status = 'NON-RELEVANT'
                 if token._.MODALITY == 'MODALITY':
                     status = 'NON-RELEVANT'
                 if token._.TIME == 'TIME':
@@ -320,7 +325,7 @@ class DSHAnnotator:
 
         # Load lexical annotators
         self.load_lexicon('./resources/dsh_sequence_lex.txt', LEMMA, 'DSH', merge=True)
-        self.load_lexicon('./resources/dsh_lex_lemma.txt', LEMMA, 'DSH', merge=True)
+        #self.load_lexicon('./resources/dsh_lex_lemma.txt', LEMMA, 'DSH', merge=True)
         self.load_lexicon('./resources/time_lex.txt', None, 'TIME')
         self.load_lexicon('./resources/negation_lex.txt', LEMMA, 'NEG')
         self.load_lexicon('./resources/modality_lex.txt', LEMMA, 'MODALITY')
@@ -385,11 +390,12 @@ class PronounLemmaCorrector(object):
 
     def __call__(self, doc):
         for token in doc:
-            if token.lower_ in ['she', 'her', 'herself']:
+            if token.lower_ in ['she', 'her', 'herself', 'themselves']:
                 token.lemma_ = token.lower_
         return doc
 
 
 if __name__ == "__main__":
     dsha = DSHAnnotator()
-    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
+    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
+    dsh_annotations = dsha.process('she was upset as her boyfriend had self-harmed', verbose=True)

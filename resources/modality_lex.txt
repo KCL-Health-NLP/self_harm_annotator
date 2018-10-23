@@ -1,6 +1,7 @@
 able	MODALITY
 aim	MODALITY
 aspiration	MODALITY
+boyfriend	MODALITY
 can	MODALITY
 capable	MODALITY
 consider	MODALITY
@@ -47,6 +48,7 @@ thought	MODALITY
 uncertain	MODALITY
 undecided	MODALITY
 unlikely	MODALITY
+voice	MODALITY
 want	MODALITY
 will	MODALITY
 wish	MODALITY

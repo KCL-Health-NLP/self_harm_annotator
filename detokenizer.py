@@ -26,6 +26,7 @@ class Detokenizer(object):
         lines = [line.split('\t') for line in open(path, 'r').read().split('\n') if not line.startswith('#') and line != '']
 
         for line in lines:
+            print(line, file=sys.stderr)
             assert len(line) == 4
 
             rule = {ORTH: line[0], LEMMA: line[1]}
