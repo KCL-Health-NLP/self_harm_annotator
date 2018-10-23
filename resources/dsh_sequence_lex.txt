@@ -58,3 +58,6 @@ smack herself in the face	DSH
 smack herself in the chest	DSH
 smack herself in the breast	DSH
 smack herself in the stomach	DSH
+suicidal thought	NON_DSH
+suicidal idea	NON_DSH
+suicidal ideation	NON_DSH

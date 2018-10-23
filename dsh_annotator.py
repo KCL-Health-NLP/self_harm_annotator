@@ -160,7 +160,7 @@ class DSHAnnotator:
                     polarity = 'NEGATIVE'
                     status = 'NON_RELEVANT'
                 if token._.MODALITY == 'MODALITY':
-                    status = 'NON_RELEVANT'
+                    status = 'NON-RELEVANT'
                 if token._.TIME == 'TIME':
                     temporality = 'HISTORICAL'
                 n += 1
@@ -174,6 +174,33 @@ class DSHAnnotator:
                                         'temporality': temporality,
                                         'text': text
                                         }
+            elif token._.DSH == 'NON_DSH':
+                mention_id = 'EHOST_Instance_' + str(n)
+                annotator = 'SYSTEM'
+                mclass = 'SELF-HARM'
+                comment = None
+                start = token.idx
+                end = token.idx + len(token.text)
+                polarity = 'POSITIVE'
+                status = 'NON-RELEVANT'
+                temporality = 'CURRENT'
+                text = token.text
+                if token._.NEG == 'NEG':
+                    polarity = 'NEGATIVE'
+                if token._.TIME == 'TIME':
+                    temporality = 'HISTORICAL'
+                n += 1
+                mentions[mention_id] = {'annotator': annotator,
+                                        'class': mclass,
+                                        'comment': comment,
+                                        'end': str(end),
+                                        'polarity': polarity,
+                                        'start': str(start),
+                                        'status': status,
+                                        'temporality': temporality,
+                                        'text': text
+                                        }
+                
         return mentions
 
     def write_ehost_output(self, pin, annotations, verbose=False):
