@@ -6,3 +6,4 @@ Hx	TIME
 used to	TIME
 past	TIME
 previous	TIME
+previously	TIME

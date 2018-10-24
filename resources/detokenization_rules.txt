@@ -1,6 +1,5 @@
 #£[0-9]+bn	£[0-9]+bn	DT	DET
-10-20	10-20	DT	DET
-linear-time	linear-time	JJ	ADJ
+self-abuse	self-abuse	NN	NOUN
 self-cutting	self-cutting	_	_
 self-harm	self-harm	NN	NOUN
 self-harmed	self-harm	VB	VERB
@@ -9,6 +8,8 @@ self-harming	self-harming	_	_
 self-hitting	self-hitting	_	_
 self-immolating	self-immolating	_	_
 self-immolation	self-immolation	NN	NOUN
+self-imolating	self-immolating	_	_
+self-imolation	self-immolation	NN	NOUN
 self-injuries	self-injury	NN	NOUN
 self-injurious	self-injurious	JJ	ADJ
 self-injure	self-injure	VB	VERB
@@ -16,4 +17,3 @@ self-injury	self-injury	NN	NOUN
 self-laceration	self-laceration	NN	NOUN
 self-mutilation	self-mutilation	NN	NOUN
 self-poisoning	self-poisoning	_	_
-start-up	start-up	_	_

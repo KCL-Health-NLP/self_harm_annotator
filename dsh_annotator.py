@@ -80,11 +80,12 @@ class DSHAnnotator:
         for i in range(len(doc)):
             if doc[i]._.DSH == 'DSH':
                 curr_sent = doc[i].sent
-                window = doc[i-5:i]
-                if len(window) == 0:
-                    window = doc[curr_sent.start:i]
+                start = i - 5
+                if start < 0:
+                    start = curr_sent.start
+                window = doc[start:i]
+                print('----->', window, curr_sent, i, start, file=sys.stderr)
                 for token in window:
-                    print('----->', token, file=sys.stderr)
                     if token.sent == curr_sent:
                         if token._.NEG == 'NEG':
                             doc[i]._.NEG = 'NEG'
@@ -92,20 +93,25 @@ class DSHAnnotator:
                             doc[i]._.TIME = 'TIME'
                         if token._.MODALITY == 'MODALITY':
                             doc[i]._.MODALITY = 'MODALITY'
+                        if token._.HEDGING == 'HEDGING':
+                            doc[i]._.HEDGING = 'HEDGING'
 
         # Hack: get attributes from window of 5 tokens after DSH mention in the same sentence
         for i in range(len(doc)):
             if doc[i]._.DSH == 'DSH':
                 curr_sent = doc[i].sent
-                window = doc[i:i+5]
-                if len(window) == 0:
-                    window = doc[i:curr_sent.end]
+                end = i + 5
+                if end > curr_sent.start + len(curr_sent):
+                    end = curr_sent.start + len(curr_sent)
+                window = doc[i:end]
                 for token in window:
                     if token.sent == curr_sent:
                         if token._.TIME == 'TIME':
                             doc[i]._.TIME = 'TIME'
                         if token._.MODALITY == 'MODALITY':
                             doc[i]._.MODALITY = 'MODALITY'
+                        if token._.HEDGING == 'HEDGING':
+                            doc[i]._.HEDGING = 'HEDGING'
 
     def print_tokens(self, doc):
         with open('T:/Andre Bittar/workspace/ka_dsh/output/report.txt', 'w') as fout:
@@ -165,6 +171,8 @@ class DSHAnnotator:
                     polarity = 'NEGATIVE'
                     status = 'NON-RELEVANT'
                 if token._.MODALITY == 'MODALITY':
+                    status = 'UNCERTAIN'
+                if token._.HEDGING == 'HEDGING':
                     status = 'NON-RELEVANT'
                 if token._.TIME == 'TIME':
                     temporality = 'HISTORICAL'
@@ -316,7 +324,7 @@ class DSHAnnotator:
 
         return root
 
-    def process(self, path, verbose=False):
+    def process(self, path, verbose=False, write_output=True):
         # Load pronoun lemma corrector
         self.load_pronoun_lemma_corrector()
 
@@ -329,6 +337,7 @@ class DSHAnnotator:
         self.load_lexicon('./resources/time_lex.txt', None, 'TIME')
         self.load_lexicon('./resources/negation_lex.txt', LEMMA, 'NEG')
         self.load_lexicon('./resources/modality_lex.txt', LEMMA, 'MODALITY')
+        self.load_lexicon('./resources/hedging_lex.txt', LEMMA, 'HEDGING')
         self.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/harm_V_lex.txt', LEMMA, 'LA')
 
@@ -352,8 +361,9 @@ class DSHAnnotator:
                 
                 mentions = self.build_ehost_output(doc)
                 global_mentions[f + '.knowtator.xml'] = mentions
-                
-                self.write_ehost_output(pin, mentions, verbose=verbose)
+
+                if write_output:
+                    self.write_ehost_output(pin, mentions, verbose=verbose)
                 
         elif os.path.isfile(path):
             print('-- Processing file:', path, file=sys.stderr)
@@ -366,7 +376,9 @@ class DSHAnnotator:
             mentions = self.build_ehost_output(doc)
             key = os.path.basename(path)
             global_mentions[key] = mentions
-            self.write_ehost_output(path, mentions, verbose=verbose)
+
+            if write_output:
+                self.write_ehost_output(path, mentions, verbose=verbose)
 
         else:
             print('-- Processing text string:', path, file=sys.stderr)
@@ -379,7 +391,9 @@ class DSHAnnotator:
             mentions = self.build_ehost_output(doc)
             key = os.path.basename(path)
             global_mentions[key] = mentions
-            self.write_ehost_output('test.txt', mentions, verbose=verbose)
+
+            if write_output:
+                self.write_ehost_output('test.txt', mentions, verbose=verbose)
         
         return global_mentions
 
@@ -398,4 +412,24 @@ class PronounLemmaCorrector(object):
 if __name__ == "__main__":
     dsha = DSHAnnotator()
     #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
-    dsh_annotations = dsha.process('she was upset as her boyfriend had self-harmed', verbose=True)
+
+    text = 'Has no history of taking overdoses'
+    text = 'risk of self-harm'
+    text = 'She is taking multiple overdoses in the past'
+    text = 'She took overdoses a long time ago'
+    text = 'family history of self-harm'
+    text = 'She wanted to hit herself'
+    text = 'She did not self-harm'
+    text = 'cuts could be due to self-harm'
+    text = 'has a high risk of cutting herself'
+    text = 'she took an overdose in 1996'
+    text = 'chronic thoughts of self-harm'
+    text = 'her father has chronic self-harm'
+    text = 'she attempted drowning herself'
+    text = 'she did self-imolation in the past'
+    text = 'no acts of self-harm'
+    text = 'she did not harm herself'
+    text = 'has a history of self-abuse'
+    text = 'has a history of taking multiple overdoses in the past'
+
+    dsh_annotations = dsha.process(text, verbose=True, write_output=False)
