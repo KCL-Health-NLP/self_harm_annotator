@@ -21,9 +21,10 @@ from xml.dom.minidom import parseString
 
 class DSHAnnotator:
 
-    def __init__(self):
+    def __init__(self, verbose=False):
         self.nlp = spacy.load('en')
         self.text = None
+        self.verbose = verbose
 
     def load_lexicon(self, path, source_attribute, target_attribute, merge=False):
         """
@@ -37,7 +38,7 @@ class DSHAnnotator:
         self.nlp = lsa.add_components()
 
     def load_pronoun_lemma_corrector(self):
-        component = PronounLemmaCorrector()
+        component = LemmaCorrector()
         pipe_name = component.name
 
         if not pipe_name in self.nlp.pipe_names:
@@ -75,16 +76,128 @@ class DSHAnnotator:
         
         return doc
 
+    def has_negation_ancestor(self, cur_token, verbose=False):
+        """
+        Basic rule-based negation search in dependency tree.
+        """
+        if verbose:
+            print('-- Detecting negations...', cur_token)
+
+        if cur_token.lemma_ in ['report', 'say', 'claim', 'announce', 'insist']:
+            for child in cur_token.children:
+                if verbose:
+                    print('  -- Checking child', child, 'of', cur_token)
+                if child.dep_ == 'neg':
+                    return True
+            #return False
+
+        elif cur_token.lemma_ in ['deny']:
+            return True
+
+        elif cur_token.pos_.startswith('N'):
+            for child in cur_token.children:
+                if verbose:
+                    print('  -- Checking child', child, 'of', cur_token)
+                if child.dep_ == 'neg' or child.lemma_ in ['no']:
+                    return True
+            #return False
+
+        elif cur_token.pos_.startswith('V'):
+            for child in cur_token.children:
+                if verbose:
+                    print('  -- Checking child', child, 'of', cur_token)
+                if child.dep_ == 'neg':
+                    return True
+            #return False
+
+        if cur_token.dep_ == 'ROOT':
+            # ROOT
+            return False
+
+        return self.has_negation_ancestor(cur_token.head, verbose=verbose)
+
+    def has_historical_ancestor(self, cur_token, verbose=False):
+        if verbose:
+            print('-- Detecting historical ancestors...', cur_token)
+        
+        if cur_token._.TIME == 'TIME':
+            return True
+
+        if cur_token.dep_ == 'ROOT':
+            # ROOT
+            return False
+
+        return self.has_historical_ancestor(cur_token.head, verbose=verbose)
+
+    def has_historical_dependent(self, cur_token, verbose=False):
+        if verbose:
+            print('-- Detecting historical modifiers...', cur_token)
+
+        if cur_token.tag_ in ['VBG', 'VBN']:
+            for child in cur_token.children:
+                if verbose:
+                    print('  -- Checking child', child, 'of', cur_token)
+                if child.lower_ == 'had':
+                    return True
+                self.has_historical_dependent(child, verbose=verbose)
+
+        if cur_token.pos_[0] in ['N', 'V']:
+            for child in cur_token.children:
+                if verbose:
+                    print('  -- Checking child', child, 'of', cur_token)
+                if child._.TIME == 'TIME':
+                    return True
+                self.has_historical_dependent(child, verbose=verbose)
+
+        return False
+
+    def has_hedging_ancestor(self, cur_token, verbose=True):
+        if cur_token._.HEDGING == 'HEDGING':
+            return True
+        
+        if cur_token.dep_ == 'ROOT':
+            # ROOT
+            return False
+        
+        return self.has_hedging_ancestor(cur_token.head, verbose=verbose)
+    
+    def has_hedging_dependent(self, cur_token, verbose=True):
+        for child in cur_token.children:
+            if child._.HEDGING == 'HEDGING':
+                return True
+            self.has_hedging_dependent(child, verbose=verbose)
+        
+        return False
+    
     def calculate_dsh_mention_attributes(self, doc):
         # Hack: get attributes from window of 5 tokens before DSH mention
         for i in range(len(doc)):
-            if doc[i]._.DSH == 'DSH':
+            if doc[i]._.DSH in ['DSH', 'NON_DSH']:
+                if self.has_negation_ancestor(doc[i]):
+                    print('-- Negation detected for', doc[i])
+                    doc[i]._.NEG = 'NEG'
+                
+                #if self.has_hedging_ancestor(doc[i]):
+                #    print('-- Hedging ancestor detected for', doc[i])
+                #    doc[i]._.HEDGING = 'HEDGING'
+
+                #if self.has_hedging_dependent(doc[i]):
+                #    print('-- Hedging dependent detected for', doc[i])
+                #    doc[i]._.HEDGING = 'HEDGING'
+                    
+                #if self.has_historical_ancestor(doc[i]):
+                #    print('-- Historical marker detected for', doc[i])
+                #    doc[i]._.TIME = 'TIME'
+
+                #if self.has_historical_dependent(doc[i]):
+                #    print('-- Historical marker detected for', doc[i])
+                #    doc[i]._.TIME = 'TIME'
+
                 curr_sent = doc[i].sent
                 start = i - 5
                 if start < 0:
                     start = curr_sent.start
                 window = doc[start:i]
-                print('----->', window, curr_sent, i, start, file=sys.stderr)
                 for token in window:
                     if token.sent == curr_sent:
                         if token._.NEG == 'NEG':
@@ -98,7 +211,7 @@ class DSHAnnotator:
 
         # Hack: get attributes from window of 5 tokens after DSH mention in the same sentence
         for i in range(len(doc)):
-            if doc[i]._.DSH == 'DSH':
+            if doc[i]._.DSH in ['DSH', 'NON_DSH']:
                 curr_sent = doc[i].sent
                 end = i + 5
                 if end > curr_sent.start + len(curr_sent):
@@ -125,7 +238,7 @@ class DSHAnnotator:
         s = '\n'
         s += 'PIPELINE:\n-- ' + '\n-- '.join(self.nlp.pipe_names)
         s += '\n\n'
-        s += '{:<10}{:<10}{:<10}{:<10}{:<10}'.format('INDEX', 'WORD', 'LEMMA', 'POS1', 'POS2')
+        s += '{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}'.format('INDEX', 'WORD', 'LEMMA', 'POS1', 'POS2', 'HEAD', 'DEP')
 
         cext = set()        
         for a in doc.user_data:
@@ -138,7 +251,7 @@ class DSHAnnotator:
 
         s += '\n'
 
-        s += '{:<10}{:<10}{:<10}{:<10}{:<10}'.format('-----', '----', '-----', '----', '----')
+        s += '{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}'.format('-----', '----', '-----', '----', '----', '----', '----')
 
         for a in cext:
             s += '{:<10}'.format('-' * len(a))
@@ -146,7 +259,7 @@ class DSHAnnotator:
         print(s, file=sys.stderr)
         
         for token in doc:
-            s = '{:<10}{:<10}{:<10}{:<10}{:<10}'.format(token.i, token.text, token.lemma_, token.tag_, token.pos_)
+            s = '{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}'.format(token.i, token.text, token.lemma_, token.tag_, token.pos_, token.head.i, token.dep_)
             for a in cext:
                 val = token._.get(a)
                 s += '{:10}'.format(val or '_')
@@ -398,7 +511,7 @@ class DSHAnnotator:
         return global_mentions
 
 
-class PronounLemmaCorrector(object):
+class LemmaCorrector(object):
     def __init__(self):
         self.name = 'pronoun_lemma_corrector'
 
@@ -406,12 +519,14 @@ class PronounLemmaCorrector(object):
         for token in doc:
             if token.lower_ in ['she', 'her', 'herself', 'themselves']:
                 token.lemma_ = token.lower_
+            if token.lower_ == 'overdoses':
+                token.lemma_ = 'overdose'
         return doc
 
 
 if __name__ == "__main__":
     dsha = DSHAnnotator()
-    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
+    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
 
     text = 'Has no history of taking overdoses'
     text = 'risk of self-harm'
@@ -425,11 +540,24 @@ if __name__ == "__main__":
     text = 'she took an overdose in 1996'
     text = 'chronic thoughts of self-harm'
     text = 'her father has chronic self-harm'
-    text = 'she attempted drowning herself'
-    text = 'she did self-imolation in the past'
+    text = 'she had cut herself'
+    """text = 'she did self-imolation in the past'
     text = 'no acts of self-harm'
     text = 'she did not harm herself'
     text = 'has a history of self-abuse'
     text = 'has a history of taking multiple overdoses in the past'
+    text = 'She does not report having had actual self-harm'
+    text = 'She says she has never cut her arm'
+    text = 'She does not report having had actual suicidal thoughts, intent or plans (and cites family reasons as being protective) as such.'
+    text = 'There is no history of deliberate self-harm except for one occasion when she reports having attempted to walk into the middle of the road (but this was when she was manic in the context of grandiose thoughts)'
+    text = e.g. sees sister regularly, goes to Effra day centre three days a week 
 
-    dsh_annotations = dsha.process(text, verbose=True, write_output=False)
+
+Risk history:
+
+Harm to self: DSH & suicide attempts; poor self-care; untreated physical illness; vulnerability to exploitation
+    text = 'In November 2006- Whilst in PICU at  ZZZZZ  Hospital- she described suicidal thoughts, low mood and talked about strangling babies.'"""
+    text = 'she has a history of self-harm'
+    text = 'she cut herself when she was 32 years old'
+
+    #dsh_annotations = dsha.process(text, verbose=True, write_output=False)

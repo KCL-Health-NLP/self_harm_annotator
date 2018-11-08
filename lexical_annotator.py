@@ -105,9 +105,11 @@ class LexicalAnnotator(object):
             doc.ents = list(doc.ents) + [entity]
 
         # Merge all entities
+        # TO DO spaCy stores ALL matches so we get 'deliberate' and 'self-harm' annotated separately - fix
         if self.merge:
             for ent in doc.ents:
-                ent.merge()
+                if ent.label_ == self.label:
+                    ent.merge()
 
         return doc
 
@@ -129,6 +131,8 @@ class LemmaAnnotatorSequence(object):
         n = 1
         with open(self.pin, 'r') as fin:
             for line in fin:
+                if line.startswith('#'):
+                    continue
                 try:
                     term, label = line.split('\t')
                 except Exception as e:
@@ -205,9 +209,11 @@ class LemmaAnnotator(object):
             doc.ents = list(doc.ents) + [entity]
 
         # Merge all entities
+        # TO DO spaCy stores ALL matches so we get 'deliberate' and 'self-harm' annotated separately - fix
         if self.merge:
             for ent in doc.ents:
-                ent.merge()
+                if ent.label_ == self.label:
+                    ent.merge()
 
         return doc
 
@@ -241,7 +247,7 @@ if __name__ == '__main__':
 
     print('Lemma Sequence Annotator')
     print('------------------------')
-       
+    
     text = 'This patient scratches herself and cuts up her arms.'
     pin = 'T:/Andre Bittar/workspace/dsh_annotator/resources/harm_V_lex.txt'
     lem_sa = LemmaAnnotatorSequence(nlp, pin, 'is_harm_action')

@@ -1,3 +1,4 @@
+asphyxiate herself	DSH
 attempt drown herself	DSH
 attempt electrocute herself	DSH
 attempt hang herself	DSH
@@ -38,9 +39,11 @@ cut herself	DSH
 d.s.h	DSH
 d.s.h.	DSH
 deliberate injury	DSH
-deliberate self harm	DSH
-deliberate self-harm	DSH
-deliberate self-injury	DSH
+# these are commented out as they cause noise due to spaCy storing 
+# all (shortest and longest) matches, needs fixing
+#deliberate self harm	DSH
+#deliberate self-harm	DSH
+#deliberate self-injury	DSH
 deliberately injure herself	DSH
 deliberately self harm	DSH
 deliberately self harming	DSH
@@ -100,8 +103,8 @@ mutilate herself	DSH
 o.d	DSH
 o.d.	DSH
 od	DSH
-overdos	DSH
 overdose	DSH
+overdosing	DSH
 parasuicidal	DSH
 parasuicidality	DSH
 parasuicide	DSH

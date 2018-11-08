@@ -25,7 +25,7 @@ Token.set_extension('TEST4', default=False)
     }
 """
 
-""" NOT WORKING IN THIS VERSION OF SPACY
+""" NOT WORKING IN THIS VERSION OF SPACY, REGEX not yet implemeneted
     {
         'name': 'CUT_HER_X_ARM',
         'pattern': [{'LEMMA': 'cut'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
@@ -80,5 +80,10 @@ RULES = [
         'name': 'IN_YEAR',
         'pattern': [{'POS': 'ADP'}, {'SHAPE': 'dddd'}],
         'avm': {0: {'TIME': 'TIME'}, 1: {'TIME': 'TIME'}}
+    },
+    {
+        'name': 'IN_MONTH_YEAR',
+        'pattern': [{'POS': 'ADP'}, {'POS': 'PROPN'}, {'SHAPE': 'dddd'}],
+        'avm': {0: {'TIME': 'TIME'}, 1: {'TIME': 'TIME'}, 2: {'TIME': 'TIME'}}
     }
 ]
