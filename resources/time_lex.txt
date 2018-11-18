@@ -9,4 +9,11 @@ previous	TIME
 previously	TIME
 earlier	TIME
 years old	TIME
-was	TIME
+#was	TIME
+#has been	TIME
+#had been	TIME
+#has had	TIME
+#have been	TIME
+#having been	TIME
+#having had	TIME
+#have had	TIME

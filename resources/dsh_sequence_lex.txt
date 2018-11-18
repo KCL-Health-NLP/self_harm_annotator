@@ -25,6 +25,16 @@ burn her chest	DSH
 burn her face	DSH
 burn her hand	DSH
 burn her leg	DSH
+stab her arm	DSH
+stab her body	DSH
+stab her breast	DSH
+stab her cheek	DSH
+stab her chest	DSH
+stab her face	DSH
+stab her hand	DSH
+stab her leg	DSH
+stab her wrist	DSH
+stab herself	DSH
 cut from self-harm	DSH
 cut her arm	DSH
 cut her body	DSH
@@ -143,12 +153,17 @@ scratches her hand	DSH
 scratches her leg	DSH
 self abuse	DSH
 self cut	DSH
+self cutting	DSH
 self harm	DSH
+self harming	DSH
 self harmer	DSH
 self hit	DSH
+self hitting	DSH
 self immolate	DSH
+self immolating	DSH
 self immolation	DSH
 self lacerate	DSH
+self lacerating	DSH
 self laceration	DSH
 self poison	DSH
 self-abuse	DSH

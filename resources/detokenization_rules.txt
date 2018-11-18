@@ -17,3 +17,23 @@ self-injury	self-injury	NN	NOUN
 self-laceration	self-laceration	NN	NOUN
 self-mutilation	self-mutilation	NN	NOUN
 self-poisoning	self-poisoning	_	_
+# annoying, but only matches on graphical form
+Self-harm	self-harm	NN	NOUN
+Self-abuse	self-abuse	NN	NOUN
+Self-cutting	self-cutting	_	_
+Self-harm	self-harm	NN	NOUN
+Self-harmed	self-harm	VB	VERB
+Self-harmer	self-harmer	NN	NOUN
+Self-harming	self-harming	_	_
+Self-hitting	self-hitting	_	_
+Self-immolating	self-immolating	_	_
+Self-immolation	self-immolation	NN	NOUN
+Self-imolating	self-immolating	_	_
+Self-imolation	self-immolation	NN	NOUN
+Self-injuries	self-injury	NN	NOUN
+Self-injurious	self-injurious	JJ	ADJ
+Self-injure	self-injure	VB	VERB
+Self-injury	self-injury	NN	NOUN
+Self-laceration	self-laceration	NN	NOUN
+Self-mutilation	self-mutilation	NN	NOUN
+Self-poisoning	self-poisoning	_	_

@@ -9,7 +9,7 @@ import os
 import spacy
 import sys
 
-from spacy.symbols import LEMMA, ORTH, POS, TAG
+from spacy.symbols import LEMMA, LOWER, ORTH, POS, TAG
 
 
 class Detokenizer(object):

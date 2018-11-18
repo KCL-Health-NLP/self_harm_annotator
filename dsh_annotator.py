@@ -6,6 +6,7 @@ Created on Mon Mar 12 14:27:31 2018
 """
 
 import os
+import re
 import spacy
 import sys
 import xml.etree.ElementTree as ET
@@ -168,6 +169,33 @@ class DSHAnnotator:
             self.has_hedging_dependent(child, verbose=verbose)
         
         return False
+
+    def has_hedging_noun_previous(self, doc, i, verbose=False):
+        """ Check anywhere right up to the start of the sentence (
+        as opposed to 5 previous tokens"""
+        start = doc[i].sent.start
+        end = doc[i].i
+        print('-- Checking for previous hedging noun...')
+        for j in range(end, start, -1):
+            token = doc[j]
+            if token.pos_[0] == 'N' and not token._.DSH:
+                if token._.HEDGING == 'HEDGING':
+                    return True
+
+        return False
+    
+    def is_section_header(self, doc, i, verbose=True):
+        cur_sent = doc[i].sent
+        end = len(cur_sent) - 1
+        window = cur_sent[i:end].text
+        if re.search(':', window) is not None:
+            return True
+        return False
+    
+    def is_singleton(self, doc, i):
+        if doc[i].text == doc[i].sent.text:
+            return True
+        return False
     
     def calculate_dsh_mention_attributes(self, doc):
         # Hack: get attributes from window of 5 tokens before DSH mention
@@ -177,6 +205,16 @@ class DSHAnnotator:
                     print('-- Negation detected for', doc[i])
                     doc[i]._.NEG = 'NEG'
                 
+                if self.has_hedging_noun_previous(doc, i):
+                    doc[i]._.HEDGING = 'HEDGING'
+                
+                if self.is_singleton(doc, i):
+                    # mark as HEDGING (NON-RELEVANT)
+                    doc[i]._.HEDGING = 'HEDGING'
+                
+                if self.is_section_header(doc, i):
+                    doc[i]._.HEDGING = 'HEDGING'
+
                 #if self.has_hedging_ancestor(doc[i]):
                 #    print('-- Hedging ancestor detected for', doc[i])
                 #    doc[i]._.HEDGING = 'HEDGING'
@@ -326,7 +364,7 @@ class DSHAnnotator:
                                         'temporality': temporality,
                                         'text': text
                                         }
-                
+        
         return mentions
 
     def write_ehost_output(self, pin, annotations, verbose=False):
@@ -336,6 +374,7 @@ class DSHAnnotator:
         root.attrib['textSource'] = os.path.basename(os.path.splitext(pin.replace('.knowtatot.xml', ''))[0] + '.txt')
 
         n = 1
+        m = 1000
         for annotation_id in sorted(annotations.keys()):
             annotation = annotations[annotation_id]
 
@@ -368,40 +407,42 @@ class DSHAnnotator:
             mention_class_node.text = annotation['text']
 
             # polarity
-            n += 1
             val = annotation.get('polarity', 'POSITIVE')
             slot_mention_node = ET.SubElement(root, 'stringSlotMention')
-            slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(n)
+            slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(m)
             mention_slot_node = ET.SubElement(slot_mention_node, 'mentionSlot')
             mention_slot_node.attrib['id'] = 'polarity'
             string_mention_value_node = ET.SubElement(slot_mention_node, 'stringSlotMentionValue')
             string_mention_value_node.attrib['value'] = val
             has_slot_mention_node = ET.SubElement(class_mention, 'hasSlotMention')
-            has_slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(n)
+            has_slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(m)
 
             # status
-            n += 1
+            m += 1
             val = annotation.get('status', 'NON-RELEVANT')
             slot_mention_node = ET.SubElement(root, 'stringSlotMention')
-            slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(n)
+            slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(m)
             mention_slot_node = ET.SubElement(slot_mention_node, 'mentionSlot')
             mention_slot_node.attrib['id'] = 'status'
             string_mention_value_node = ET.SubElement(slot_mention_node, 'stringSlotMentionValue')
             string_mention_value_node.attrib['value'] = val
             has_slot_mention_node = ET.SubElement(class_mention, 'hasSlotMention')
-            has_slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(n)
+            has_slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(m)
 
             # temporality
-            n += 1
+            m += 1
             val = annotation.get('temporality', 'CURRENT')
             slot_mention_node = ET.SubElement(root, 'stringSlotMention')
-            slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(n)
+            slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(m)
             mention_slot_node = ET.SubElement(slot_mention_node, 'mentionSlot')
             mention_slot_node.attrib['id'] = 'temporality'
             string_mention_value_node = ET.SubElement(slot_mention_node, 'stringSlotMentionValue')
             string_mention_value_node.attrib['value'] = val
             has_slot_mention_node = ET.SubElement(class_mention, 'hasSlotMention')
-            has_slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(n)
+            has_slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(m)
+            
+            n += 1
+            m += 1
 
         # Create Adjudication status with default values
         adj_status = ET.SubElement(root, 'eHOST_Adjudication_Status')
@@ -526,7 +567,7 @@ class LemmaCorrector(object):
 
 if __name__ == "__main__":
     dsha = DSHAnnotator()
-    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
+    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
 
     text = 'Has no history of taking overdoses'
     text = 'risk of self-harm'
@@ -559,5 +600,11 @@ Harm to self: DSH & suicide attempts; poor self-care; untreated physical illness
     text = 'In November 2006- Whilst in PICU at  ZZZZZ  Hospital- she described suicidal thoughts, low mood and talked about strangling babies.'"""
     text = 'she has a history of self-harm'
     text = 'she cut herself when she was 32 years old'
+    text = 'Her mother has suffered from depression and attempted suicide in the past but is currently well.'
+    '''text = 'She would cut herself numerous times'
+    text = 'Poor coping skills - likely to show impulsive behaviour (self-harm or fire-setting) when stressed.'
+    text = 'She has had five psychiatric admissions precipitated by suicidal and self-harm behaviour.'
+    text = 'Self-harm'
+    text = 'suicide (self harm) : with a lot of room for the very lovely self harm'''
 
-    #dsh_annotations = dsha.process(text, verbose=True, write_output=False)
+    dsh_annotations = dsha.process(text, verbose=True, write_output=False)
