@@ -22,7 +22,7 @@ DEFAULT_ATTR_VALUE = False
 def transfer_annotations_to_span(annotation, span):
     for token in span:
         for attr in DSH_ATTRIBUTES:
-            # use  mmclass to avoid syntax error wiith class when checking
+            # use  mclass to avoid syntax error with reserved word "class" when checking
             # during DSH sentence collection
             if attr == 'mclass':
                 token._.set(attr, annotation.get('class', DEFAULT_ATTR_VALUE))
@@ -142,7 +142,7 @@ def collect_annotations(doc, pout, dsh_sentences_only=False):
     return annotations
     
 
-def transfer_annotations():
+def transfer_annotations(style='conll'):
     set_custom_attributes(DSH_ATTRIBUTES)
 
     nlp = spacy.load('en')
@@ -190,9 +190,15 @@ def transfer_annotations():
         #patient_dir = os.path.basename(os.path.abspath(os.path.join(os.path.dirname(f), os.pardir)))
         #saved_dir = os.path.basename(os.path.dirname(f))
 
-        # merge all span into single tokens
         for span in spans:
-            span.merge()
+            if style == 'conll':
+                # add CONLL-style (BIO) labels to tokens in spans
+                span[0]._.mclass = 'B'
+                for token in span[1:]:
+                    token._.mclass = 'I'
+            else:
+                # merge all spans into single tokens
+                span.merge()
 
         """ Print to see if this has worked - yep.
         for token in doc:
