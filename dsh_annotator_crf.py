@@ -10,8 +10,6 @@ from sklearn_crfsuite import metrics
 
 from itertools import chain
 
-from spacy.tokens import Token
-
 import os
 import pickle
 import re
@@ -27,11 +25,7 @@ DEFAULT_ATTR_VALUE = False
 
 class CorpusLoader:
     def __int__(self):
-        self.set_custom_attributes(['DSH'])
-
-    def set_custom_attributes(self, attributes):
-        for attr in attributes:
-            Token.set_extension(attr, default=DEFAULT_ATTR_VALUE, force=True)
+        pass
 
     # return a dictionary of features for a token excluding the label
     def token2features(self, token):
