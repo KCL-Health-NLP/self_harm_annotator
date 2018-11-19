@@ -567,7 +567,7 @@ class LemmaCorrector(object):
 
 if __name__ == "__main__":
     dsha = DSHAnnotator()
-    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
+    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
 
     text = 'Has no history of taking overdoses'
     text = 'risk of self-harm'
@@ -582,7 +582,7 @@ if __name__ == "__main__":
     text = 'chronic thoughts of self-harm'
     text = 'her father has chronic self-harm'
     text = 'she had cut herself'
-    """text = 'she did self-imolation in the past'
+    text = 'she did self-imolation in the past'
     text = 'no acts of self-harm'
     text = 'she did not harm herself'
     text = 'has a history of self-abuse'
@@ -591,20 +591,33 @@ if __name__ == "__main__":
     text = 'She says she has never cut her arm'
     text = 'She does not report having had actual suicidal thoughts, intent or plans (and cites family reasons as being protective) as such.'
     text = 'There is no history of deliberate self-harm except for one occasion when she reports having attempted to walk into the middle of the road (but this was when she was manic in the context of grandiose thoughts)'
-    text = e.g. sees sister regularly, goes to Effra day centre three days a week 
+    text = """e.g. sees sister regularly, goes to Effra day centre three days a week 
 
 
 Risk history:
 
-Harm to self: DSH & suicide attempts; poor self-care; untreated physical illness; vulnerability to exploitation
-    text = 'In November 2006- Whilst in PICU at  ZZZZZ  Hospital- she described suicidal thoughts, low mood and talked about strangling babies.'"""
+Harm to self: DSH & suicide attempts; poor self-care; untreated physical illness; vulnerability to exploitation"""
+    text = 'In November 2006- Whilst in PICU at  ZZZZZ  Hospital- she described suicidal thoughts, low mood and talked about strangling babies.'
     text = 'she has a history of self-harm'
     text = 'she cut herself when she was 32 years old'
     text = 'Her mother has suffered from depression and attempted suicide in the past but is currently well.'
-    '''text = 'She would cut herself numerous times'
+    text = 'She would cut herself numerous times'
     text = 'Poor coping skills - likely to show impulsive behaviour (self-harm or fire-setting) when stressed.'
     text = 'She has had five psychiatric admissions precipitated by suicidal and self-harm behaviour.'
     text = 'Self-harm'
-    text = 'suicide (self harm) : with a lot of room for the very lovely self harm'''
-
-    dsh_annotations = dsha.process(text, verbose=True, write_output=False)
+    text = 'suicide (self harm) : with a lot of room for the very lovely self harm'
+    text = "Sertraline 50mg OD, has been taking this for last few days"
+    text = 'She has reported self-harm ideation'
+    text = 'Instances of deliberate self-harm in 2002.'
+    text = 'She had recently taken an overdose of Olanzapine'
+    text = 'Took OD because wanted to die due to children being taken from her.'
+    text = 'She has scratches on her arms'
+    text = '- History of self-harms (superficial cuts on forearms) according to ZZZZZ last time about 6 months ago.'
+    text = 'She was reported to be banging her head on the fence'
+    text = 'She has a history of throwing herself in front of a bus.'
+    text = 'On Monday night ZZZZZ had tied a shirt and a dressing gown together and was planning to attach this to the door handle and hang herself.'
+    text = 'ZZZZZ was clear that she has not had any other thoughts of suicide since Monday.'
+    text = 'The reason for the recall is that she had threatened to induce her labour herself to staff and given her history of trying to asphyxiate herself in the 20th week of pregnancy the threat to do this was taken seriously.'
+    text = """Risperidone 6mg OD
+Allergic to Penicillin"""
+    #dsh_annotations = dsha.process(text, verbose=True, write_output=False)

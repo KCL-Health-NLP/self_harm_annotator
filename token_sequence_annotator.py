@@ -42,13 +42,14 @@ class TokenSequenceAnnotator(object):
             pattern = rule['pattern']
             name = rule['name']
             avm = rule['avm']
+            merge = rule.get('merge', False)
 
             self.matcher = Matcher(self.nlp.vocab)  # Need to do this for each rule separately unfortunately
             self.matcher.add(name, None, pattern)
 
             matches = self.matcher(doc)
             self.matches.append((rule, matches))
-            self.add_annotation(doc, matches, avm)
+            self.add_annotation(doc, matches, avm, merge)
 
             print('-- ' + name + ': ' + str(len(matches)) + ' matches.', file=sys.stderr)
         
@@ -58,7 +59,7 @@ class TokenSequenceAnnotator(object):
         # TODO this is where we need to parse the rule file - specify path as an argument
         pass
 
-    def add_annotation(self, doc, matches, rule_avm):
+    def add_annotation(self, doc, matches, rule_avm, merge):
         """
         Add annotations to the specified tokens in a match.
         Does not work with operators.
@@ -70,7 +71,7 @@ class TokenSequenceAnnotator(object):
         for match in matches:
             start = match[1]
             end = match[2]
-            span = doc[start:end + 1]
+            span = doc[start:end] # why was this end + 1?
             for j in range(len(span)):
                 if j in rule_avm.keys():
                     new_annotations = rule_avm.get(j, None)
@@ -83,6 +84,9 @@ class TokenSequenceAnnotator(object):
                                 print('-- Warning: cannot modify built-in attribute', new_attr, file=sys.stderr)
                             else:
                                 token._.set(new_attr, val)
+            if merge:
+                print('-- Merging span:', [token for token in span], file=sys.stderr)
+                span.merge()
 
     def print_spans(self, doc):
         s = '\n'

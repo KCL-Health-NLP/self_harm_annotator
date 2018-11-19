@@ -1,5 +1,7 @@
 able	HEDGING
+about to	HEDGING
 aim	HEDGING
+almost	HEDGING
 aspiration	HEDGING
 boyfriend	HEDGING
 girlfriend	HEDGING
@@ -10,12 +12,31 @@ sister	HEDGING
 brother	HEDGING
 grandmother	HEDGING
 granddfather	HEDGING
+grandma	HEDGING
+nana	HEDGING
+nan	HEDGING
+grandpa	HEDGING
+grandad	HEDGING
 uncle	HEDGING
 aunt	HEDGING
+auntie	HEDGING
+aunty	HEDGING
 cousin	HEDGING
 niece	HEDGING
 nephew	HEDGING
 family	HEDGING
+step-mother	HEDGING
+step-father	HEDGING
+step-brother	HEDGING
+step-sister	HEDGING
+stepmother	HEDGING
+stepfather	HEDGING
+stepbrother	HEDGING
+stepsister	HEDGING
+step mother	HEDGING
+step father	HEDGING
+step brother	HEDGING
+step sister	HEDGING
 can	HEDGING
 capable	HEDGING
 consider	HEDGING
@@ -35,6 +56,7 @@ inevitable	HEDGING
 intend	HEDGING
 intent	HEDGING
 intention	HEDGING
+nearly	HEDGING
 objective	HEDGING
 ought	HEDGING
 plan	HEDGING
@@ -52,6 +74,8 @@ think	HEDGING
 thought	HEDGING
 undecided	HEDGING
 unlikely	HEDGING
+urge	HEDGING
+on the verge of	HEDGING
 voice	HEDGING
 want	HEDGING
 will	HEDGING

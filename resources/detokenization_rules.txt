@@ -2,6 +2,7 @@
 self-abuse	self-abuse	NN	NOUN
 self-cutting	self-cutting	_	_
 self-harm	self-harm	NN	NOUN
+self-harms	self-harm	NN	NOUN
 self-harmed	self-harm	VB	VERB
 self-harmer	self-harmer	NN	NOUN
 self-harming	self-harming	_	_

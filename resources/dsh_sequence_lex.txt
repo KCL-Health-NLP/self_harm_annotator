@@ -16,6 +16,7 @@ auto mutilation	DSH
 auto-mutilate	DSH
 auto-mutilation	DSH
 automutilate	DSH
+bang her head	DSH
 burn from self-harm	DSH
 burn her arm	DSH
 burn her body	DSH
@@ -112,7 +113,6 @@ laceration from self-harm	DSH
 mutilate herself	DSH
 o.d	DSH
 o.d.	DSH
-od	DSH
 overdose	DSH
 overdosing	DSH
 parasuicidal	DSH
@@ -123,9 +123,7 @@ punch herself in the breast	DSH
 punch herself in the chest	DSH
 punch herself in the face	DSH
 punch herself in the stomach	DSH
-risk to herself	DSH
-risk to self	DSH
-scratch	DSH
+scratch herself	DSH
 scratch her arm	DSH
 scratch her body	DSH
 scratch her breast	DSH
@@ -134,7 +132,6 @@ scratch her chest	DSH
 scratch her face	DSH
 scratch her hand	DSH
 scratch her leg	DSH
-scratch on her	DSH
 scratched her arm	DSH
 scratched her body	DSH
 scratched her breast	DSH
@@ -155,6 +152,8 @@ self abuse	DSH
 self cut	DSH
 self cutting	DSH
 self harm	DSH
+self harm ideation	NON_DSH
+self-harm ideation	NON_DSH
 self harming	DSH
 self harmer	DSH
 self hit	DSH
@@ -166,6 +165,7 @@ self lacerate	DSH
 self lacerating	DSH
 self laceration	DSH
 self poison	DSH
+self poisoning	DSH
 self-abuse	DSH
 self-cutting	DSH
 self-harm	DSH
