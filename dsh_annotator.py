@@ -47,6 +47,15 @@ class DSHAnnotator:
         else:
             print('-- ', pipe_name, 'exists already. Component not added.')
 
+    def load_date_annotator(self):
+        component = DateTokenAnnotator()
+        pipe_name = component.name
+
+        if not pipe_name in self.nlp.pipe_names:
+            self.nlp.add_pipe(component, last=True)
+        else:
+            print('-- ', pipe_name, 'exists already. Component not added.')
+
     def load_detokenizer(self, path):
         """
         Load all detokenization rules.
@@ -178,11 +187,57 @@ class DSHAnnotator:
         print('-- Checking for previous hedging noun...')
         for j in range(end, start, -1):
             token = doc[j]
+            # A colon indicates previous words are likely to be a list heading,
+            # and so are irrelevant
+            if token.lemma_ == ':':
+                return False
             if token.pos_[0] == 'N' and not token._.DSH:
                 if token._.HEDGING == 'HEDGING':
                     return True
+            # Deal with merged spans that may not have the correct POS, e.g. suicidal thoughts
+            if re.search('idea(tion)?|intent|thought', token.head.lemma_, flags=re.I) is not None:
+                return True
 
         return False
+    
+    # This has a disastrous effect on results
+    def has_past_tense_governor(self, curr_token):
+        """ Check if governor is a past tense verb """
+        return curr_token.head.tag_ in ['VBD', 'VBN', 'VHD', 'VHN', 'VVD', 'VVN']
+    
+    def has_propatt_ancestor(self, cur_token):
+        """ Check if DSH mention has a propositional attitude ancestor"""
+        if cur_token.head.pos_ == 'VERB':
+            if cur_token.head.lemma_ in ['believe', 'desire', 'dream', 'feel', 'imagine', 'think', 'want', 'wish', 'wonder']:
+                return True
+
+        if cur_token.head.pos_ == 'NOUN':
+            if cur_token.head.lemma_ in ['assumption', 'belief', 'feeling', 'desire', 'dream', 'idea', 'opinion', 'wish', 'view']:
+                return True
+
+        if cur_token.head._.DSH == 'NON_DSH':
+            # e.g. suicidal thoughts   
+            match = re.search('idea(tion)?|intent|thought', cur_token.head.lemma_, flags=re.I)
+            return match is not None
+
+        if cur_token.dep_ == 'ROOT':
+            # ROOT
+            return False
+
+        return self.has_propatt_ancestor(cur_token.head)
+    
+    def is_reported_speech(self, cur_token):
+        """ Check if the current node is governed by a reported speech verb 
+        -- NOT IN USE
+        """
+        if cur_token.head._.RSPEECH == 'TRUE':
+            return True
+
+        if cur_token.dep_ == 'ROOT':
+            # ROOT
+            return False
+
+        return self.is_reported_speech(cur_token.head.head)
     
     def is_section_header(self, doc, i, verbose=True):
         cur_sent = doc[i].sent
@@ -197,48 +252,78 @@ class DSHAnnotator:
             return True
         return False
     
+    def is_definite(self, doc, i):
+        for child in doc[i].children:
+            if child.lemma_ in ['the', 'this', 'that', 'her']:
+                return True
+        return False
+    
     def calculate_dsh_mention_attributes(self, doc):
         # Hack: get attributes from window of 5 tokens before DSH mention
         for i in range(len(doc)):
             if doc[i]._.DSH in ['DSH', 'NON_DSH']:
-                if self.has_negation_ancestor(doc[i]):
+                if self.has_negation_ancestor(doc[i]) and not self.is_definite(doc, i):
                     print('-- Negation detected for', doc[i])
                     doc[i]._.NEG = 'NEG'
                 
                 if self.has_hedging_noun_previous(doc, i):
+                    print('-- Hedging noun detected for', doc[i])
                     doc[i]._.HEDGING = 'HEDGING'
                 
                 if self.is_singleton(doc, i):
                     # mark as HEDGING (NON-RELEVANT)
+                    print('-- Singleton', doc[i])
                     doc[i]._.HEDGING = 'HEDGING'
                 
                 if self.is_section_header(doc, i):
+                    print('-- Section header', doc[i])
                     doc[i]._.HEDGING = 'HEDGING'
-
+                
+                # Lowers results
+                #if self.has_propatt_ancestor(doc[i]):
+                #    print('-- Propositional attitude', doc[i])
+                #    doc[i]._.HEDGING = 'HEDGING'
+                
+                # Lowers results
                 #if self.has_hedging_ancestor(doc[i]):
                 #    print('-- Hedging ancestor detected for', doc[i])
                 #    doc[i]._.HEDGING = 'HEDGING'
 
+                # Lowers results
                 #if self.has_hedging_dependent(doc[i]):
                 #    print('-- Hedging dependent detected for', doc[i])
                 #    doc[i]._.HEDGING = 'HEDGING'
-                    
+                
+                # Slight decrease p, slight increase r, slight increase f
                 #if self.has_historical_ancestor(doc[i]):
                 #    print('-- Historical marker detected for', doc[i])
                 #    doc[i]._.TIME = 'TIME'
 
+                # Lowers results
                 #if self.has_historical_dependent(doc[i]):
                 #    print('-- Historical marker detected for', doc[i])
                 #    doc[i]._.TIME = 'TIME'
 
+                # Check previous tokens in window going back from mention
                 curr_sent = doc[i].sent
                 start = i - 5
                 if start < 0:
                     start = curr_sent.start
                 window = doc[start:i]
-                for token in window:
+                for token in reversed(window):
                     if token.sent == curr_sent:
-                        if token._.NEG == 'NEG':
+                        # Intended to deal with incorrect HEDGING, but reduces
+                        # performance on other attributes for a slight improvement
+                        # A colon indicates previous words are likely to be a list heading,
+                        # and so are irrelevant
+                        #if token.lemma_ == ':':
+                        #    break
+                        # Improves status, decreases temporality
+                        # Break on newline, consider it a sentence boundary
+                        #if token.pos_ == 'SPACE':
+                        #    break
+                        # Definite mentions are positive
+                        if not self.is_definite(doc, i) and token._.NEG == 'NEG':
                             doc[i]._.NEG = 'NEG'
                         if token._.TIME == 'TIME':
                             doc[i]._.TIME = 'TIME'
@@ -255,14 +340,23 @@ class DSHAnnotator:
                 if end > curr_sent.start + len(curr_sent):
                     end = curr_sent.start + len(curr_sent)
                 window = doc[i:end]
+                found_CCONJ = False # used for MODALITY and HEDGING
                 for token in window:
                     if token.sent == curr_sent:
+                        # Increases status for MODALITY and HEDGING, not TIME
+                        # Coordinating conjunction is a syntactic "barrier", 
+                        # so we avoid examining features beyond.
+                        if token.pos_ == 'CCONJ':
+                            print('-- Found subsequent CCONJ', token.text)
+                            found_CCONJ = True
                         if token._.TIME == 'TIME':
                             doc[i]._.TIME = 'TIME'
                         if token._.MODALITY == 'MODALITY':
-                            doc[i]._.MODALITY = 'MODALITY'
+                            if not found_CCONJ:
+                                doc[i]._.MODALITY = 'MODALITY'
                         if token._.HEDGING == 'HEDGING':
-                            doc[i]._.HEDGING = 'HEDGING'
+                            if not found_CCONJ:
+                                doc[i]._.HEDGING = 'HEDGING'
 
     def print_tokens(self, doc):
         with open('T:/Andre Bittar/workspace/ka_dsh/output/report.txt', 'w') as fout:
@@ -481,6 +575,9 @@ class DSHAnnotator:
     def process(self, path, verbose=False, write_output=True):
         # Load pronoun lemma corrector
         self.load_pronoun_lemma_corrector()
+        
+        # Load date annotator
+        self.load_date_annotator()
 
         # Load detokenizer
         self.load_detokenizer(os.path.join('resources', 'detokenization_rules.txt'))
@@ -494,6 +591,7 @@ class DSHAnnotator:
         self.load_lexicon('./resources/hedging_lex.txt', LEMMA, 'HEDGING')
         self.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/harm_V_lex.txt', LEMMA, 'LA')
+        self.load_lexicon('./resources/reported_speech_lex.txt', LEMMA, 'RSPEECH')
 
         # Load token sequence annotators
         dsha.load_token_sequence_annotator(None)
@@ -565,9 +663,28 @@ class LemmaCorrector(object):
         return doc
 
 
+class DateTokenAnnotator(object):
+    def __init__(self):
+        self.name = 'date_token_annotator'
+
+    def __call__(self, doc):
+        # Date pattern regexes
+        yyyy = '(19[0-9][0-9]|20[0-9])'
+        ddmmyy = '(0?[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[012])\/([0-9][0-9])'
+        ddmmyyyy = '(0?[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[012])\/(19[0-9][0-9]|20[0-9])'
+        ddmmyy_dot = '(0?[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.([0-9][0-9])'
+        ddmmyyyy_dot = '(0?[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[012])\.(19[0-9][0-9]|20[0-9])'
+        date = '(' + yyyy + '|' + ddmmyy + '|' + ddmmyyyy + '|' + ddmmyy_dot + '|' + ddmmyyyy_dot + ')'
+        for token in doc:
+            if re.search(date, token.lemma_) is not None:
+                token._.TIME = 'TIME'
+        return doc
+
+
 if __name__ == "__main__":
     dsha = DSHAnnotator()
-    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
+    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
+    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus')
 
     text = 'Has no history of taking overdoses'
     text = 'risk of self-harm'
@@ -602,7 +719,6 @@ Harm to self: DSH & suicide attempts; poor self-care; untreated physical illness
     text = 'she cut herself when she was 32 years old'
     text = 'Her mother has suffered from depression and attempted suicide in the past but is currently well.'
     text = 'She would cut herself numerous times'
-    text = 'Poor coping skills - likely to show impulsive behaviour (self-harm or fire-setting) when stressed.'
     text = 'She has had five psychiatric admissions precipitated by suicidal and self-harm behaviour.'
     text = 'Self-harm'
     text = 'suicide (self harm) : with a lot of room for the very lovely self harm'
@@ -620,4 +736,59 @@ Harm to self: DSH & suicide attempts; poor self-care; untreated physical illness
     text = 'The reason for the recall is that she had threatened to induce her labour herself to staff and given her history of trying to asphyxiate herself in the 20th week of pregnancy the threat to do this was taken seriously.'
     text = """Risperidone 6mg OD
 Allergic to Penicillin"""
+
+    # 28.01.2019
+    text = """Does not see a future for herself
+
+Reluctant to talk about stressors and triggers that led her to attempt suicide
+mentioned briefly about financial problems"""
+    text = 'Denied she has said she wanted to cut the baby out, said she had asked about what would happen to the baby if she killed herself and if the doctors would cut the baby out if she tried to commit suicide.'
+    text = 'She cried during our meeting, talking about thinking of overdosing.'
+    text = 'At one point she told the neighbours she was going to kill herself and stated that her friend had poisoned their water pipes.'
+    text = 'There is no history of suicidal thoughts being expressed; command hallucinations to harm her or deliberate self harm acts.'
+    text = 'Impact: Moderate to self but given that she is pregnant OD could cause serious harm to babay'
+    text = 'In terms of risks, there is a noted history of self harm in the past. As mentioned, she reports a planned overdose in the context of depression and suicidal intent at the age of 16, which was incidentally discovered by her mother.'
+    text = 'As mentioned, she reports a planned overdose in the context of depression and suicidal intent at the age of 16, which was incidentally discovered by her mother.'
+    text = 'Took OD because wanted to die due to children being taken from her.'
+    text = 'ZZZZZ  -  risk of aggression, self neglect and non serious self harm when unwell noted.'
+    text = 'Risk of intentional harm: moderate at the moment due to ambivalent suicide ideation, and previous high risk suicidal behaviour prior to admission (lying under a bus )'
+    text = 'She has not prevoiously attempted suicide since 2006.'
+    text = "ZZZZZ  acknowledged that her decision to hang herself was because she was 'angry and raging' with both  QQQQQ  and her mother."
+    text = 'However, she still regrets that she did not succeed and still thinks about doing it and would use same method with OD.'
+    text = 'Referred by PLN - patient admitted earlier today to Lewisham RATU after taking an OD of Sibutramine 20mg x17 tabs + Acamprosate 333mg x 20tabs'
+    text = 'On Monday night,  ZZZZZ  had tied a shirt and a dressing gown together and was planning to attach this to the door handle and hang herself.'
+    text = 'She does not fully understand the severity of her overdose and is not willing to be admitted to a psychiatric ward.'    
+    text = 'She said that she never intended to jump out of the window but was just opening it.'
+    text = 'ZZZZZ  was not able to pinpoint a direct trigger for the suicide attempt and says she has just been feeling more depressed over the past week.'
+    text = 'She feels she could not trust herself if she were discharged from hospital now, as even now regrets s that the overdose did not work. Social Services involved re 12-year-old child.'
+    text = 'She does not regret the suicide attempt but feels guilty because of her daughter.'
+    text = 'She has suicidal thoughts about taking an overdose.'
+    text = 'She admitted to recurrent suicidal thoughts about taking an overdose or jumping in front of a moving car and also admitted to fleeting thoughts about smothering her baby.'
+    text = 'Poor coping skills - likely to show impulsive behaviour (self-harm or fire-setting) when stressed.'
+    text = """Risks
+Self neglect
+Self harm
+She is vulnerable both physical, financial and sexually for exploitation. She has the history of self harm.
+"""
+    text = 'Current or past risk of suicide (overdose, self harm, starvation, jumping from height etc) : self harm, ( cutting her wrist with table knife)'
+    text = 'She described two previous psychiatric hospital admissions following suicide attempts, and possibly drug-induced psychosis, and one episode of depressed mood and psychosis (probably a psychotic depression) in prison custody in 2005.'
+    text = "She stated that she had only refused treatment because she was 'bored, I wanted to go out for a cigarette'. She stated that the 'OD was not that bad, I'm ok, the baby's kicking, its fine', grossly minimising the impact and seriousness of this act."
+    text = 'She is 6 months pregnant and has taken a massive overdose with intention to end her life.'
+    text = '2006 - Overdose with 40 tabs of Sertraline, wanted to kill herself. She then rang her mom who called ambulance.'
+    text = 'In terms of risks, whilst she has developed pessimistic and negative thoughts during the depressive periods, there has been no actual self harm or suicidal thoughts.'
+    text = 'Drug induced psychosis 1991 Bexley Health hospital - OD/cut wrist - voluntary ? 2-3 week admission.'
+    text = "ZZZZZ   ZZZZZ  told us she was admitted to Bexley Hospital, informally, at the age of 16 following a suicide attempt and a 'drug psychosis' secondary to cannabis abuse."
+    text = '20/09/99: Overdose of methadone, paroxetine, zopiclone, and alcohol.'
+    text = '1998 - Tried to hang herself but cord broke down. She was depressed but not on medications.'
+    text = "Multiple admissions related to drug induced psychosis. Last admission in Sep' 06 with overdose of Sertraline."
+    text = 'Previous attempted overdose approximately two months ago (48 tablets including Quetiapine)'
+    text = "Dr Wuyts concluded that Ms  ZZZZZ 's current mental state is characterised by elaborate symptoms of depression, coinciding with minor paranoid ideation, history of DSH and social problems and a first degree family history of schizophrenia."
+    text = 'Self: previous possible sexual exploitation- inviting men back to her flat to use drugs, risk assessment notes history of suicidal ideation and acts including overdose, little detail'
+    text = """No risk when stable as she is now
+Had 2 suicide attempts during psychotic episode in 2007 - One of them was trying to cut her wrists and then jump out of the window, on another occasion attempted OD with painkillers and alcohol
+"""
+    text = "Other concerns were around  ZZZZZ 's ability to care for the child, her dissociation and self-harm and her issues around the child being a girl."
+    text = 'ZZZZZ  has reported no current thoughts of deliberate self harm but disclosed past self harm when initially became unwell aged 25 years.'
+    text = 'She experienced anhedonia, was very negative about the future and had suicidal thoughts and self harmed.'
+
     #dsh_annotations = dsha.process(text, verbose=True, write_output=False)

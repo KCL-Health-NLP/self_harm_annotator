@@ -223,5 +223,18 @@ RULES = [
         'pattern': [{'LEMMA': 'end'}, {'LEMMA': 'her'}, {'LEMMA': 'own'}, {'LEMMA': 'life'}],
         'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}, 3: {'DSH': 'DSH'}},
         'merge': True
+    },
+    # This next rule is ad hoc to deal with headings, needs to be generalised
+    {
+        'name': 'SPACE_DSH_SPACE',
+        'pattern': [{'POS': 'SPACE'}, {'LEMMA': 'self harm'}, {'POS': 'SPACE'}],
+        'avm': {1: {'DSH': 'NON_DSH'}},
+        'merge': False
+    },
+    {
+        'name': 'RISK_ASSESSMENT',
+        'pattern': [{'LEMMA': 'risk'}, {'LEMMA': 'assessment'}],
+        'avm': {0: {'HEDGING': False}},
+        'merge': False
     }
 ]

@@ -1,6 +1,7 @@
 able	HEDGING
 about to	HEDGING
 aim	HEDGING
+aiming	HEDGING
 almost	HEDGING
 aspiration	HEDGING
 boyfriend	HEDGING
@@ -40,14 +41,21 @@ step sister	HEDGING
 can	HEDGING
 capable	HEDGING
 consider	HEDGING
+considering	HEDGING
 contemplate	HEDGING
+contemplating	HEDGING
+decide	HEDGING
+deciding	HEDGING
+decision	HEDGING
 desire	HEDGING
 dispose	HEDGING
 dream	HEDGING
+dreaming	HEDGING
 envisage	HEDGING
 eventual	HEDGING
 future	HEDGING
 goal	HEDGING
+be go to	HEDGING
 hypothetical	HEDGING
 idea	HEDGING
 impossible	HEDGING
@@ -69,15 +77,23 @@ prone	HEDGING
 risk	HEDGING
 should	HEDGING
 speculate	HEDGING
+speculating	HEDGING
+speculation	HEDGING
 suppose	HEDGING
 think	HEDGING
+thinking	HEDGING
 thought	HEDGING
+threat	HEDGING
+threaten	HEDGING
+threatening	HEDGING
 undecided	HEDGING
 unlikely	HEDGING
 urge	HEDGING
+urging	HEDGING
 on the verge of	HEDGING
 voice	HEDGING
 want	HEDGING
 will	HEDGING
 wish	HEDGING
+wishing	HEDGING
 would	HEDGING

@@ -109,7 +109,7 @@ class LexicalAnnotator(object):
         if self.merge:
             for ent in doc.ents:
                 if ent.label_ == self.label:
-                    ent.merge()
+                    ent.merge(lemma=''.join([token.lemma_ + token.whitespace_ for token in ent]).strip())
 
         return doc
 
@@ -213,7 +213,7 @@ class LemmaAnnotator(object):
         if self.merge:
             for ent in doc.ents:
                 if ent.label_ == self.label:
-                    ent.merge()
+                    ent.merge(lemma=''.join([token.lemma_ + token.whitespace_ for token in ent]).strip())
 
         return doc
 

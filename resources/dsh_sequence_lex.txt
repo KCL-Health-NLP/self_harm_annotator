@@ -51,7 +51,7 @@ d.s.h	DSH
 d.s.h.	DSH
 deliberate injury	DSH
 # these are commented out as they cause noise due to spaCy storing 
-# all (shortest and longest) matches, needs fixing
+# all (shortest and longest) matches (i.e. self-harm and deliberate self-harm), needs fixing
 #deliberate self harm	DSH
 #deliberate self-harm	DSH
 #deliberate self-injury	DSH

@@ -1,14 +1,17 @@
 ago	TIME
+at the age of	TIME
 since	TIME
 when	TIME
 history	TIME
 Hx	TIME
+hx	TIME
 used to	TIME
 past	TIME
 previous	TIME
 previously	TIME
 earlier	TIME
 years old	TIME
+at the time	TIME
 #was	TIME
 #has been	TIME
 #had been	TIME
