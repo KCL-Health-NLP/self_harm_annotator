@@ -206,3 +206,4 @@ try to electrocute herself	DSH
 try to hang herself	DSH
 try to kill herself	DSH
 try to poison herself	DSH
+with suicidal intent	DSH

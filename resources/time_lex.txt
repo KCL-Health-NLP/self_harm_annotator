@@ -12,6 +12,7 @@ previously	TIME
 earlier	TIME
 years old	TIME
 at the time	TIME
+tendency	TIME
 #was	TIME
 #has been	TIME
 #had been	TIME

@@ -224,6 +224,19 @@ RULES = [
         'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}, 3: {'DSH': 'DSH'}},
         'merge': True
     },
+    # suicidal thoughts is merged on lexicon matching
+    {
+        'name': 'SUICIDAL_THOUGHTS_AND_ACT',
+        'pattern': [{'LEMMA': 'suicidal thought'}, {'LEMMA': 'and'}, {'LEMMA': 'act'}],
+        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        'name': 'PLANNED_OD',
+        'pattern': [{'ORTH': 'planned'}, {'LEMMA': 'overdose'}],
+        'avm': {0: {'HEDGING': False}, 1: {'DSH': 'DSH'}},
+        'merge': False
+    },
     # This next rule is ad hoc to deal with headings, needs to be generalised
     {
         'name': 'SPACE_DSH_SPACE',

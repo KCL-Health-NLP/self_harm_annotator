@@ -790,5 +790,10 @@ Had 2 suicide attempts during psychotic episode in 2007 - One of them was trying
     text = "Other concerns were around  ZZZZZ 's ability to care for the child, her dissociation and self-harm and her issues around the child being a girl."
     text = 'ZZZZZ  has reported no current thoughts of deliberate self harm but disclosed past self harm when initially became unwell aged 25 years.'
     text = 'She experienced anhedonia, was very negative about the future and had suicidal thoughts and self harmed.'
-
+    
+    text = 'She has a tendency to self-harm.'
+    text = '2 previous overdoses with suicidal intent.'
+    text = 'Overall, it appears that these suicidal thoughts and act (when she was aged 16), appears to have occurred in the context of depressive mood, possibly precipitated by social crisis.'
+    text = 'Her planned overdose did not happen'
+    
     #dsh_annotations = dsha.process(text, verbose=True, write_output=False)
