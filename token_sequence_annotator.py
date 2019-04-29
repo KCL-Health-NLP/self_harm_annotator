@@ -26,12 +26,13 @@ DEFAULT_ATTRIBUTES = ['DEP', 'HEAD', 'IS_ALPHA', 'IS_ASCII', 'IS_BRACKET',
 
 class TokenSequenceAnnotator(object):
 
-    def __init__(self, nlp):
+    def __init__(self, nlp, verbose=False):
         self.name = 'token_sequence_annotator'
         self.nlp = nlp
         self.matcher = None
         self.matches = []
         self.rules = RULES
+        self.verbose = verbose
 
     def __call__(self, doc):
         """
@@ -51,7 +52,8 @@ class TokenSequenceAnnotator(object):
             self.matches.append((rule, matches))
             self.add_annotation(doc, matches, avm, merge)
 
-            print('-- ' + name + ': ' + str(len(matches)) + ' matches.', file=sys.stderr)
+            if self.verbose:
+                print('-- ' + name + ': ' + str(len(matches)) + ' matches.', file=sys.stderr)
         
         return doc
     
@@ -85,7 +87,8 @@ class TokenSequenceAnnotator(object):
                             else:
                                 token._.set(new_attr, val)
             if merge:
-                print('-- Merging span:', [token for token in span], file=sys.stderr)
+                if self.verbose:
+                    print('-- Merging span:', [token for token in span], file=sys.stderr)
                 span.merge()
 
     def print_spans(self, doc):

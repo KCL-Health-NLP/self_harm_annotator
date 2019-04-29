@@ -18,6 +18,7 @@ from token_sequence_annotator import TokenSequenceAnnotator
 from detokenizer import Detokenizer
 from spacy.symbols import LEMMA
 from xml.dom.minidom import parseString
+from xml.parsers.expat import ExpatError
 
 
 class DSHAnnotator:
@@ -26,6 +27,31 @@ class DSHAnnotator:
         self.nlp = spacy.load('en')
         self.text = None
         self.verbose = verbose
+        
+        # initialise
+        # Load pronoun lemma corrector
+        self.load_pronoun_lemma_corrector()
+        
+        # Load date annotator
+        self.load_date_annotator()
+
+        # Load detokenizer
+        self.load_detokenizer(os.path.join('resources', 'detokenization_rules.txt'))
+
+        # Load lexical annotators
+        self.load_lexicon('./resources/dsh_sequence_lex.txt', LEMMA, 'DSH', merge=True)
+        #self.load_lexicon('./resources/dsh_lex_lemma.txt', LEMMA, 'DSH', merge=True)
+        self.load_lexicon('./resources/time_lex.txt', LEMMA, 'TIME')
+        self.load_lexicon('./resources/current_lex.txt', LEMMA, 'TIME')
+        self.load_lexicon('./resources/negation_lex.txt', LEMMA, 'NEG')
+        self.load_lexicon('./resources/modality_lex.txt', LEMMA, 'MODALITY')
+        self.load_lexicon('./resources/hedging_lex.txt', LEMMA, 'HEDGING')
+        self.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
+        self.load_lexicon('./resources/harm_V_lex.txt', LEMMA, 'LA')
+        self.load_lexicon('./resources/reported_speech_lex.txt', LEMMA, 'RSPEECH')
+
+        # Load token sequence annotators
+        self.load_token_sequence_annotator(None)
 
     def load_lexicon(self, path, source_attribute, target_attribute, merge=False):
         """
@@ -81,7 +107,9 @@ class DSHAnnotator:
 
     def annotate_file(self, path):
         # TODO check for file in input
-        self.text = open(path, 'r').read()
+        # TODO check encoding
+        f = open(path, 'r', encoding='Latin-1')
+        self.text = f.read()
         doc = self.nlp(self.text)
         
         return doc
@@ -184,7 +212,8 @@ class DSHAnnotator:
         as opposed to 5 previous tokens"""
         start = doc[i].sent.start
         end = doc[i].i
-        print('-- Checking for previous hedging noun...')
+        if verbose:
+            print('-- Checking for previous hedging noun...')
         for j in range(end, start, -1):
             token = doc[j]
             # A colon indicates previous words are likely to be a list heading,
@@ -258,25 +287,29 @@ class DSHAnnotator:
                 return True
         return False
     
-    def calculate_dsh_mention_attributes(self, doc):
+    def calculate_dsh_mention_attributes(self, doc, verbose=False):
         # Hack: get attributes from window of 5 tokens before DSH mention
         for i in range(len(doc)):
             if doc[i]._.DSH in ['DSH', 'NON_DSH']:
                 if self.has_negation_ancestor(doc[i]) and not self.is_definite(doc, i):
-                    print('-- Negation detected for', doc[i])
+                    if verbose:
+                        print('-- Negation detected for', doc[i])
                     doc[i]._.NEG = 'NEG'
                 
                 if self.has_hedging_noun_previous(doc, i):
-                    print('-- Hedging noun detected for', doc[i])
+                    if verbose:
+                        print('-- Hedging noun detected for', doc[i])
                     doc[i]._.HEDGING = 'HEDGING'
                 
                 if self.is_singleton(doc, i):
                     # mark as HEDGING (NON-RELEVANT)
-                    print('-- Singleton', doc[i])
+                    if verbose:
+                        print('-- Singleton', doc[i])
                     doc[i]._.HEDGING = 'HEDGING'
                 
                 if self.is_section_header(doc, i):
-                    print('-- Section header', doc[i])
+                    if verbose:
+                        print('-- Section header', doc[i])
                     doc[i]._.HEDGING = 'HEDGING'
                 
                 # Lowers results
@@ -347,7 +380,8 @@ class DSHAnnotator:
                         # Coordinating conjunction is a syntactic "barrier", 
                         # so we avoid examining features beyond.
                         if token.pos_ == 'CCONJ':
-                            print('-- Found subsequent CCONJ', token.text)
+                            if verbose:
+                                print('-- Found subsequent CCONJ', token.text)
                             found_CCONJ = True
                         if token._.TIME == 'TIME':
                             doc[i]._.TIME = 'TIME'
@@ -559,7 +593,13 @@ class DSHAnnotator:
 
         # Print to screen
         xmlstr = ET.tostring(root, encoding='utf8', method='xml')
-        pxmlstr = parseString(xmlstr)
+        try:
+            pxmlstr = parseString(xmlstr)
+        except ExpatError as e:
+            with open('Z:/Andre Bittar/Projects/KA_Self-harm/data/batch_err.log', 'a') as b_err:
+                print('Unable to create XML file:', ehost_pout, file=b_err)
+            b_err.close()
+            return root
 
         if verbose:
             print(pxmlstr.toprettyxml(indent='\t'), file=sys.stderr)
@@ -568,34 +608,12 @@ class DSHAnnotator:
         #tree = ET.ElementTree(root)
         #tree.write(ehost_pout, encoding="utf-8", xml_declaration=True)
         open(ehost_pout, 'w').write(pxmlstr.toprettyxml(indent='\t'))
-        print('-- Wrote EHOST file: ' + ehost_pout, file=sys.stderr)
+        if verbose:
+            print('-- Wrote EHOST file: ' + ehost_pout, file=sys.stderr)
 
         return root
 
     def process(self, path, verbose=False, write_output=True):
-        # Load pronoun lemma corrector
-        self.load_pronoun_lemma_corrector()
-        
-        # Load date annotator
-        self.load_date_annotator()
-
-        # Load detokenizer
-        self.load_detokenizer(os.path.join('resources', 'detokenization_rules.txt'))
-
-        # Load lexical annotators
-        self.load_lexicon('./resources/dsh_sequence_lex.txt', LEMMA, 'DSH', merge=True)
-        #self.load_lexicon('./resources/dsh_lex_lemma.txt', LEMMA, 'DSH', merge=True)
-        self.load_lexicon('./resources/time_lex.txt', None, 'TIME')
-        self.load_lexicon('./resources/negation_lex.txt', LEMMA, 'NEG')
-        self.load_lexicon('./resources/modality_lex.txt', LEMMA, 'MODALITY')
-        self.load_lexicon('./resources/hedging_lex.txt', LEMMA, 'HEDGING')
-        self.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
-        self.load_lexicon('./resources/harm_V_lex.txt', LEMMA, 'LA')
-        self.load_lexicon('./resources/reported_speech_lex.txt', LEMMA, 'RSPEECH')
-
-        # Load token sequence annotators
-        dsha.load_token_sequence_annotator(None)
-
         global_mentions = {}
 
         if os.path.isdir(path):
@@ -603,7 +621,8 @@ class DSHAnnotator:
             
             for f in files:
                 pin = os.path.join(path, f)
-                print('-- Processing file:', pin, file=sys.stderr)
+                if verbose:
+                    print('-- Processing file:', pin, file=sys.stderr)
                 # Annotate and print results
                 doc = self.annotate_file(pin)
                 self.calculate_dsh_mention_attributes(doc)
@@ -648,6 +667,27 @@ class DSHAnnotator:
                 self.write_ehost_output('test.txt', mentions, verbose=verbose)
         
         return global_mentions
+    
+    
+    def process_text(self, text, text_id, verbose=False, write_output=False):
+        if verbose:
+            print('-- Processing text string:', text, file=sys.stderr)
+        
+        global_mentions = {}
+        doc = self.nlp(text)
+        self.calculate_dsh_mention_attributes(doc)
+
+        if verbose:
+            self.print_spans(doc)
+
+        mentions = self.build_ehost_output(doc)
+        
+        global_mentions[text_id] = mentions
+
+        if write_output:
+            self.write_ehost_output('test.txt', mentions, verbose=verbose)
+        
+        return global_mentions
 
 
 class LemmaCorrector(object):
@@ -684,7 +724,7 @@ class DateTokenAnnotator(object):
 if __name__ == "__main__":
     dsha = DSHAnnotator()
     #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
-    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus')
+    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus')
 
     text = 'Has no history of taking overdoses'
     text = 'risk of self-harm'
@@ -795,5 +835,14 @@ Had 2 suicide attempts during psychotic episode in 2007 - One of them was trying
     text = '2 previous overdoses with suicidal intent.'
     text = 'Overall, it appears that these suicidal thoughts and act (when she was aged 16), appears to have occurred in the context of depressive mood, possibly precipitated by social crisis.'
     text = 'Her planned overdose did not happen'
+    text = 'ZZZZZ  admitted to POS, partner reported patient self- harm via cut to her arm and neck on a number of times after a verbal argument.'
+    text = 'History of self-harm at 16'
+    text = 'H/o self-harm'
+    text = 'She has made eight attempts to kill herself'
+    text = 'Risperidone 40 mgs OD'
+    text = 'Overdose on Monday'
     
-    #dsh_annotations = dsha.process(text, verbose=True, write_output=False)
+    dsh_annotations = dsha.process_text(text, 'text_001', verbose=True, write_output=False)
+    
+    #pin = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text/10015033/corpus/2008-02-21_12643289_30883.txt'
+    #dsh_annotations = dsha.process(pin, verbose=True, write_output=True)

@@ -1,3 +1,8 @@
+# all (shortest and longest) matches (i.e. self-harm and deliberate self-harm), needs fixing
+# these are commented out as they cause noise due to spaCy storing 
+#deliberate self harm	DSH
+#deliberate self-harm	DSH
+#deliberate self-injury	DSH
 asphyxiate herself	DSH
 attempt drown herself	DSH
 attempt electrocute herself	DSH
@@ -13,6 +18,8 @@ attempt to kill herself	DSH
 attempt to poison herself	DSH
 auto mutilate	DSH
 auto mutilation	DSH
+#auto- mutilate	DSH # added post-eval
+#auto- mutilation	DSH # added post-eval
 auto-mutilate	DSH
 auto-mutilation	DSH
 automutilate	DSH
@@ -26,16 +33,6 @@ burn her chest	DSH
 burn her face	DSH
 burn her hand	DSH
 burn her leg	DSH
-stab her arm	DSH
-stab her body	DSH
-stab her breast	DSH
-stab her cheek	DSH
-stab her chest	DSH
-stab her face	DSH
-stab her hand	DSH
-stab her leg	DSH
-stab her wrist	DSH
-stab herself	DSH
 cut from self-harm	DSH
 cut her arm	DSH
 cut her body	DSH
@@ -50,14 +47,11 @@ cut herself	DSH
 d.s.h	DSH
 d.s.h.	DSH
 deliberate injury	DSH
-# these are commented out as they cause noise due to spaCy storing 
-# all (shortest and longest) matches (i.e. self-harm and deliberate self-harm), needs fixing
-#deliberate self harm	DSH
-#deliberate self-harm	DSH
-#deliberate self-injury	DSH
 deliberately injure herself	DSH
 deliberately self harm	DSH
 deliberately self harming	DSH
+#deliberately self- injure	DSH # added post-eval
+#deliberately self- injure herself	DSH # added post-eval
 deliberately self-injure	DSH
 deliberately self-injure herself	DSH
 dsh	DSH
@@ -123,7 +117,6 @@ punch herself in the breast	DSH
 punch herself in the chest	DSH
 punch herself in the face	DSH
 punch herself in the stomach	DSH
-scratch herself	DSH
 scratch her arm	DSH
 scratch her body	DSH
 scratch her breast	DSH
@@ -132,6 +125,7 @@ scratch her chest	DSH
 scratch her face	DSH
 scratch her hand	DSH
 scratch her leg	DSH
+scratch herself	DSH
 scratched her arm	DSH
 scratched her body	DSH
 scratched her breast	DSH
@@ -153,9 +147,8 @@ self cut	DSH
 self cutting	DSH
 self harm	DSH
 self harm ideation	NON_DSH
-self-harm ideation	NON_DSH
-self harming	DSH
 self harmer	DSH
+self harming	DSH
 self hit	DSH
 self hitting	DSH
 self immolate	DSH
@@ -166,9 +159,27 @@ self lacerating	DSH
 self laceration	DSH
 self poison	DSH
 self poisoning	DSH
+#self- abuse	DSH # added post-eval
+#self- cutting	DSH # added post-eval
+#self- harm	DSH # added post-eval
+#self- harm	DSH # added post-eval
+#self- harm ideation	NON_DSH # added post-eval
+#self- harmer	DSH # added post-eval
+#self- harming	DSH # added post-eval
+#self- harming behaviour	DSH # added post-eval
+#self- hitting	DSH # added post-eval
+#self- immolating	DSH # added post-eval
+#self- immolation	DSH # added post-eval
+#self- injuries	DSH # added post-eval
+#self- injurious behaviour	DSH # added post-eval
+#self- injury	DSH # added post-eval
+#self- laceration	DSH # added post-eval
+#self- mutilation	DSH # added post-eval
+#self- poisoning	DSH # added post-eval
 self-abuse	DSH
 self-cutting	DSH
 self-harm	DSH
+self-harm ideation	NON_DSH
 self-harmer	DSH
 self-harming	DSH
 self-harming behaviour	DSH
@@ -188,6 +199,16 @@ smack herself in the breast	DSH
 smack herself in the chest	DSH
 smack herself in the face	DSH
 smack herself in the stomach	DSH
+stab her arm	DSH
+stab her body	DSH
+stab her breast	DSH
+stab her cheek	DSH
+stab her chest	DSH
+stab her face	DSH
+stab her hand	DSH
+stab her leg	DSH
+stab her wrist	DSH
+stab herself	DSH
 suicidal behaviour	DSH
 suicidal gesture	DSH
 suicidal idea	NON_DSH

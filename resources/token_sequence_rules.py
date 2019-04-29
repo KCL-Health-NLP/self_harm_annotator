@@ -249,5 +249,59 @@ RULES = [
         'pattern': [{'LEMMA': 'risk'}, {'LEMMA': 'assessment'}],
         'avm': {0: {'HEDGING': False}},
         'merge': False
+    },
+    {
+        'name': 'MG_OD',
+        'pattern': [{'ORTH': 'mg'}, {'LEMMA': 'od'}],
+        'avm': {1: {'DSH': 'NO_DSH'}},
+        'merge': False
+    },
+    {
+        'name': 'MGS_OD',
+        'pattern': [{'ORTH': 'mgs'}, {'LEMMA': 'od'}],
+        'avm': {1: {'DSH': 'NO_DSH'}},
+        'merge': False
+    },
+    {
+        'name': 'MILLIGRAM_OD',
+        'pattern': [{'LEMMA': 'milligram'}, {'LEMMA': 'od'}],
+        'avm': {1: {'DSH': 'NO_DSH'}},
+        'merge': False
+    },
+    {
+        'name': 'MICROGRAM_OD',
+        'pattern': [{'LEMMA': 'microgram'}, {'LEMMA': 'od'}],
+        'avm': {1: {'DSH': 'NO_DSH'}},
+        'merge': False
+    },
+    {
+        'name': 'MICROGRAMME_OD',
+        'pattern': [{'LEMMA': 'microgramme'}, {'LEMMA': 'od'}],
+        'avm': {1: {'DSH': 'NO_DSH'}},
+        'merge': False
+    },
+    {
+        'name': 'G_OD',
+        'pattern': [{'LEMMA': 'g'}, {'LEMMA': 'od'}],
+        'avm': {1: {'DSH': 'NO_DSH'}},
+        'merge': False
+    },
+    {
+        'name': 'GRAMME_OD',
+        'pattern': [{'LEMMA': 'gramme'}, {'LEMMA': 'od'}],
+        'avm': {1: {'DSH': 'NO_DSH'}},
+        'merge': False
+    },
+    {
+        'name': 'GRAM_OD',
+        'pattern': [{'LEMMA': 'gram'}, {'LEMMA': 'od'}],
+        'avm': {1: {'DSH': 'NO_DSH'}},
+        'merge': False
+    },
+    {
+        'name': 'TABLET_OD',
+        'pattern': [{'POS': 'NUM'}, {'LEMMA': 'tablet'}, {'LEMMA': 'od'}],
+        'avm': {2: {'DSH': 'NO_DSH'}},
+        'merge': False
     }
 ]

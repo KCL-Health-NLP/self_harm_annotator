@@ -1,4 +1,5 @@
 #£[0-9]+bn	£[0-9]+bn	DT	DET
+h/o	h/o	NN	NOUN # added post-eval
 self-abuse	self-abuse	NN	NOUN
 self-cutting	self-cutting	_	_
 self-harm	self-harm	NN	NOUN
@@ -19,6 +20,7 @@ self-laceration	self-laceration	NN	NOUN
 self-mutilation	self-mutilation	NN	NOUN
 self-poisoning	self-poisoning	_	_
 # annoying, but only matches on graphical form
+H/o	h/o	NN	NOUN # added post-eval
 Self-harm	self-harm	NN	NOUN
 Self-abuse	self-abuse	NN	NOUN
 Self-cutting	self-cutting	_	_
