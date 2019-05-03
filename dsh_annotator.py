@@ -37,7 +37,7 @@ class DSHAnnotator:
 
         # Load detokenizer
         self.load_detokenizer(os.path.join('resources', 'detokenization_rules.txt'))
-
+        
         # Load lexical annotators
         self.load_lexicon('./resources/dsh_sequence_lex.txt', LEMMA, 'DSH', merge=True)
         #self.load_lexicon('./resources/dsh_lex_lemma.txt', LEMMA, 'DSH', merge=True)
@@ -49,10 +49,10 @@ class DSHAnnotator:
         self.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/harm_V_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/reported_speech_lex.txt', LEMMA, 'RSPEECH')
-
+        
         # Load token sequence annotators
         self.load_token_sequence_annotator(None)
-
+    
     def load_lexicon(self, path, source_attribute, target_attribute, merge=False):
         """
         Load a lexicon/terminology file for annotation.
