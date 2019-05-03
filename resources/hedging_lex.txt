@@ -26,6 +26,7 @@ cousin	HEDGING
 niece	HEDGING
 nephew	HEDGING
 family	HEDGING
+family history	HEDGING
 step-mother	HEDGING
 step-father	HEDGING
 step-brother	HEDGING

@@ -1,0 +1,7 @@
+adolescent	LIFE_STAGE
+child	LIFE_STAGE
+kid	LIFE_STAGE
+teen	LIFE_STAGE
+teenager	LIFE_STAGE
+young	LIFE_STAGE
+youngster	LIFE_STAGE

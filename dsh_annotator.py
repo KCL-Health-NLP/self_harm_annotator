@@ -24,7 +24,8 @@ from xml.parsers.expat import ExpatError
 class DSHAnnotator:
 
     def __init__(self, verbose=False):
-        self.nlp = spacy.load('en_core_web_sm')
+        print('DSH annotator')
+        self.nlp = spacy.load('en_core_web_sm', disable=['ner'])
         self.text = None
         self.verbose = verbose
         
@@ -42,6 +43,7 @@ class DSHAnnotator:
         self.load_lexicon('./resources/dsh_lex.txt', LEMMA, 'DSH')
         self.load_lexicon('./resources/time_past_lex.txt', LEMMA, 'TIME')
         self.load_lexicon('./resources/time_present_lex.txt', LEMMA, 'TIME')
+        self.load_lexicon('./resources/time_life_stage_lex.txt', LEMMA, 'TIME')
         self.load_lexicon('./resources/negation_lex.txt', LEMMA, 'NEG')
         self.load_lexicon('./resources/modality_lex.txt', LEMMA, 'MODALITY')
         self.load_lexicon('./resources/hedging_lex.txt', LEMMA, 'HEDGING')
@@ -53,6 +55,10 @@ class DSHAnnotator:
         # Load token sequence annotators
         self.load_token_sequence_annotator('level0')
         self.load_token_sequence_annotator('level1')
+        self.load_token_sequence_annotator('time')
+        
+        print('-- Pipeline:', file=sys.stderr)
+        print('  -- ' + '\n  -- '.join(self.nlp.pipe_names), file=sys.stderr)
 
     def load_lexicon(self, path, source_attribute, target_attribute, merge=False):
         """
@@ -87,7 +93,8 @@ class DSHAnnotator:
         """
         Load all detokenization rules.
         """
-        self.nlp = Detokenizer(self.nlp).load_detokenization_rules(path, verbose=True)
+        print('-- Detokenizer')
+        self.nlp = Detokenizer(self.nlp).load_detokenization_rules(path, verbose=self.verbose)
 
     def load_token_sequence_annotator(self, name):
         """
@@ -95,7 +102,7 @@ class DSHAnnotator:
         TODO allow for multiple annotators, cf. lemma and lexical annotators.
         TODO add path argument to specify rule file.
         """
-        tsa = TokenSequenceAnnotator(self.nlp, name)
+        tsa = TokenSequenceAnnotator(self.nlp, name, verbose=self.verbose)
         if tsa.name not in self.nlp.pipe_names:
             self.nlp.add_pipe(tsa)
 
@@ -614,7 +621,7 @@ class DSHAnnotator:
 
         return root
 
-    def process(self, path, verbose=False, write_output=True):
+    def process(self, path, write_output=True):
         global_mentions = {}
 
         if os.path.isdir(path):
@@ -622,27 +629,28 @@ class DSHAnnotator:
             
             for f in files:
                 pin = os.path.join(path, f)
-                if verbose:
+                print('-- Processing file:', pin, file=sys.stderr)
+                if self.verbose:
                     print('-- Processing file:', pin, file=sys.stderr)
                 # Annotate and print results
                 doc = self.annotate_file(pin)
                 self.calculate_dsh_mention_attributes(doc)
                 
-                if verbose:
+                if self.verbose:
                     self.print_spans(doc)
                 
                 mentions = self.build_ehost_output(doc)
                 global_mentions[f + '.knowtator.xml'] = mentions
 
                 if write_output:
-                    self.write_ehost_output(pin, mentions, verbose=verbose)
+                    self.write_ehost_output(pin, mentions, verbose=self.verbose)
                 
         elif os.path.isfile(path):
             print('-- Processing file:', path, file=sys.stderr)
             doc = self.annotate_file(path)
             self.calculate_dsh_mention_attributes(doc)
             
-            if verbose:
+            if self.verbose:
                 self.print_spans(doc)
             
             mentions = self.build_ehost_output(doc)
@@ -650,14 +658,14 @@ class DSHAnnotator:
             global_mentions[key] = mentions
 
             if write_output:
-                self.write_ehost_output(path, mentions, verbose=verbose)
+                self.write_ehost_output(path, mentions, verbose=self.verbose)
 
         else:
             print('-- Processing text string:', path, file=sys.stderr)
             doc = self.nlp(path)
             self.calculate_dsh_mention_attributes(doc)
 
-            if verbose:
+            if self.verbose:
                 self.print_spans(doc)
 
             mentions = self.build_ehost_output(doc)
@@ -665,19 +673,19 @@ class DSHAnnotator:
             global_mentions[key] = mentions
 
             if write_output:
-                self.write_ehost_output('test.txt', mentions, verbose=verbose)
+                self.write_ehost_output('test.txt', mentions, verbose=self.verbose)
         
         return global_mentions
 
-    def process_text(self, text, text_id, verbose=False, write_output=False):
-        if verbose:
+    def process_text(self, text, text_id, write_output=False):
+        if self.verbose:
             print('-- Processing text string:', text, file=sys.stderr)
         
         global_mentions = {}
         doc = self.nlp(text)
         self.calculate_dsh_mention_attributes(doc)
 
-        if verbose:
+        if self.verbose:
             self.print_spans(doc)
 
         mentions = self.build_ehost_output(doc)
@@ -685,7 +693,7 @@ class DSHAnnotator:
         global_mentions[text_id] = mentions
 
         if write_output:
-            self.write_ehost_output('test.txt', mentions, verbose=verbose)
+            self.write_ehost_output('test.txt', mentions, verbose=self.verbose)
         
         return global_mentions
 
@@ -722,10 +730,10 @@ class DateTokenAnnotator(object):
 
 
 if __name__ == "__main__":
-    dsha = DSHAnnotator()
+    dsha = DSHAnnotator(verbose=False)
     #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
-    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=False, verbose=True)
-    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus/10-06-2011_29145600648193.txt', write_output=False, verbose=True)
+    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=True)
+    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus/11-05-2011_28851073610065.txt', write_output=False)
 
     text = 'Has no history of taking overdoses'
     text = 'risk of self-harm'
@@ -904,6 +912,9 @@ Had 2 suicide attempts during psychotic episode in 2007 - One of them was trying
     text = 'She has signs of self-inflicted burns.'
 
     text = 'She has suicidal idea. She has suicidal ideation. She has suicidal intent. She has suicidal thought. She has suicide attempt. She has thought of suicide. She has threat of suicide. She has try and commit suicide. She has try and hang herself. She has try and poison herself. She has try to commit suicide. She has try to drown herself. She has try to electrocute herself. She has try to hang herself. She has try to kill herself. She has try to poison herself. She has with suicidal intent.'
+    
+    text = 'Has no family history of taking overdoses'
+    text = 'She is taking multiple overdoses in the past. She is taking multiple overdoses when she was young'
     
     #dsh_annotations = dsha.process_text(text, 'text_001', verbose=True, write_output=False)
 

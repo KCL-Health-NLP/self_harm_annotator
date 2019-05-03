@@ -1,18 +1,18 @@
-ago	TIME
-at the age of	TIME
-at age	TIME
-since	TIME
-when	TIME
-history	TIME
-Hx	TIME
-hx	TIME
-h/o	TIME
-use to	TIME
-past	TIME
-previous	TIME
-previously	TIME
-earlier	TIME
-year old	TIME
-at the time	TIME
-at that time	TIME
-tendency	TIME
+ago	PAST
+at the age of	PAST
+at age	PAST
+since	PAST
+when	PAST
+history	PAST
+Hx	PAST
+hx	PAST
+h/o	PAST
+use to	PAST
+the past	PAST
+previous year	PAST
+previously	PAST
+earlier	PAST
+year old	PAST
+at the time	PAST
+at that time	PAST
+tendency	PAST

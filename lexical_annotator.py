@@ -181,9 +181,7 @@ class LemmaAnnotatorSequence(object):
         return self.annotation_rules
 
     def add_components(self):
-        print(self.annotation_rules, file=sys.stderr)
         for label in self.annotation_rules:
-            print(label, file=sys.stderr)
             lemma_sequences = self.annotation_rules[label]
 
             # Avoid component name clashes
@@ -240,6 +238,7 @@ class LemmaAnnotator(object):
                 try:
                     doc.ents = list(doc.ents) + [entity]
                 except ValueError as e:
+                    print(doc.ents, entity, file=sys.stderr)
                     print('-- Warning: entity overlap for', entity)
                     print(e)
 

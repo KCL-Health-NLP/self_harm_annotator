@@ -12,7 +12,7 @@ RULES_1 = [
     {
         # DSH and BODY_PART (for coordinated body parts)
         'name': 'DSH_AND_BODY_PART',
-        'pattern': [{'_': {'DSH': 'DSH'}}, {'LEMMA': 'and'}, {'LEMMA': {'REGEX': '(all|both)'}, 'OP': '?'}, {'LEMMA': 'her', 'OP': '?'}, {'LEMMA': {'REGEX': '^(left|right|lower|upper)$'}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}}],
+        'pattern': [{'_': {'DSH': 'DSH'}}, {'LEMMA': 'and'}, {'LEMMA': {'REGEX': '^(all|both)$'}, 'OP': '?'}, {'LEMMA': 'her', 'OP': '?'}, {'LEMMA': {'REGEX': '^(left|right|lower|upper)$'}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
@@ -54,21 +54,21 @@ RULES_1 = [
     {
         # made a suicide attempt
         'name': 'MAKE_SUICIDE_ATTEMPT',
-        'pattern': [{'LEMMA': {'REGEX': '^(make)$'}}, {'POS': {'REGEX': '^(ADJ|DET|NUM)$'}}, {'POS': {'REGEX': '^(ADJ|ADV)$'}, 'OP': '*'}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
+        'pattern': [{'LEMMA': 'make'}, {'POS': {'REGEX': '^(ADJ|DET|NUM)$'}}, {'POS': {'REGEX': '^(ADJ|ADV)$'}, 'OP': '*'}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
     {
         # DSH behaviour
         'name': 'DSH_BEHAVIOUR',
-        'pattern': [{'_': {'DSH': 'DSH'}}, {'LEMMA': {'REGEX': '^(act|action|attempt|behaviour|gesture)'}}],
+        'pattern': [{'_': {'DSH': 'DSH'}}, {'LEMMA': {'REGEX': '^(act|action|attempt|behaviour|gesture)$'}}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
     {
         # suicidal behaviour
         'name': 'SUICIDAL_BEHAVIOUR',
-        'pattern': [{'LEMMA': {'REGEX': '^suicid(al|e)'}}, {'LEMMA': {'REGEX': '^(act|action|attempt|behaviour|gesture)'}}],
+        'pattern': [{'LEMMA': {'REGEX': '^(suicid(al|e))$'}}, {'LEMMA': {'REGEX': '^(act|action|attempt|behaviour|gesture)$'}}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     }

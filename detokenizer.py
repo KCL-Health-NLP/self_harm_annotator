@@ -26,8 +26,9 @@ class Detokenizer(object):
         lines = [line.split('\t') for line in open(path, 'r').read().split('\n') if not line.startswith('#') and line != '']
 
         for line in lines:
-            print(line, file=sys.stderr)
-            assert len(line) == 4
+            
+            if len(line) != 4:
+                raise ValueError('  -- Error: syntax error in detokenisation grammar at ', line)
 
             rule = {ORTH: line[0], LEMMA: line[1]}
 
@@ -38,11 +39,11 @@ class Detokenizer(object):
                 rule[POS] = line[3]
 
             if verbose:
-                print('-- Added detokenization rule: ' + str(rule), file=sys.stderr)
+                print('  -- Added detokenization rule: ' + str(rule), file=sys.stderr)
 
             self.nlp.tokenizer.add_special_case(line[0], [rule])
 
-        print('-- Added ' + str(len(lines)) + ' tokenization rules.', file=sys.stderr)
+        print('  -- Added ' + str(len(lines)) + ' tokenization rules.', file=sys.stderr)
         
         return self.nlp
 
