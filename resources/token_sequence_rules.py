@@ -5,303 +5,171 @@ from spacy.tokens import Token
 #################################
 
 Token.set_extension('DSH', default=False, force=True)
+Token.set_extension('BODY_PART', default=False, force=True)
 Token.set_extension('TIME', default=False, force=True)
 
-""" TESTS
-Token.set_extension('TEST1', default=False)
-Token.set_extension('TEST2', default=False)
-Token.set_extension('TEST3', default=False)
-Token.set_extension('TEST4', default=False)
+# TODO add possibility of setting new attributes for merged spans in the rules
 
-    {
-        'name': 'TEST_1',
-        'pattern': [{'LEMMA': 'be'}, {'POS': 'ADV', 'OP': '*'}, {'POS': 'ADJ'}],
-        'avm': {0: {'TEST1': 'TRUE'}, 1: {'TEST2': 'TRUE'}, 2: {'TEST3': 'TRUE'}}
-    },
-    {
-        'name': 'TEST_2',
-        'pattern': [{'_': {'DSH': 'TRUE'}}],
-        'avm': {0: {'TEST4': 'TRUE'}}
-    }
-"""
-
-""" NOT WORKING IN THIS VERSION OF SPACY, REGEX not yet implemeneted
-    {
-        'name': 'CUT_HER_X_ARM',
-        'pattern': [{'LEMMA': 'cut'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
-    },
-    {
-        'name': 'BURN_HER_X_ARM',
-        'pattern': [{'LEMMA': 'burn'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
-    },
-    {
-        'name': 'SLASH_HER_X_ARM',
-        'pattern': [{'LEMMA': 'slash'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
-    },
-    {
-        'name': 'LACERATE_HER_X_ARM',
-        'pattern': [{'LEMMA': 'lacerate'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
-    },
-    {
-        'name': 'HIT_HER_X_ARM',
-        'pattern': [{'LEMMA': 'hit'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
-    },
-    {
-        'name': 'PUNCH_HER_X_ARM',
-        'pattern': [{'LEMMA': 'punch'}, {'LOWER': 'her'}, {'REGEX': '^(arms?|hands?|legs?)'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
-    },
-    {
-        'name': 'HIT_HERSELF_IN_X_ARM',
-        'pattern': [{'LEMMA': 'hit'}, {'LOWER': 'herself'}, {'POS': 'ADP'}, {'POS': 'DET'},
-                    {'REGEX': '^(arms?|hands?|legs?|chest|breasts|stomach|face)'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
-    },
-    {
-        'name': 'PUNCH_HERSELF_IN_X_ARM',
-        'pattern': [{'LEMMA': 'punch'}, {'LOWER': 'herself'}, {'POS': 'ADP'}, {'POS': 'DET'},
-                    {'REGEX': '^(arms?|hands?|legs?|chest|breasts|stomach|face)'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}}
-    },
-"""
-
-
-####################
-# Rule definitions #
-####################
+#################################
+# Token sequence rules, Level 0 #
+#################################
 
 RULES = [
+    # suicide pattern rules - add LA=SUICIDE annotation
     {
-        'name': 'IN_YEAR',
-        'pattern': [{'POS': 'ADP'}, {'SHAPE': 'dddd'}],
-        'avm': {0: {'TIME': 'TIME'}, 1: {'TIME': 'TIME'}}
+        # commit suicide
+        'name': 'COMMIT_SUICIDE',
+        'pattern': [{'LEMMA': 'commit'}, {'LEMMA': 'suicide'}],
+        'avm': {'ALL': {'LA': 'SUICIDE'}},
+        'merge': False  # merge here for now, rather than in next level rules (requires longest match selection for OP=+)
     },
     {
-        'name': 'SINCE_MON',
-        'pattern': [{'POS': 'ADP'}, {'LEMMA': 'monday'}],
-        'avm': {0: {'TIME': False}, 1: {'TIME': False}}
+        # end her (own) life
+        'name': 'END_HER_LIFE',
+        'pattern': [{'LEMMA': 'end'}, {'LEMMA': 'her'}, {'LEMMA': 'own', 'OP': '?'}, {'LEMMA': 'life'}],
+        'avm': {'ALL': {'LA': 'SUICIDE'}},
+        'merge': False
     },
     {
-        'name': 'SINCE_TUE',
-        'pattern': [{'POS': 'ADP'}, {'LEMMA': 'tuesday'}],
-        'avm': {0: {'TIME': False}, 1: {'TIME': False}}
-    },
-    {
-        'name': 'SINCE_WED',
-        'pattern': [{'POS': 'ADP'}, {'LEMMA': 'wednesday'}],
-        'avm': {0: {'TIME': False}, 1: {'TIME': False}}
-    },
-    {
-        'name': 'SINCE_THU',
-        'pattern': [{'POS': 'ADP'}, {'LEMMA': 'thursday'}],
-        'avm': {0: {'TIME': False}, 1: {'TIME': False}}
-    },
-    {
-        'name': 'SINCE_FRI',
-        'pattern': [{'POS': 'ADP'}, {'LEMMA': 'friday'}],
-        'avm': {0: {'TIME': False}, 1: {'TIME': False}}
-    },
-    {
-        'name': 'SINCE_SAT',
-        'pattern': [{'POS': 'ADP'}, {'LEMMA': 'saturday'}],
-        'avm': {0: {'TIME': False}, 1: {'TIME': False}}
-    },
-    {
-        'name': 'SINCE_SUN',
-        'pattern': [{'POS': 'ADP'}, {'LEMMA': 'sunday'}],
-        'avm': {0: {'TIME': False}, 1: {'TIME': False}}
-    },
-    {
-        'name': 'IN_MONTH_YEAR',
-        'pattern': [{'POS': 'ADP'}, {'POS': 'PROPN'}, {'SHAPE': 'dddd'}],
-        'avm': {0: {'TIME': 'TIME'}, 1: {'TIME': 'TIME'}, 2: {'TIME': 'TIME'}}
-    },
-    # for some reason 'od' was causing bizarre matching in the dsh_sequence_lex, so moved it to here
-    {
-        'name': 'OD',
-        'pattern': [{'ORTH': 'OD'}],
-        'avm': {0: {'DSH': 'DSH'}}
-    },
-    {
-        'name': 'MED_DOSAGE_1',
-        'pattern': [{'POS': 'NUM'}, {'LEMMA': 'mg'}, {'LEMMA': 'od'}],
-        'avm': {2: {'DSH': False}}
-    },
-    {
-        'name': 'MED_DOSAGE_2',
-        'pattern': [{'POS': 'NUM'}, {'LEMMA': 'mgrs'}, {'LEMMA': 'od'}],
-        'avm': {2: {'DSH': False}}
-    },
-    {
-        'name': 'MED_DOSAGE_3',
-        'pattern': [{'POS': 'NUM'}, {'LEMMA': 'milligrams'}, {'LEMMA': 'od'}],
-        'avm': {2: {'DSH': False}}
-    },
-    {
-        'name': 'MED_DOSAGE_4',
-        'pattern': [{'POS': 'NUM'}, {'LEMMA': 'milligrammes'}, {'LEMMA': 'od'}],
-        'avm': {2: {'DSH': False}}
-    },
-    {
-        'name': 'MED_DOSAGE_5',
-        'pattern': [{'POS': 'NUM'}, {'LEMMA': 'mcg'}, {'LEMMA': 'od'}],
-        'avm': {2: {'DSH': False}}
-    },
-    {
-        'name': 'MED_DOSAGE_6',
-        'pattern': [{'POS': 'NUM'}, {'LEMMA': 'gram'}, {'LEMMA': 'od'}],
-        'avm': {2: {'DSH': False}}
-    },
-    {
-        'name': 'DSH',
-        'pattern': [{'LEMMA': 'deliberate'}, {'LEMMA': 'self-harm'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}},
-        'merge': True
-    },
-    {
-        'name': 'SCRATCH_ON_HER_NN',
-        'pattern': [{'LEMMA': 'scratch'}, {'POS': 'ADP'}, {'LEMMA': 'her'}, {'POS': 'NOUN'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}, 3: {'DSH': 'DSH'}},
-        'merge': True
-    },
-    {
-        'name': 'THROW_HERSELF_IN_DET_NOUN',
-        'pattern': [{'LEMMA': 'throw'}, {'LEMMA': 'herself'}, {'POS': 'ADP'}, {'POS': 'DET'}, {'POS': 'NOUN'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}, 3: {'DSH': 'DSH'}, 4: {'DSH': 'DSH'}},
-        'merge': True
-    },
-    {
-        'name': 'THROW_HERSELF_IN_FRONT_OF_DET_NOUN',
-        'pattern': [{'LEMMA': 'throw'}, {'LEMMA': 'herself'}, {'POS': 'ADP'}, {'LEMMA': 'front'}, {'LEMMA': 'of'}, {'POS': 'DET'}, {'POS': 'NOUN'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}, 3: {'DSH': 'DSH'}, 4: {'DSH': 'DSH'}, 5: {'DSH': 'DSH'}, 6: {'DSH': 'DSH'}},
-        'merge': True
-    },
-    {
-        'name': 'JUMP_IN_DET_NOUN',
-        'pattern': [{'LEMMA': 'jump'}, {'POS': 'ADP'}, {'POS': 'DET'}, {'POS': 'NOUN'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}, 3: {'DSH': 'DSH'}},
-        'merge': True
-    },
-    {
+        # kill herself
         'name': 'KILL_HERSELF',
         'pattern': [{'LEMMA': 'kill'}, {'LEMMA': 'herself'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}},
+        'avm': {'ALL': {'LA': 'SUICIDE'}},
+        'merge': False
+    },
+    {
+        # suicide attempt
+        'name': 'SUICIDE_ATTEMPT',
+        'pattern': [{'LEMMA': 'suicide'}, {'LEMMA': 'attempt'}],
+        'avm': {'ALL': {'LA': 'SUICIDE'}},
+        'merge': False
+    },
+    # DSH pattern rules
+    {
+        # burnt (both) her (upper (left)) arms
+        # TODO avoid matching with He punched her back etc.
+        'name': 'HARM_ACTION_POSITION_BODY_PART',
+        'pattern': [{'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': {'REGEX': '(all|both)'}, 'OP': '?'}, {'LEMMA': 'her'}, {'LEMMA': {'REGEX': '^(left|right|lower|upper)$'}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}, 'POS': 'NOUN'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
     {
-        'name': 'HARM_HERSELF',
-        'pattern': [{'LEMMA': 'harm'}, {'LEMMA': 'herself'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}},
-        'merge': True
-    },
-    # sometimes this doesn't match from the lexicon
-    {
-        'name': 'SELF_HARM',
-        'pattern': [{'LEMMA': 'self'}, {'LEMMA': 'harm'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}},
+        # burnt herself on the (upper (left)) arm
+        'name': 'HARM_ACTION_PP_POSITION_BODY_PART',
+        'pattern': [{'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'herself'}, {'POS': 'ADP'}, {'POS': 'DET'}, {'LEMMA': {'REGEX': '^(left|right|lower|upper)$'}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
     {
-        'name': 'TAKE_HER_OWN_LIFE',
-        'pattern': [{'LEMMA': 'take'}, {'LEMMA': 'her'}, {'LEMMA': 'own'}, {'LEMMA': 'life'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}, 3: {'DSH': 'DSH'}},
+        # burns on (both) her (upper (left)) arm
+        'name': 'HARM_ACTION_PP_HER_POSITION_BODY_PART',
+        'pattern': [{'_': {'LA': 'HARM_ACTION'}}, {'POS': 'ADP'}, {'LEMMA': 'both', 'OP': '?'}, {'LEMMA': 'her'}, {'LEMMA': {'REGEX': '^(left|right|lower|upper)$'}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
     {
-        'name': 'END_HER_LIFE',
-        'pattern': [{'LEMMA': 'end'}, {'LEMMA': 'her'}, {'LEMMA': 'life'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}},
+        # cut herself (deliberately)
+        'name': 'HARM_ACTION_V_HERSELF_1',
+        'pattern': [{'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'herself'}, {'_': {'LA': 'INTENT'}, 'OP': '*'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
     {
-        'name': 'END_HER_OWN_LIFE',
-        'pattern': [{'LEMMA': 'end'}, {'LEMMA': 'her'}, {'LEMMA': 'own'}, {'LEMMA': 'life'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}, 3: {'DSH': 'DSH'}},
-        'merge': True
-    },
-    # suicidal thoughts is merged on lexicon matching
-    {
-        'name': 'SUICIDAL_THOUGHTS_AND_ACT',
-        'pattern': [{'LEMMA': 'suicidal thought'}, {'LEMMA': 'and'}, {'LEMMA': 'act'}],
-        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 2: {'DSH': 'DSH'}},
+        # (deliberately) cut herself
+        'name': 'HARM_ACTION_V_HERSELF_2',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'herself'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
     {
-        'name': 'PLANNED_OD',
-        'pattern': [{'ORTH': 'planned'}, {'LEMMA': 'overdose'}],
-        'avm': {0: {'HEDGING': False}, 1: {'DSH': 'DSH'}},
-        'merge': False
-    },
-    # This next rule is ad hoc to deal with headings, needs to be generalised
-    {
-        'name': 'SPACE_DSH_SPACE',
-        'pattern': [{'POS': 'SPACE'}, {'LEMMA': 'self harm'}, {'POS': 'SPACE'}],
-        'avm': {1: {'DSH': 'NON_DSH'}},
-        'merge': False
+        # (deliberate) cutting of herself
+        'name': 'HARM_ACTION_N_HERSELF',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'of'}, {'LEMMA': 'herself'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
     },
     {
-        'name': 'RISK_ASSESSMENT',
-        'pattern': [{'LEMMA': 'risk'}, {'LEMMA': 'assessment'}],
-        'avm': {0: {'HEDGING': False}},
-        'merge': False
+        # (deliberate) harm to herself
+        'name': 'DELIBERATE_HARM_TO_HERSELF',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': {'REGEX': '^to(wards?)?'}}, {'LEMMA': {'REGEX': '(her)?self'}}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
     },
     {
-        'name': 'MG_OD',
-        'pattern': [{'ORTH': 'mg'}, {'LEMMA': 'od'}],
-        'avm': {1: {'DSH': 'NO_DSH'}},
-        'merge': False
+        # deliberate injuries
+        'name': 'DELIBERATE_INJURY',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '+'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'herself', 'OP': '?'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
     },
     {
-        'name': 'MGS_OD',
-        'pattern': [{'ORTH': 'mgs'}, {'LEMMA': 'od'}],
-        'avm': {1: {'DSH': 'NO_DSH'}},
-        'merge': False
+        # (deliberate) self-harm (behaviour)
+        'name': 'DSH_1',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^self-.+'}, '_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
     },
     {
-        'name': 'MILLIGRAM_OD',
-        'pattern': [{'LEMMA': 'milligram'}, {'LEMMA': 'od'}],
-        'avm': {1: {'DSH': 'NO_DSH'}},
-        'merge': False
+        # (deliberate) self harm (behaviour)
+        'name': 'DSH_2',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'self'}, {'LEMMA': {'REGEX': '^self-.+'}, '_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
     },
     {
-        'name': 'MICROGRAM_OD',
-        'pattern': [{'LEMMA': 'microgram'}, {'LEMMA': 'od'}],
-        'avm': {1: {'DSH': 'NO_DSH'}},
-        'merge': False
+        # (deliberate) self- harm (behaviour)
+        'name': 'DSH_3',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^self-'}}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
     },
     {
-        'name': 'MICROGRAMME_OD',
-        'pattern': [{'LEMMA': 'microgramme'}, {'LEMMA': 'od'}],
-        'avm': {1: {'DSH': 'NO_DSH'}},
-        'merge': False
-    },
-    {
-        'name': 'G_OD',
-        'pattern': [{'LEMMA': 'g'}, {'LEMMA': 'od'}],
-        'avm': {1: {'DSH': 'NO_DSH'}},
+        # (deliberately) engage in cutting (behaviour)
+        'name': 'ENGAGE_IN_HARM',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^(carry|do|engage|perform)'}}, {'POS': {'REGEX': '(ADP|PART)'}, 'OP': '?'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
+        'avm': {2: {'DSH': 'DSH'}, 3: {'DSH': 'DSH'}, 4: {'DSH': 'DSH'}},
         'merge': False
     },
     {
-        'name': 'GRAMME_OD',
-        'pattern': [{'LEMMA': 'gramme'}, {'LEMMA': 'od'}],
-        'avm': {1: {'DSH': 'NO_DSH'}},
+        # evidence of cutting (behaviour)
+        'name': 'EVIDENCE_OF_HARM',
+        'pattern': [{'LEMMA': {'REGEX': '^(evidence|sign)'}}, {'LEMMA': 'of'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
+        'avm': {2: {'DSH': 'DSH'}, 3: {'DSH': 'DSH'}},
         'merge': False
     },
     {
-        'name': 'GRAM_OD',
-        'pattern': [{'LEMMA': 'gram'}, {'LEMMA': 'od'}],
-        'avm': {1: {'DSH': 'NO_DSH'}},
+        # she has (deep) (self-) lacerations
+        'name': 'SHE_HAS_HARM',
+        'pattern': [{'LEMMA': 'she'}, {'LEMMA': {'REGEX': '^(be|display|evidence|have|present|show)'}, 'OP': '+'}, {'POS': 'ADP', 'OP': '?'}, {'POS': 'ADJ', 'OP': '?'}, {'LEMMA': {'REGEX': '^(self-)'}, 'OP': '?'}, {'_': {'LA': 'HARM_ACTION'}, 'OP': '+'}],
+        'avm': {'LAST': {'DSH': 'DSH'}},
         'merge': False
     },
     {
-        'name': 'TABLET_OD',
-        'pattern': [{'POS': 'NUM'}, {'LEMMA': 'tablet'}, {'LEMMA': 'od'}],
-        'avm': {2: {'DSH': 'NO_DSH'}},
-        'merge': False
+        # (deliberate) jump off
+        'name': 'JUMP_OFF',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'jump'}, {'POS': {'REGEX': '(ADP|PART)'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        # (deliberate) jump in front of
+        'name': 'JUMP_IN_FRONT',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'jump'}, {'LEMMA': 'in'}, {'LEMMA': 'front'}, {'LEMMA': 'of'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        # great risk to herself
+        'name': 'RISK_TO_HERSELF',
+        'pattern': [{'LEMMA': {'REGEX': '^(elevated?|extreme|great|high|intense|much|serious|worry|worrying)'}}, {'LEMMA': 'risk'}, {'LEMMA': 'to'}, {'LEMMA': 'herself'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        # self-inflicted injuries
+        'name': 'SELF-INFLICTED_INJURIES',
+        'pattern': [{'LEMMA': {'REGEX': '^self\-inflict(ing)?'}}, {'_': {'LA': 'HARM_ACTION'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
     }
 ]

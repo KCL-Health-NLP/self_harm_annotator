@@ -12,8 +12,8 @@ from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, Token
 from spacy.symbols import LEMMA
 
-# TODO factorise these classes into a single AnnotatorSequence parent and various child classes that implement
-# load_lexicon and other methods
+# TODO factorise these classes into a single AnnotatorSequence parent and 
+# various child classes that implement load_lexicon and other methods
 
 
 class LexicalAnnotatorSequence(object):
@@ -88,6 +88,7 @@ class LexicalAnnotator(object):
 
     def __call__(self, doc):
         matches = self.matcher(doc)
+        matches = self.get_longest_matches(matches)
         spans = []
         Token.set_extension('tense', default=False, force=True)
         for _, start, end in matches:
@@ -102,7 +103,9 @@ class LexicalAnnotator(object):
             for token in entity:
                 token._.set('tense', tense)
 
-            doc.ents = list(doc.ents) + [entity]
+            # avoid adding entities twice, but CAREFUL make sure this doesn't stop several annotations being added to the same token sequence
+            if entity not in doc.ents:
+                doc.ents = list(doc.ents) + [entity]
 
         # Merge all entities
         # TO DO spaCy stores ALL matches so we get 'deliberate' and 'self-harm' annotated separately - fix
@@ -112,6 +115,32 @@ class LexicalAnnotator(object):
                     ent.merge(lemma=''.join([token.lemma_ + token.whitespace_ for token in ent]).strip())
 
         return doc
+
+    def get_longest_matches(self, matches):
+        """
+        Remove all shortest matching overlapping spans.
+        :return: matches list of all longest matches only
+        """
+        offsets = [(match[1], match[2]) for match in matches]
+        overlaps = {}
+        for offset in offsets:
+            o = [(i[0], i[1]) for i in offsets if i[0] >= offset[0] and 
+                 i[0] <= offset[1] or i[1] >= offset[0] and 
+                 i[1] <= offset[1] if (i[0], i[1]) != offset and
+                 (i[0], i[1]) and (i[0], i[1]) not in overlaps]
+            if len(o) > 0:
+                overlaps[offset] = o
+            
+        overlapping_spans = [[k] + v for (k, v) in overlaps.items()]
+        for os in overlapping_spans:
+            longest_span = sorted(os, key=lambda x: x[1] - x[0], reverse=True)[0]
+            for match in matches:
+                start, end = match[1], match[2]
+                # if it's not the longest match then chuck it out
+                if (start, end) in os and (start != longest_span[0] or end != longest_span[1]):
+                    matches.remove(match)
+            
+        return matches
 
 
 class LemmaAnnotatorSequence(object):
@@ -192,6 +221,7 @@ class LemmaAnnotator(object):
         
     def __call__(self, doc):
         matches = self.matcher(doc)
+        matches = self.get_longest_matches(matches)
         spans = []
         Token.set_extension('tense', default=False, force=True)
         for _, start, end in matches:
@@ -206,7 +236,12 @@ class LemmaAnnotator(object):
             for token in entity:
                 token._.set('tense', tense)
 
-            doc.ents = list(doc.ents) + [entity]
+            if entity not in doc.ents:
+                try:
+                    doc.ents = list(doc.ents) + [entity]
+                except ValueError as e:
+                    print('-- Warning: entity overlap for', entity)
+                    print(e)
 
         # Merge all entities
         # TO DO spaCy stores ALL matches so we get 'deliberate' and 'self-harm' annotated separately - fix
@@ -216,6 +251,32 @@ class LemmaAnnotator(object):
                     ent.merge(lemma=''.join([token.lemma_ + token.whitespace_ for token in ent]).strip())
 
         return doc
+
+    def get_longest_matches(self, matches):
+        """
+        Remove all shortest matching overlapping spans.
+        :return: matches list of all longest matches only
+        """
+        offsets = [(match[1], match[2]) for match in matches]
+        overlaps = {}
+        for offset in offsets:
+            o = [(i[0], i[1]) for i in offsets if i[0] >= offset[0] and 
+                 i[0] <= offset[1] or i[1] >= offset[0] and 
+                 i[1] <= offset[1] if (i[0], i[1]) != offset and
+                 (i[0], i[1]) and (i[0], i[1]) not in overlaps]
+            if len(o) > 0:
+                overlaps[offset] = o
+            
+        overlapping_spans = [[k] + v for (k, v) in overlaps.items()]
+        for os in overlapping_spans:
+            longest_span = sorted(os, key=lambda x: x[1] - x[0], reverse=True)[0]
+            for match in matches:
+                start, end = match[1], match[2]
+                # if it's not the longest match then chuck it out
+                if (start, end) in os and (start != longest_span[0] or end != longest_span[1]):
+                    matches.remove(match)
+            
+        return matches
 
 
 class TokenSequenceAnnotatorSequence(object):
@@ -228,7 +289,7 @@ class TokenSequenceAnnotatorSequence(object):
 
 
 if __name__ == '__main__':
-    nlp = spacy.load('en')
+    nlp = spacy.load('en_core_web_sm')
 
     print('Lexical Sequence Annotator')
     print('--------------------------')
@@ -249,7 +310,7 @@ if __name__ == '__main__':
     print('------------------------')
     
     text = 'This patient scratches herself and cuts up her arms.'
-    pin = 'T:/Andre Bittar/workspace/dsh_annotator/resources/harm_V_lex.txt'
+    pin = 'T:/Andre Bittar/workspace/dsh_annotator/resources/harm_action_lex.txt'
     lem_sa = LemmaAnnotatorSequence(nlp, pin, 'is_harm_action')
     lem_sa.load_lexicon()
     nlp = lem_sa.add_components()

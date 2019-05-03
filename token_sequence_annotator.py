@@ -8,9 +8,11 @@ Created on Fri Aug  3 15:44:07 2018
 import spacy
 import sys
 
-from resources.token_sequence_rules import RULES
 from spacy.matcher import Matcher
-from spacy.tokens import Token
+from spacy.tokens import Span
+
+# Ad hoc import selection
+
 
 
 # This is an ad hoc workaround to avoid trying to overwrite default attributes
@@ -26,12 +28,19 @@ DEFAULT_ATTRIBUTES = ['DEP', 'HEAD', 'IS_ALPHA', 'IS_ASCII', 'IS_BRACKET',
 
 class TokenSequenceAnnotator(object):
 
-    def __init__(self, nlp, verbose=False):
-        self.name = 'token_sequence_annotator'
+    def __init__(self, nlp, name, verbose=True):
+        self.name = 'token_sequence_annotator_' + name
+        # filthy conditional import while we aren't parsing rule files
+        self.rules = []
+        if name == 'level0':
+            from resources.token_sequence_rules import RULES
+            self.rules = RULES
+        elif name == 'level1':
+            from resources.token_sequence_rules_1 import RULES_1
+            self.rules = RULES_1
         self.nlp = nlp
         self.matcher = None
-        self.matches = []
-        self.rules = RULES
+        self.matches = {}
         self.verbose = verbose
 
     def __call__(self, doc):
@@ -39,57 +48,154 @@ class TokenSequenceAnnotator(object):
         :param doc: the current spaCy document object
         :return: the matches
         """
+        print('-- Token sequence annotator:', self.name)
+        
+        # clear matches - this is required as we initialise this component only once and matches from previous documents need to be erased
+        self.matches = {}
+        
         for rule in self.rules:
             pattern = rule['pattern']
             name = rule['name']
             avm = rule['avm']
             merge = rule.get('merge', False)
+            # TODO add possibility of setting new attributes for merged spans in the rules
+            # attrs = rule.get('attrs', [])
 
             self.matcher = Matcher(self.nlp.vocab)  # Need to do this for each rule separately unfortunately
             self.matcher.add(name, None, pattern)
 
             matches = self.matcher(doc)
-            self.matches.append((rule, matches))
-            self.add_annotation(doc, matches, avm, merge)
+
+            # store all matched spans for subsequent merging
+            spans = {}
+            for match in matches:
+                start = match[1]
+                end = match[2]
+                span = Span(doc, start, end)  # store offsets for longest match selection
+                spans[(start, end)] = span
+
+            if len(spans) > 0:
+                self.matches[rule['name']] = [matches, spans, merge]
+            self.add_annotation(doc, matches, name, avm)
 
             if self.verbose:
-                print('-- ' + name + ': ' + str(len(matches)) + ' matches.', file=sys.stderr)
-        
+                print('  -- Rule ' + name + ': ' + str(len(matches)) + ' matches.', file=sys.stderr)
+
+        # retain only longest matching spans
+        self.get_longest_matches()
+
+        # perform merging where specified by the rule
+        for rule_name in self.matches:
+            rule_matches = self.matches[rule_name]
+            spans = rule_matches[1]
+            merge = rule_matches[2]
+            if merge:
+                with doc.retokenize() as retokenizer:
+                    for offsets in spans:
+                        span = spans[offsets]
+                        try:
+                            if self.verbose:
+                                print('  -- Merging span from rule ' + rule_name + ':', [token for token in span], file=sys.stderr)
+                            print(self.matches)
+                            retokenizer.merge(span)
+                        except IndexError as e:
+                            print('  -- Warning: unable to merge span at', offsets, '(token may have been merged previously).', file=sys.stderr)
+                            print(e, file=sys.stderr)
+
         return doc
     
     def load_rules(self):
         # TODO this is where we need to parse the rule file - specify path as an argument
         pass
 
-    def add_annotation(self, doc, matches, rule_avm, merge):
+    def get_longest_matches(self):
+        """
+        Remove all shortest matching overlapping spans.
+        :return: None
+        """
+
+        def get_overlapping_spans(spans):
+            """ Get a unique list of all overlapping span offsets """
+            offsets = spans.keys()
+            overlaps = {}
+            for offset in offsets:
+                o = [(i[0], i[1]) for i in offsets if
+                     i[0] >= offset[0] and i[0] <= offset[1] or i[1] >= offset[0] and i[1] <= offset[1] if
+                     (i[0], i[1]) != offset and (i[0], i[1]) and (i[0], i[1]) not in overlaps]
+                if len(o) > 0:
+                    overlaps[offset] = o
+
+            return [[k] + v for (k, v) in overlaps.items()]
+
+        rule_names = self.matches.keys()
+        for rule_name in rule_names:
+            match = self.matches[rule_name]
+            all_spans = match[1]
+            overlapping_spans = get_overlapping_spans(all_spans)
+            for os in overlapping_spans:
+                shortest_spans = sorted(os, key=lambda x: x[1] - x[0], reverse=True)[1:]
+                # pop shortest spans
+                for ss in shortest_spans:
+                    # avoid trying to remove a span more than once
+                    if ss in all_spans:
+                        all_spans.pop(ss)
+
+    def add_annotation(self, doc, matches, rule_name, rule_avm):
         """
         Add annotations to the specified tokens in a match.
         Does not work with operators.
         :param doc: the spaCy document object
         :param matches: the matches
         :param rule_avm: the attribute-value pair dictionary specified in the annotation rule
+        :param merge: merge matched spans or not
         :return: None
         """
+        # TODO this is really ugly, tidy it up
         for match in matches:
             start = match[1]
             end = match[2]
             span = doc[start:end] # why was this end + 1?
-            for j in range(len(span)):
-                if j in rule_avm.keys():
-                    new_annotations = rule_avm.get(j, None)
-                    if new_annotations is not None:
-                        for new_attr in new_annotations:
-                            token = span[j]
-                            val = new_annotations[new_attr]
-                            if new_attr in DEFAULT_ATTRIBUTES:
-                                # TODO check if modification of built-in attributes is possible
-                                print('-- Warning: cannot modify built-in attribute', new_attr, file=sys.stderr)
-                            else:
-                                token._.set(new_attr, val)
-            if merge:
-                if self.verbose:
-                    print('-- Merging span:', [token for token in span], file=sys.stderr)
-                span.merge()
+            if self.verbose:
+                print('  -- Match:', rule_name, match, doc[start:end], file=sys.stderr)
+            # First check if rule annotates ALL tokens (this is to deal with multi-token operators (+, *)
+            new_annotations = rule_avm.get('ALL', None)
+            if new_annotations is not None:
+                for new_attr in new_annotations:
+                    for j in range(len(span)):
+                        token = span[j]
+                        val = new_annotations[new_attr]
+                        if new_attr in DEFAULT_ATTRIBUTES:
+                            # TODO check if modification of built-in attributes is possible
+                            print('  -- Warning: cannot modify built-in attribute', new_attr, file=sys.stderr)
+                        else:
+                            token._.set(new_attr, val)
+            else:
+                new_annotations = rule_avm.get('LAST', None)
+
+                if new_annotations is not None:
+                    for new_attr in new_annotations:
+                        token = span[len(span) - 1]
+                        val = new_annotations[new_attr]
+                        if new_attr in DEFAULT_ATTRIBUTES:
+                            # TODO check if modification of built-in attributes is possible
+                            print('  -- Warning: cannot modify built-in attribute', new_attr, file=sys.stderr)
+                        else:
+                            token._.set(new_attr, val)
+
+                # Otherwise, annotate token-by-token according to rule
+                else:
+                    for j in range(len(span)):
+                        if j in rule_avm.keys():
+                            new_annotations = rule_avm.get(j, None)
+                            if new_annotations is not None:
+                                for new_attr in new_annotations:
+                                    token = span[j]
+                                    val = new_annotations[new_attr]
+                                    if new_attr in DEFAULT_ATTRIBUTES:
+                                        # TODO check if modification of built-in attributes is possible
+                                        print('  -- Warning: cannot modify built-in attribute', new_attr, file=sys.stderr)
+                                    else:
+                                        token._.set(new_attr, val)
 
     def print_spans(self, doc):
         s = '\n'
@@ -122,11 +228,11 @@ class TokenSequenceAnnotator(object):
 
 
 if __name__ == '__main__':
-    nlp = spacy.load('en')
+    nlp = spacy.load('en_core_web_sm')
 
     text = 'This self-harm has not been done by Elizabeth Callaghan who cut her arm and cut her legs. I will be very very very happy. I have apple and banana'
 
-    tsa = TokenSequenceAnnotator(nlp)
+    tsa = TokenSequenceAnnotator(nlp, 'test')
     nlp.add_pipe(tsa)
     doc = nlp(text)
 

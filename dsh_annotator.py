@@ -24,7 +24,7 @@ from xml.parsers.expat import ExpatError
 class DSHAnnotator:
 
     def __init__(self, verbose=False):
-        self.nlp = spacy.load('en')
+        self.nlp = spacy.load('en_core_web_sm')
         self.text = None
         self.verbose = verbose
         
@@ -37,22 +37,23 @@ class DSHAnnotator:
 
         # Load detokenizer
         self.load_detokenizer(os.path.join('resources', 'detokenization_rules.txt'))
-        
+
         # Load lexical annotators
-        self.load_lexicon('./resources/dsh_sequence_lex.txt', LEMMA, 'DSH', merge=True)
-        #self.load_lexicon('./resources/dsh_lex_lemma.txt', LEMMA, 'DSH', merge=True)
-        self.load_lexicon('./resources/time_lex.txt', LEMMA, 'TIME')
-        self.load_lexicon('./resources/current_lex.txt', LEMMA, 'TIME')
+        self.load_lexicon('./resources/dsh_lex.txt', LEMMA, 'DSH')
+        self.load_lexicon('./resources/time_past_lex.txt', LEMMA, 'TIME')
+        self.load_lexicon('./resources/time_present_lex.txt', LEMMA, 'TIME')
         self.load_lexicon('./resources/negation_lex.txt', LEMMA, 'NEG')
         self.load_lexicon('./resources/modality_lex.txt', LEMMA, 'MODALITY')
         self.load_lexicon('./resources/hedging_lex.txt', LEMMA, 'HEDGING')
+        self.load_lexicon('./resources/intent_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
-        self.load_lexicon('./resources/harm_V_lex.txt', LEMMA, 'LA')
+        self.load_lexicon('./resources/harm_action_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/reported_speech_lex.txt', LEMMA, 'RSPEECH')
-        
+
         # Load token sequence annotators
-        self.load_token_sequence_annotator(None)
-    
+        self.load_token_sequence_annotator('level0')
+        self.load_token_sequence_annotator('level1')
+
     def load_lexicon(self, path, source_attribute, target_attribute, merge=False):
         """
         Load a lexicon/terminology file for annotation.
@@ -88,13 +89,13 @@ class DSHAnnotator:
         """
         self.nlp = Detokenizer(self.nlp).load_detokenization_rules(path, verbose=True)
 
-    def load_token_sequence_annotator(self, path):
+    def load_token_sequence_annotator(self, name):
         """
         Load all token sequence annotators.
         TODO allow for multiple annotators, cf. lemma and lexical annotators.
-        TODO activate path argument.
+        TODO add path argument to specify rule file.
         """
-        tsa = TokenSequenceAnnotator(self.nlp)
+        tsa = TokenSequenceAnnotator(self.nlp, name)
         if tsa.name not in self.nlp.pipe_names:
             self.nlp.add_pipe(tsa)
 
@@ -667,8 +668,7 @@ class DSHAnnotator:
                 self.write_ehost_output('test.txt', mentions, verbose=verbose)
         
         return global_mentions
-    
-    
+
     def process_text(self, text, text_id, verbose=False, write_output=False):
         if verbose:
             print('-- Processing text string:', text, file=sys.stderr)
@@ -724,7 +724,8 @@ class DateTokenAnnotator(object):
 if __name__ == "__main__":
     dsha = DSHAnnotator()
     #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
-    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus')
+    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=False, verbose=True)
+    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus/10-06-2011_29145600648193.txt', write_output=False, verbose=True)
 
     text = 'Has no history of taking overdoses'
     text = 'risk of self-harm'
@@ -797,7 +798,7 @@ mentioned briefly about financial problems"""
     text = 'However, she still regrets that she did not succeed and still thinks about doing it and would use same method with OD.'
     text = 'Referred by PLN - patient admitted earlier today to Lewisham RATU after taking an OD of Sibutramine 20mg x17 tabs + Acamprosate 333mg x 20tabs'
     text = 'On Monday night,  ZZZZZ  had tied a shirt and a dressing gown together and was planning to attach this to the door handle and hang herself.'
-    text = 'She does not fully understand the severity of her overdose and is not willing to be admitted to a psychiatric ward.'    
+    text = 'She does not fully understand the severity of her overdose and is not willing to be admitted to a psychiatric ward.'
     text = 'She said that she never intended to jump out of the window but was just opening it.'
     text = 'ZZZZZ  was not able to pinpoint a direct trigger for the suicide attempt and says she has just been feeling more depressed over the past week.'
     text = 'She feels she could not trust herself if she were discharged from hospital now, as even now regrets s that the overdose did not work. Social Services involved re 12-year-old child.'
@@ -830,7 +831,7 @@ Had 2 suicide attempts during psychotic episode in 2007 - One of them was trying
     text = "Other concerns were around  ZZZZZ 's ability to care for the child, her dissociation and self-harm and her issues around the child being a girl."
     text = 'ZZZZZ  has reported no current thoughts of deliberate self harm but disclosed past self harm when initially became unwell aged 25 years.'
     text = 'She experienced anhedonia, was very negative about the future and had suicidal thoughts and self harmed.'
-    
+
     text = 'She has a tendency to self-harm.'
     text = '2 previous overdoses with suicidal intent.'
     text = 'Overall, it appears that these suicidal thoughts and act (when she was aged 16), appears to have occurred in the context of depressive mood, possibly precipitated by social crisis.'
@@ -841,8 +842,70 @@ Had 2 suicide attempts during psychotic episode in 2007 - One of them was trying
     text = 'She has made eight attempts to kill herself'
     text = 'Risperidone 40 mgs OD'
     text = 'Overdose on Monday'
+
+    # testing token sequence rules
+    text = 'She is very very funny and has self-harmed before and cut her arm...and then she burned her legs'
+    text = 'She tried to burn herself.'
+    text = 'She burnt her arm. She cut her arm. She burnt her upper arm. She burnt her left arm. She burnt her upper left arm.'
+    text = 'She did deliberate self-harm, and then deliberate self-harming, and after deliberate self-injury.'
+    text = 'She did deliberate self-harm behaviours, and then deliberate self-harming behaviour, and after deliberate self-injury behaviour.'
+    text = 'She did deliberate self harm and deliberate self injury and then deliberate self mutilation'
+    text = 'She did deliberate self harm behaviours and deliberate self injury behaviours and then deliberate self mutilation behaviours'
+    text = 'She has tried to commit suicide. She made an attempt at committing suicide.'
+    text = 'She made an attempt at suicide. She tried suicide. Her first try at suicide. First attempt at suicide'
+    text = 'She made an attempt to kill herself. She tried to commit suicide'
+    text = 'She has made several suicide attempts. She has made a suicide attempt. She made 4 suicide attempts.'
+    text = 'She has made several recent suicide attempts. She has made a very bad suicide attempt. She made 4 terribly serious suicide attempts.'
+    text = 'She tends to self mutilate. She auto mutilated'
+    text = 'She banged her head'
+    text = 'This led to deliberate burning of herself.'
+    text = 'And many cuts from beating herself'
+    text = 'Much evidence of dsh and D.S.H and D.S.H. She has signs of d.s.h. She has signs of d.s.h. '
+    text = 'She has attempted suicide. She has auto mutilated.'
+    text = 'She tried to end her life. She tried to end her own life'
+    text = 'She tried to end her life. She tried to end her own life'
+    text = 'She has deliberate injuries.'
+    text = 'She has signs of auto-mutilation. She has automutilated. She has auto-mutilated.'
+    text = 'She has attempted to commit suicide. She has done auto mutilation. She has deliberate self harm. She has deliberate self-injury.'
+    text = 'She has deliberate self-harm behaviour.'
+    text = 'She has deliberately injured herself. She has deliberately self harmed. She has done deliberate self harming. She has deliberately self-injured. She has deliberately self-injured herself.'
+    text = 'Signs of deliberate harm towards herself'
+    text = 'She injured herself intentionally'
+    text = 'She has hit herself in the stomach. She has burnt herself on both hands'
+    text = 'She has immolated herself'
+    text = 'She has signs of dsh. She has electrocute herself.'
+    text = 'She shows signs of having deliberately self-injured herself'
+    text = 'She has jumped from a moving bus. She has jumped in front of a moving bus. She has self-injuries. She has self-injurious behaviour.'
+    text = 'She has self-destructive behaviour. She has self-immolation. She has self-injury. She has self-laceration. She has self-mutilation. She has self-poisoning.'
+    text = 'She has electrocution. She has hang herself. She has harm herself. She has harm to herself. She has harm to self. She has harm to themselves. She has harm toward herself. She has harm toward self. She has harm toward themselves. She has harm towards herself. She has harm towards self. She has harm towards themselves. She has hit herself. She has immolate herself. She has injure herself deliberately. She has injure herself intentionally. She has injure herself on purpose. She has intentional injury. She has intentional self-injury. She has intentionally injure herself. She has intentionally self-injure herself. She has jump from. She has jump in front of. She has jump off. She has lacerate herself. She has laceration. She has mutilate herself. She has o.d. She has o.d.. She has od. She has overdose. She has parasuicidal. She has parasuicidality. She has parasuicide. She has poison herself. She has risk to herself. She has risk to self. She has scratch. She has scratch on her. She has self cut. She has self harm. She has self harmer. She has self hit. She has self immolate. She has self immolation. She has self lacerate. She has self laceration. She has self poison. She has self-cutting. She has self-harm. She has self-harmer. She has self-harming. She has self-harming behaviour. She has self-hitting. She has self-immolating.'
+    text = 'She has slit both her wrists. She has suicidal behaviour. She has suicidal gesture. She has suicide attempt. She has try to commit suicide'
+    text = 'She has been lacerating herself on the arms with a knife'
+    text = 'She is a great risk to herself'
+    text = 'She has scratches on both her upper left arms'
+    text = 'She does self-harmer behaviour'
+    text = 'She has deliberate self harm. She has deliberate self-harm. She has deliberate self-injury. She has asphyxiate herself. She has attempted to drown herself. She has attempted to electrocute herself. She has attempted to hang herself. She has attempted to kill herself. She has attempted to poison herself. She has made attempts at suicide. She has attempted to commit suicide. She has attempted to drown herself. She has attempted to electrocute herself. She has attempted to hang herself. She has attempted to kill herself. She has attempted to poison herself.'
+    text = 'She has banged her head. She has burned her arm. She has burned her body. She has burnt her breasts. She has burnt her cheek. She has burned her chest. She has burnt her face. She has burnt her right hand. She has burn her lower left leg.'
+    text = 'She has cuts from self-harm. She has cut her arm. She has cut her body. She has cut her left breast. She has cut her right cheek. She has cut her chest. She has cut her face. She has cut her hand. She has cut her leg. She has cut her wrist. She has cut herself. She has d.s.h. She has d.s.h.. She has deliberate injury. She has deliberately injured herself. She has deliberately self harmed. She has signs of deliberately self harming.'
+    text = 'She has deliberately self- injured. She has deliberately self- injured herself. She has deliberately self-injured. She has deliberately self-injured herself. She has dsh. She has electrocuted herself. She has signs of electrocution.'
+    text = 'She has intentionally engaged in cutting behaviour. She has carried out burning. She has evidence of burning her arms. She has evidence of cutting. She has evidence of slashing.'
+    text = 'She has hit herself on the breast'
+    text = 'She has hang herself. She has harm herself. She has harm to herself. She has harm to self. She has harm to themselves. She has harm toward herself. She has harm toward self. She has harm toward themselves. She has harm towards herself. She has harm towards self. She has harm towards themselves. She has hit her face. She has hit her head. She has hit herself. She has hit herself in the breast. She has hit herself in the chest. She has hit herself in the face. She has hit herself in the stomach. She has immolate herself. She has injure herself deliberately. She has injure herself intentionally. She has injure herself on purpose. She has intentional injury. She has intentional self-injury. She has intentionally injure herself. She has intentionally self-injure herself. She has jump from. She has jump in front of. She has jump off. She has jump out. She has jump out of. She has lacerate her arm. She has lacerate her body. She has lacerate her breast. She has lacerate her cheek. She has lacerate her chest. She has lacerate her face. She has lacerate her hand. She has lacerate her leg. She has lacerate her wrist. She has lacerate herself.'
+    text = 'She has laceration from self-harm. She has mutilate herself.'
+    text = 'She has deep lacerations.'
+    text = 'She has o.d. She has o.d.. She has overdose. She has overdosing.'
+    text = 'She has parasuicidal. She has parasuicidality. She has parasuicide. She has poison herself. She has punch herself in the breast. She has punch herself in the chest. She has punch herself in the face. She has punch herself in the stomach. She has scratch her arm. She has scratch her body. She has scratch her breast. She has scratch her cheek. She has scratch her chest. She has scratch her face. She has scratch her hand. She has scratch her leg. She has scratch herself. She has scratched her arm. She has scratched her body. She has scratched her breast. She has scratched her cheek. She has scratched her chest. She has scratched her face. She has scratched her hand. She has scratched her leg. She has scratches her arm. She has scratches her body. She has scratches her breast. She has scratches her cheek. She has scratches her chest. She has scratches her face. She has scratches her hand. She has scratches her leg.'
+    text = 'She has self abused. She has self cut. She has self cutting. She has self harm.'
+    text = 'She has self harm ideation. She is a self harmer. She has been self harming. She has self hit. She has self hitting. She has self immolate. She has self immolating. She has self immolation. She has self lacerate. She has self lacerating. She has self laceration. She has self poison. She has self poisoning.'
+    text = 'She has self- abuse. She has been self- cutting. She has self- harm. She has self- harm. She has self- harm ideation. She has been a self- harmer.'
+    text = 'She has been self- harming. She has shown self- harming behaviour. She has self- hitting. She has self- immolating. She has self- immolation. She has self- injuries.'
+    text = 'She has self- injurious behaviour. She has self- injury. She has self- laceration. She has self- mutilation. She has self- poisoning. She has self-abuse. She has self-cutting. She has self-harm. She has self-harm ideation. She has self-harmer. She has self-harming. She has self-harming behaviour. She has self-hitting. She has self-immolating. She has self-immolation. She has self-injuries. She has self-injurious behaviour. She has self-injury. She has self-laceration. She has self-mutilation. She has self-poisoning. She has selfharm. She has slash her wrist. She has slit her wrist.'
+    text = 'She has smack herself in the breast. She has smack herself in the chest. She has smack herself in the face. She has smack herself in the stomach. She has stab her arm. She has stab her body. She has stab her breast. She has stab her cheek. She has stab her chest. She has stab her face. She has stab her hand. She has stab her leg. She has stab her wrist. She has stab herself. She has suicidal behaviour. She has suicidal gesture.'
+    text = 'She has auto mutilated. She has done auto mutilation. She has auto-mutilated. She has done auto-mutilation. She has auto-mutilated. She has signs of auto-mutilation. She has burns from self-harm.'
+    text = 'She has signs of self-inflicted burns.'
+
+    text = 'She has suicidal idea. She has suicidal ideation. She has suicidal intent. She has suicidal thought. She has suicide attempt. She has thought of suicide. She has threat of suicide. She has try and commit suicide. She has try and hang herself. She has try and poison herself. She has try to commit suicide. She has try to drown herself. She has try to electrocute herself. She has try to hang herself. She has try to kill herself. She has try to poison herself. She has with suicidal intent.'
     
-    dsh_annotations = dsha.process_text(text, 'text_001', verbose=True, write_output=False)
-    
+    #dsh_annotations = dsha.process_text(text, 'text_001', verbose=True, write_output=False)
+
     #pin = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text/10015033/corpus/2008-02-21_12643289_30883.txt'
     #dsh_annotations = dsha.process(pin, verbose=True, write_output=True)

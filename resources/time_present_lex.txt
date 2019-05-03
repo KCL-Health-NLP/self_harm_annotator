@@ -1,0 +1,7 @@
+monday	CURRENT
+tuesday	CURRENT
+wednesday	CURRENT
+thursday	CURRENT
+friday	CURRENT
+saturday	CURRENT
+sunday	CURRENT
