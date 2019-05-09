@@ -65,7 +65,7 @@ class TokenSequenceAnnotator(object):
             # TODO add possibility of setting new attributes for merged spans in the rules
             # attrs = rule.get('attrs', [])
 
-            self.matcher = Matcher(self.nlp.vocab)  # Need to do this for each rule separately unfortunately
+            self.matcher = Matcher(self.nlp.vocab, validate=False)  # Need to do this for each rule separately unfortunately
             self.matcher.add(name, None, pattern)
 
             matches = self.matcher(doc)
@@ -86,6 +86,7 @@ class TokenSequenceAnnotator(object):
                 print('  -- Rule ' + name + ': ' + str(len(matches)) + ' matches.', file=sys.stderr)
 
         # retain only longest matching spans
+        """
         self.get_longest_matches()
 
         # perform merging where specified by the rule
@@ -105,6 +106,7 @@ class TokenSequenceAnnotator(object):
                         except IndexError as e:
                             print('  -- Warning: unable to merge span at', offsets, '(token may have been merged previously).', file=sys.stderr)
                             print(e, file=sys.stderr)
+        """
 
         return doc
     
@@ -142,7 +144,7 @@ class TokenSequenceAnnotator(object):
                 for ss in shortest_spans:
                     # avoid trying to remove a span more than once
                     if ss in all_spans:
-                        print(ss, file=sys.stderr)
+                        #print(ss, file=sys.stderr)
                         all_spans.pop(ss)
 
     def add_annotation(self, doc, matches, rule_name, rule_avm):

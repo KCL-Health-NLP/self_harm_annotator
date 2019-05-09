@@ -400,6 +400,49 @@ class DSHAnnotator:
                             if not found_CCONJ:
                                 doc[i]._.HEDGING = 'HEDGING'
 
+    def merge_spans(self, doc):
+
+        def get_longest_spans(offsets):
+            """ Get a unique list of all overlapping span offsets """
+            overlaps = {}
+            for offset in offsets:
+                o = [(i[0], i[1]) for i in offsets if
+                     i[0] >= offset[0] and i[0] <= offset[1] or i[1] >= offset[0] and i[1] <= offset[1] if
+                     (i[0], i[1]) != offset and (i[0], i[1]) and (i[0], i[1]) not in overlaps]
+                if len(o) > 0:
+                    overlaps[offset] = o
+
+            for offset in [[k] + v for (k, v) in overlaps.items()]:
+                shortest_spans = sorted(offset, key=lambda x: x[1] - x[0], reverse=True)[1:]
+                for ss in shortest_spans:
+                    if ss in offsets:
+                        offsets.remove(ss)
+            
+            return offsets
+
+        offsets = []
+        i = 0
+        while i < len(doc):
+            token = doc[i]
+            if token._.DSH:
+                start = i
+                while token._.DSH:
+                    token = doc[i]
+                    i += 1
+                end = i - 1
+                offsets.append((start, end))
+            i += 1
+
+        #print('BEFORE:', offsets, file=sys.stderr)
+        #offsets = get_longest_spans(offsets)
+        #print('AFTER :', offsets, file=sys.stderr)
+        
+        with doc.retokenize() as retokenizer:
+            for (start, end) in offsets:
+                retokenizer.merge(doc[start:end])
+
+        return doc
+        
     def print_tokens(self, doc):
         with open('T:/Andre Bittar/workspace/ka_dsh/output/report.txt', 'w') as fout:
             for token in doc:
@@ -636,12 +679,14 @@ class DSHAnnotator:
                 doc = self.annotate_file(pin)
                 self.calculate_dsh_mention_attributes(doc)
                 
+                doc = self.merge_spans(doc)
+                
                 if self.verbose:
                     self.print_spans(doc)
                 
                 mentions = self.build_ehost_output(doc)
                 global_mentions[f + '.knowtator.xml'] = mentions
-
+                
                 if write_output:
                     self.write_ehost_output(pin, mentions, verbose=self.verbose)
                 
@@ -649,6 +694,8 @@ class DSHAnnotator:
             print('-- Processing file:', path, file=sys.stderr)
             doc = self.annotate_file(path)
             self.calculate_dsh_mention_attributes(doc)
+            
+            doc = self.merge_spans(doc)
             
             if self.verbose:
                 self.print_spans(doc)
@@ -664,6 +711,8 @@ class DSHAnnotator:
             print('-- Processing text string:', path, file=sys.stderr)
             doc = self.nlp(path)
             self.calculate_dsh_mention_attributes(doc)
+
+            doc = self.merge_spans(doc)
 
             if self.verbose:
                 self.print_spans(doc)
@@ -683,8 +732,10 @@ class DSHAnnotator:
         
         global_mentions = {}
         doc = self.nlp(text)
-        self.calculate_dsh_mention_attributes(doc)
+        #self.calculate_dsh_mention_attributes(doc)
 
+        doc = self.merge_spans(doc)
+        
         if self.verbose:
             self.print_spans(doc)
 
@@ -732,8 +783,8 @@ class DateTokenAnnotator(object):
 if __name__ == "__main__":
     dsha = DSHAnnotator(verbose=False)
     #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
-    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=True)
-    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus/11-05-2011_28851073610065.txt', write_output=False)
+    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=True)
+    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus/01-07-2011_29365502.txt', write_output=True)
 
     text = 'Has no history of taking overdoses'
     text = 'risk of self-harm'
@@ -910,13 +961,19 @@ Had 2 suicide attempts during psychotic episode in 2007 - One of them was trying
     text = 'She has smack herself in the breast. She has smack herself in the chest. She has smack herself in the face. She has smack herself in the stomach. She has stab her arm. She has stab her body. She has stab her breast. She has stab her cheek. She has stab her chest. She has stab her face. She has stab her hand. She has stab her leg. She has stab her wrist. She has stab herself. She has suicidal behaviour. She has suicidal gesture.'
     text = 'She has auto mutilated. She has done auto mutilation. She has auto-mutilated. She has done auto-mutilation. She has auto-mutilated. She has signs of auto-mutilation. She has burns from self-harm.'
     text = 'She has signs of self-inflicted burns.'
+    text = 'She has a history of cutting herself on the wrists.'
 
     text = 'She has suicidal idea. She has suicidal ideation. She has suicidal intent. She has suicidal thought. She has suicide attempt. She has thought of suicide. She has threat of suicide. She has try and commit suicide. She has try and hang herself. She has try and poison herself. She has try to commit suicide. She has try to drown herself. She has try to electrocute herself. She has try to hang herself. She has try to kill herself. She has try to poison herself. She has with suicidal intent.'
     
     text = 'Has no family history of taking overdoses'
-    text = 'She is taking multiple overdoses in the past. She is taking multiple overdoses when she was young'
+    text = 'She is taking multiple overdoses in the past. She is taking multiple overdoses when she was young'    
+    text = 'she self-harmed over a period of several years in the past'
+    text = 'At 16, she recalls, she used to cut her wrists'
+    text = 'She has a family history of self-harm.'
+    text = '- She often experience commanding auditory hallucination telling her to kill herself.'
+    text = 'Harm to self: DSH & suicide attempts; poor self-care; untreated physical illness; vulnerability to exploitation'
     
-    #dsh_annotations = dsha.process_text(text, 'text_001', verbose=True, write_output=False)
+    dsh_annotations = dsha.process_text(text, 'text_001', write_output=False)
 
     #pin = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text/10015033/corpus/2008-02-21_12643289_30883.txt'
     #dsh_annotations = dsha.process(pin, verbose=True, write_output=True)

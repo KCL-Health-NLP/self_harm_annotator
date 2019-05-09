@@ -1,3 +1,4 @@
+abuse	HARM_ACTION
 asphyxiate	HARM_ACTION
 asphyxiation	HARM_ACTION
 auto-mutilate	HARM_ACTION
@@ -12,7 +13,11 @@ burning	HARM_ACTION
 chop	HARM_ACTION
 chopping	HARM_ACTION
 cut	HARM_ACTION
+cutting	DSH
 cutting	HARM_ACTION
+destruct	HARM_ACTION
+destruction	HARM_ACTION
+destructive	HARM_ACTION
 drown	HARM_ACTION
 drowning	HARM_ACTION
 electrocute	HARM_ACTION
@@ -35,6 +40,7 @@ immolating	HARM_ACTION
 immolation	HARM_ACTION
 injure	HARM_ACTION
 injuring	HARM_ACTION
+injurious	HARM_ACTION
 injury	HARM_ACTION
 jump	HARM_ACTION
 jumping	HARM_ACTION
@@ -86,7 +92,6 @@ stab	HARM_ACTION
 stabbing	HARM_ACTION
 strangle	HARM_ACTION
 strangling	HARM_ACTION
-suicide	SUICIDE
 tear	HARM_ACTION
 tearing	HARM_ACTION
 throttle	HARM_ACTION

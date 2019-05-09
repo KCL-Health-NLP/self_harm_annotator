@@ -20,28 +20,35 @@ RULES_1 = [
         # attempt to DSH
         'name': 'ATTEMPT_TO_DSH',
         'pattern': [{'LEMMA': {'REGEX': '^(attempt|try)$'}}, {'LEMMA': {'REGEX': '^(at|to)$'}}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH': 'DSH'}},
+        'avm': {'LAST': {'DSH': 'DSH'}},
         'merge': True
     },
     {
         # attempt (at) suicide
         'name': 'ATTEMPT_AT_SUICIDE',
         'pattern': [{'LEMMA': {'REGEX': '^(attempt|try)$'}}, {'LEMMA': 'at', 'OP': '?'}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH': 'DSH'}},
+        'avm': {'LAST': {'DSH': 'DSH'}},
         'merge': True
     },
     {
         # attempt to commit suicide
         'name': 'ATTEMPT_TO_COMMIT_SUICIDE',
         'pattern': [{'LEMMA': {'REGEX': '^(attempt|try)$'}}, {'LEMMA': {'REGEX': '^(at|to)$'}}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH': 'DSH'}},
+        'avm': {'LAST': {'DSH': 'DSH'}},
         'merge': True
     },
     {
         # attempt to electrocute herself
         'name': 'ATTEMPT_TO_DSH',
         'pattern': [{'LEMMA': {'REGEX': '^(attempt|try)$'}}, {'LEMMA': {'REGEX': '^(at|to)$'}}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH': 'DSH'}},
+        'avm': {'LAST': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        # voices telling her to kill herself
+        'name': 'ATTEMPT_TO_DSH',
+        'pattern': [{'LEMMA': {'REGEX': '^(command|compell|incite|say|tell|urge)$'}}, {'LEMMA': 'to', 'OP': '?'}, {'LEMMA': 'her'}, {'LEMMA': 'to'}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
+        'avm': {'LAST': {'DSH': 'DSH'}},
         'merge': True
     },
     {
@@ -61,15 +68,16 @@ RULES_1 = [
     {
         # DSH behaviour
         'name': 'DSH_BEHAVIOUR',
-        'pattern': [{'_': {'DSH': 'DSH'}}, {'LEMMA': {'REGEX': '^(act|action|attempt|behaviour|gesture)$'}}],
+        'pattern': [{'_': {'DSH': 'DSH'}, 'OP': '+'}, {'LEMMA': {'REGEX': '^(act|action|attempt|behaviour|gesture)$'}}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
+    # NON-DSH
     {
-        # suicidal behaviour
-        'name': 'SUICIDAL_BEHAVIOUR',
-        'pattern': [{'LEMMA': {'REGEX': '^(suicid(al|e))$'}}, {'LEMMA': {'REGEX': '^(act|action|attempt|behaviour|gesture)$'}}],
+        # 1mg OD
+        'name': 'OD_DOSAGE',
+        'pattern': [{'POS': 'NUM'}, {'LEMMA': {'REGEX': '^(mc?gs?|(micro|mill?i)gram(me)?|tablet|tabs?)$'}}, {'LEMMA': 'od'}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
-    }
+     }
 ]

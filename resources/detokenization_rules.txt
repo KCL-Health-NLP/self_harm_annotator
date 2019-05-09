@@ -3,6 +3,7 @@ auto-mutilate	auto-mutilate	VB	VERB
 auto-mutilates	auto-mutilate	VBZ	VERB
 auto-mutilated	auto-mutilate	VBZ	VERB
 auto-mutilation	auto-mutilation	NN	NOUN
+fh/o	fh/o	NN	NOUN
 h/o	h/o	NN	NOUN
 self-abuse	self-abuse	_	_
 self-abused	self-abuse	VBD	VERB
@@ -46,7 +47,9 @@ self-poisoning	self-poisoning	_	_
 # annoying, but only matches on graphical form
 Auto-mutilated	auto-mutilate	VBZ	VERB
 Auto-mutilation	auto-mutilation	NN	NOUN
-H/o	h/o	NN	NOUN # added post-eval
+Fh/o	fh/o	NN	NOUN
+FH/o	fh/o	NN	NOUN
+H/o	h/o	NN	NOUN
 Self-harm	self-harm	NN	NOUN
 Self-abuse	self-abuse	NN	NOUN
 Self-cutting	self-cutting	_	_

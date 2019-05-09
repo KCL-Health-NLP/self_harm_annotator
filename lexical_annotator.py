@@ -238,7 +238,6 @@ class LemmaAnnotator(object):
                 try:
                     doc.ents = list(doc.ents) + [entity]
                 except ValueError as e:
-                    print(doc.ents, entity, file=sys.stderr)
                     print('-- Warning: entity overlap for', entity)
                     print(e)
 

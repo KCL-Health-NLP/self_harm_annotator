@@ -27,6 +27,8 @@ niece	HEDGING
 nephew	HEDGING
 family	HEDGING
 family history	HEDGING
+fhx	HEDGING
+fh/o	HEDGING
 step-mother	HEDGING
 step-father	HEDGING
 step-brother	HEDGING
@@ -57,14 +59,12 @@ eventual	HEDGING
 future	HEDGING
 goal	HEDGING
 be go to	HEDGING
+hallucination	HEDGING
 hypothetical	HEDGING
 idea	HEDGING
 impossible	HEDGING
 indeterminate	HEDGING
 inevitable	HEDGING
-intend	HEDGING
-intent	HEDGING
-intention	HEDGING
 nearly	HEDGING
 objective	HEDGING
 ought	HEDGING

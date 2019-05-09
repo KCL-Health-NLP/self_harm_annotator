@@ -15,6 +15,14 @@ Token.set_extension('TIME', default=False, force=True)
 #################################
 
 RULES = [
+    # suicidal NON-RELEVANT
+    {
+        # suicidal ideation
+        'name': 'SUICIDAL_IDEATION',
+        'pattern': [{'LEMMA': {'REGEX': '^(suicid(e|al))$'}}, {'LEMMA': 'ideation'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': False  # merge here for now, rather than in next level rules (requires longest match selection for OP=+)
+    },
     # suicide pattern rules - add LA=SUICIDE annotation
     {
         # commit suicide
@@ -68,6 +76,13 @@ RULES = [
         'merge': True
     },
     {
+        # (deliberately) harm herself (deliberately)
+        'name': 'HARM_V_HERSELF',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'harm'}, {'LEMMA': 'herself'}, {'_': {'LA': 'INTENT'}, 'OP': '*'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
         # (deliberately) cut herself (deliberately)
         'name': 'HARM_ACTION_V_HERSELF_1',
         'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'herself'}, {'_': {'LA': 'INTENT'}, 'OP': '*'}],
@@ -103,9 +118,16 @@ RULES = [
         'merge': True
     },
     {
-        # (deliberate) self harm (behaviour)
+        # (deliberate) self-injurious (behaviour)
         'name': 'DSH_2',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'self'}, {'LEMMA': {'REGEX': '^(self-.+)$'}, '_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^(self-.+)$'}, '_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        # self- harmer
+        'name': 'SELF-HARMER',
+        'pattern': [{'LEMMA': {'REGEX': '^(self-)$'}}, {'LEMMA': 'harmer'}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
@@ -113,6 +135,20 @@ RULES = [
         # (deliberate) self- harm (behaviour)
         'name': 'DSH_3',
         'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^(self-)$'}}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        # (deliberate) self mutilation (behaviour)
+        'name': 'DSH_3',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^(self)$'}}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        # (deliberate) self harm (behaviour)
+        'name': 'DSH_4',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^(self)$'}}, {'LEMMA': {'REGEX': '^(harm(ing)?)$'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
@@ -162,6 +198,13 @@ RULES = [
         # self-inflicted injuries
         'name': 'SELF-INFLICTED_INJURIES',
         'pattern': [{'LEMMA': {'REGEX': '^(self\-inflict(ing)?)$'}}, {'_': {'LA': 'HARM_ACTION'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        # suicidal behaviour
+        'name': 'SUICIDAL_BEHAVIOUR',
+        'pattern': [{'LEMMA': {'REGEX': '^(suicid(al|e))$'}}, {'LEMMA': {'REGEX': '^(act|action|attempt|behaviour|gesture)$'}}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     }
