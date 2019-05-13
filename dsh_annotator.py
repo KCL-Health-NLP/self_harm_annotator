@@ -50,6 +50,7 @@ class DSHAnnotator:
         self.load_lexicon('./resources/intent_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/harm_action_lex.txt', LEMMA, 'LA')
+        self.load_lexicon('./resources/med_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/reported_speech_lex.txt', LEMMA, 'RSPEECH')
 
         # Load token sequence annotators
@@ -439,6 +440,7 @@ class DSHAnnotator:
         
         with doc.retokenize() as retokenizer:
             for (start, end) in offsets:
+                print('MERGING:', doc[start:end], file=sys.stderr)
                 retokenizer.merge(doc[start:end])
 
         return doc
@@ -726,7 +728,8 @@ class DSHAnnotator:
         
         return global_mentions
 
-    def process_text(self, text, text_id, write_output=False):
+    def process_text(self, text, text_id, write_output=False, verbose=False):
+        self.verbose = verbose
         if self.verbose:
             print('-- Processing text string:', text, file=sys.stderr)
         
@@ -781,9 +784,9 @@ class DateTokenAnnotator(object):
 
 
 if __name__ == "__main__":
-    dsha = DSHAnnotator(verbose=False)
+    dsha = DSHAnnotator(verbose=True)
     #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
-    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=True)
+    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=True)
     #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus/01-07-2011_29365502.txt', write_output=True)
 
     text = 'Has no history of taking overdoses'
@@ -973,7 +976,31 @@ Had 2 suicide attempts during psychotic episode in 2007 - One of them was trying
     text = '- She often experience commanding auditory hallucination telling her to kill herself.'
     text = 'Harm to self: DSH & suicide attempts; poor self-care; untreated physical illness; vulnerability to exploitation'
     
-    dsh_annotations = dsha.process_text(text, 'text_001', write_output=False)
+    text = 'Risperidone 0.5mg OD (at night) - tolerating this well.'
+    text = 'At a point in the interview,  ZZZZZ  jumped up from the couch and hid behind some equipment, pointing and exclaiming that people covered in blood had just entered the cubicle.'
+    text = 'She threw herself down the stairs'
+    text = 'Sodium valproate (chrono preparation) 1.5grams OD.'
+    text = 'Picked up by police at Brixton high street (after they were alerted by bus alarm going off  ZZZZZ  was lying under the bus- as if trying to kill herself or being run over ) and was put on MHA Sec 136 and then escorted to Lambeth 136 suite. '
+    
+    text = """Denies thoughts of self harm or suicide.
+
+ ZZZZZ  said she has not used any drugs for the past 3/52."""
+     
+    text = ';Overall, it appears that these suicidal thoughts and act (when she was aged 16), appears to have occurred in the context of depressive mood'
+    text = 'It also noted that she may have left suicidal notes.'
+    text = 'ZZZZZ  was clear that she has not had any other thoughts of suicide since Monday.'
+    text = 'No suicidal or self harm ideation or intention reported.'
+    text = """Risk to self:
+Previous overdose(s)."""
+    text = 'Harm to self: DSH & suicide attempts; poor self-care; untreated physical illness; vulnerability to exploitation.'
+    text = 'Outcome e.g. 4 months in prison and remains on probation; overdose was life-threatening and she required ITU admission'
+
+    text = """Risk to self-   currently mild as patient is presently stable, but has a tendency to self-harm when depressed. Though she currently has no thoughts/intent of self harm/ suicide
+Risk to others-   Moderate, as patient is currently mentally stable, but has a history of responding to auditory hallucinations by being impulsively physically aggressive."""
+    text = 'She was aware the tablets may have harmed her unborn baby but said she had not intended to harm the baby. '
+    text = 'She experienced anhedonia, was very negative about the future and had suicidal thoughts and self harmed.'
+
+    dsh_annotations = dsha.process_text(text, 'text_001', write_output=False, verbose=True)
 
     #pin = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text/10015033/corpus/2008-02-21_12643289_30883.txt'
     #dsh_annotations = dsha.process(pin, verbose=True, write_output=True)

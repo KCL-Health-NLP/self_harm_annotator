@@ -189,8 +189,10 @@ class TokenSequenceAnnotator(object):
                         else:
                             token._.set(new_attr, val)
 
-                # Otherwise, annotate token-by-token according to rule
-                else:
+                # Now annotate token-by-token according to rule (for rules with LAST and integers)
+                int_keys = [key for key in rule_avm.keys() if isinstance(key, int)]
+                for key in int_keys:
+                    new_annotations = rule_avm.get(key, None)
                     for j in range(len(span)):
                         if j in rule_avm.keys():
                             new_annotations = rule_avm.get(j, None)

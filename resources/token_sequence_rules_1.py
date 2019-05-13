@@ -33,20 +33,20 @@ RULES_1 = [
     {
         # attempt to commit suicide
         'name': 'ATTEMPT_TO_COMMIT_SUICIDE',
-        'pattern': [{'LEMMA': {'REGEX': '^(attempt|try)$'}}, {'LEMMA': {'REGEX': '^(at|to)$'}}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
+        'pattern': [{'LEMMA': {'REGEX': '^(attempt|try)(ing)?$'}}, {'LEMMA': {'REGEX': '^(at|to)$'}}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
         'avm': {'LAST': {'DSH': 'DSH'}},
         'merge': True
     },
     {
         # attempt to electrocute herself
         'name': 'ATTEMPT_TO_DSH',
-        'pattern': [{'LEMMA': {'REGEX': '^(attempt|try)$'}}, {'LEMMA': {'REGEX': '^(at|to)$'}}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        'pattern': [{'LEMMA': {'REGEX': '^(attempt|try)(ing)?$'}}, {'LEMMA': {'REGEX': '^(at|to)$'}}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
         'avm': {'LAST': {'DSH': 'DSH'}},
         'merge': True
     },
     {
         # voices telling her to kill herself
-        'name': 'ATTEMPT_TO_DSH',
+        'name': 'TELL_TO_ATTEMPT_TO_DSH',
         'pattern': [{'LEMMA': {'REGEX': '^(command|compell|incite|say|tell|urge)$'}}, {'LEMMA': 'to', 'OP': '?'}, {'LEMMA': 'her'}, {'LEMMA': 'to'}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
         'avm': {'LAST': {'DSH': 'DSH'}},
         'merge': True
@@ -72,12 +72,56 @@ RULES_1 = [
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
+     # DSH NON-RELEVANT
+    {
+        # thought of self-harm
+        'name': 'THOUGHT_OF_DSH',
+        'pattern': [{'LEMMA': {'REGEX': '^(dream|thought)$'}}, {'LEMMA': {'REGEX': '^(about|of)$'}}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        'avm': {0: {'DSH': False}, 'LAST': {'HEDGING': 'HEDGING'}},
+        'merge': True
+    },
+    {
+        # plan to end her life
+        'name': 'PLAN_TO_SUICIDE',
+        'pattern': [{'LEMMA': {'REGEX': '^(inten(d|t)|plan)$'}}, {'LEMMA': 'to'}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
+        'avm': {0: {'DSH': False}, 'LAST': {'DSH': 'DSH', 'HEDGING': 'HEDGING'}},
+        'merge': False
+    },
+    {
+        # thought of self-harm or suicide
+        'name': 'THOUGHT_OF_DSH_OR_SUICIDE',
+        'pattern': [{'LEMMA': {'REGEX': '^(dream|thought)$'}}, {'LEMMA': {'REGEX': '^(about|of)$'}}, {'_': {'DSH': 'DSH'}, 'OP': '+'}, {'POS': 'CCONJ'}, {'LEMMA': 'suicide'}],
+        'avm': {0: {'DSH': False}, 'LAST': {'DSH': 'DSH', 'HEDGING': 'HEDGING'}},
+        'merge': True
+    },
+    {
+        # harmful thoughts
+        'name': 'HARMFUL_THOUGHT',
+        'pattern': [{'LEMMA': 'harmful'}, {'LEMMA': {'REGEX': '^(thought)$'}}],
+        'avm': {'ALL': {'DSH': 'DSH', 'HEDGING': 'HEDGING'}},
+        'merge': True
+    },
+     # DSH NON-RELEVANT
+    {
+        # suicidal or self-harm ideation
+        'name': 'SUICIDAL_CCONJ_DSH_IDEATION',
+        'pattern': [{'LEMMA': {'REGEX': '^(suicid(al|e))$'}}, {'POS': 'CCONJ'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}, {'LEMMA': 'ideation'}],
+        'avm': {0: {'DSH': 'DSH', 'HEDGING': 'HEDGING'}, 'LAST': {'HEDGING': 'HEDGING'}},
+        'merge': True
+    },
     # NON-DSH
     {
-        # 1mg OD
+        # mg OD
         'name': 'OD_DOSAGE',
-        'pattern': [{'POS': 'NUM'}, {'LEMMA': {'REGEX': '^(mc?gs?|(micro|mill?i)gram(me)?|tablet|tabs?)$'}}, {'LEMMA': 'od'}],
-        'avm': {'ALL': {'DSH': 'DSH'}},
+        'pattern': [{'LEMMA': {'REGEX': '^(mc?gs?|(micro|mill?i)?gram(me)?|tablet|tabs?)$'}}, {'LEMMA': {'REGEX' : '^(od|OD)'}}],
+        'avm': {1: {'DSH': False}},
+        'merge': True
+     },
+     {
+        # mg OD
+        'name': 'NUMUNIT_OD_DOSAGE',
+        'pattern': [{'LEMMA': {'REGEX': '^[0-9\.,]+(mc?gs?|(micro|mill?i)?gram(me)?)$'}}, {'LEMMA': {'REGEX' : '^(od|OD)'}}],
+        'avm': {1: {'DSH': False}},
         'merge': True
      }
 ]

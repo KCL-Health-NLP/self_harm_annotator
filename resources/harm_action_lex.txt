@@ -1,4 +1,3 @@
-abuse	HARM_ACTION
 asphyxiate	HARM_ACTION
 asphyxiation	HARM_ACTION
 auto-mutilate	HARM_ACTION
@@ -8,6 +7,8 @@ bang	HARM_ACTION
 banging	HARM_ACTION
 beat	HARM_ACTION
 beating	HARM_ACTION
+bite	HARM_ACTION
+biting	HARM_ACTION
 burn	HARM_ACTION
 burning	HARM_ACTION
 chop	HARM_ACTION
@@ -30,8 +31,6 @@ hack	HARM_ACTION
 hacking	HARM_ACTION
 hang	HARM_ACTION
 hanging	HARM_ACTION
-harm	HARM_ACTION
-harming	HARM_ACTION
 hit	HARM_ACTION
 hurt	HARM_ACTION
 hurting	HARM_ACTION

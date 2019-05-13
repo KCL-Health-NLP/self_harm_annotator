@@ -1,0 +1,11 @@
+amitriptyline	MED
+aspirin	MED
+cocodamol	MED
+ibuprofen	MED
+neurofen	MED
+nurofen	MED
+olanzapine	MED
+paracetamol	MED
+respiradone	MED
+respiridone	MED
+sleeping	MED

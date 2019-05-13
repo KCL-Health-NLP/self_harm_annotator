@@ -19,9 +19,44 @@ RULES = [
     {
         # suicidal ideation
         'name': 'SUICIDAL_IDEATION',
-        'pattern': [{'LEMMA': {'REGEX': '^(suicid(e|al))$'}}, {'LEMMA': 'ideation'}],
-        'avm': {'ALL': {'DSH': 'DSH'}},
-        'merge': False  # merge here for now, rather than in next level rules (requires longest match selection for OP=+)
+        'pattern': [{'LEMMA': {'REGEX': '^(suicid(e|al))$'}}, {'LEMMA': {'REGEX': '^(idea(tion)?|thought)'}}],
+        'avm': {'ALL': {'DSH': 'DSH', 'HEDGING': 'HEDGING'}},
+        'merge': False
+    },
+    {
+        # suicidal intention
+        'name': 'SUICIDAL_INTENTION',
+        'pattern': [{'LEMMA': {'REGEX': '^(suicid(e|al))$'}}, {'_': {'LA': 'INTENT'}}],
+        'avm': {'ALL': {'DSH': 'DSH', 'HEDGING': 'HEDGING'}},
+        'merge': False
+    },
+    {
+        # plans for suicide
+        'name': 'PLAN_FOR_SUICIDE',
+        'pattern': [{'LEMMA': 'plan'}, {'LEMMA': {'IN': ['for', 'of']}}, {'LEMMA': 'suicide'}],
+        'avm': {2: {'DSH': 'DSH', 'HEDGING': 'HEDGING'}},
+        'merge': False
+    },
+    {
+        # thought of suicide
+        'name': 'THOUGHT_OF_SUICIDE',
+        'pattern': [{'LEMMA': {'REGEX': '^(dream|thought)$'}}, {'LEMMA': {'REGEX': '^(about|of)$'}}, {'LEMMA': 'suicide'}],
+        'avm': {0: {'DSH': False}, 'LAST': {'DSH': 'DSH', 'HEDGING': 'HEDGING'}},
+        'merge': True
+    },
+    {
+        # wanted to die
+        'name': 'WANT_TO_DIE',
+        'pattern': [{'LEMMA': 'want'}, {'LEMMA': 'to'}, {'LEMMA': 'die'}],
+        'avm': {'ALL': {'DSH': 'DSH', 'HEDGING': 'HEDGING'}},
+        'merge': False
+    },
+    {
+        # felt suicidal
+        'name': 'FEEL_SUICIDAL',
+        'pattern': [{'LEMMA': 'feel'}, {'LEMMA': 'suicidal'}],
+        'avm': {'ALL': {'DSH': 'DSH', 'HEDGING': 'HEDGING'}},
+        'merge': False
     },
     # suicide pattern rules - add LA=SUICIDE annotation
     {
@@ -29,12 +64,12 @@ RULES = [
         'name': 'COMMIT_SUICIDE',
         'pattern': [{'LEMMA': 'commit'}, {'LEMMA': 'suicide'}],
         'avm': {'ALL': {'LA': 'SUICIDE'}},
-        'merge': False  # merge here for now, rather than in next level rules (requires longest match selection for OP=+)
+        'merge': False
     },
     {
         # end her (own) life
         'name': 'END_HER_LIFE',
-        'pattern': [{'LEMMA': 'end'}, {'LEMMA': 'her'}, {'LEMMA': 'own', 'OP': '?'}, {'LEMMA': 'life'}],
+        'pattern': [{'LEMMA': {'IN': ['end', 'take']}}, {'LEMMA': 'her'}, {'LEMMA': 'own', 'OP': '?'}, {'LEMMA': 'life'}],
         'avm': {'ALL': {'LA': 'SUICIDE'}},
         'merge': False
     },
@@ -52,7 +87,21 @@ RULES = [
         'avm': {'ALL': {'LA': 'SUICIDE'}},
         'merge': False
     },
+    {
+        # attempt(ed) suicide
+        'name': 'ATTEMPT_SUICIDE',
+        'pattern': [{'LEMMA': 'attempt'}, {'LEMMA': 'suicide'}],
+        'avm': {'ALL': {'LA': 'SUICIDE'}},
+        'merge': False
+    },
     # DSH pattern rules
+    {
+        # self harm/ suicide
+        'name': 'HARM_LEMMA',
+        'pattern': [{'LEMMA': 'self'}, {'LEMMA': { 'REGEX': 'harm\W'}}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': False
+    },
     {
         # burnt (both) her (upper (left)) arms
         # TODO avoid matching with He punched her back etc.
@@ -69,6 +118,13 @@ RULES = [
         'merge': True
     },
     {
+        # pull her hair
+        'name': 'PULL_HER_HAIR',
+        'pattern': [{'LEMMA': {'REGEX': '^(pull(ing)?|tug(ging)?|yank(ing)?)'}}, {'LEMMA': 'her'}, {'LEMMA': 'hair'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
         # burns on (both) her (upper (left)) arm
         'name': 'HARM_ACTION_PP_HER_POSITION_BODY_PART',
         'pattern': [{'_': {'LA': 'HARM_ACTION'}}, {'POS': 'ADP'}, {'LEMMA': 'both', 'OP': '?'}, {'LEMMA': 'her'}, {'LEMMA': {'REGEX': '^(left|right|lower|upper)$'}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}}],
@@ -79,6 +135,20 @@ RULES = [
         # (deliberately) harm herself (deliberately)
         'name': 'HARM_V_HERSELF',
         'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'harm'}, {'LEMMA': 'herself'}, {'_': {'LA': 'INTENT'}, 'OP': '*'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        # (deliberately) harm self (deliberately)
+        'name': 'HARM_SELF',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'harm'}, {'LEMMA': 'self'}, {'_': {'LA': 'INTENT'}, 'OP': '*'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        # (deliberately) harm her self (deliberately)
+        'name': 'HARM_V_HER_SELF',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'harm'}, {'LEMMA': 'her'}, {'LEMMA': 'self'}, {'_': {'LA': 'INTENT'}, 'OP': '*'}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
@@ -105,8 +175,15 @@ RULES = [
     },
     {
         # deliberate injuries
+        'name': 'DELIBERATELY_INJURE_HERSELF',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '+'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'herself'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        # deliberate injuries
         'name': 'DELIBERATE_INJURY',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '+'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'herself', 'OP': '?'}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '+'}, {'LEMMA': {'IN': ['harm', 'injury', 'violence']}, 'POS': 'NOUN'}, {'LEMMA': 'herself', 'OP': '?'}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
@@ -134,23 +211,16 @@ RULES = [
     {
         # (deliberate) self- harm (behaviour)
         'name': 'DSH_3',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^(self-)$'}}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
-        'avm': {'ALL': {'DSH': 'DSH'}},
-        'merge': True
-    },
-    {
-        # (deliberate) self mutilation (behaviour)
-        'name': 'DSH_3',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^(self)$'}}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^(self-?)$'}}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
     {
         # (deliberate) self harm (behaviour)
         'name': 'DSH_4',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^(self)$'}}, {'LEMMA': {'REGEX': '^(harm(ing)?)$'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'self'}, {'LEMMA': {'REGEX': '^(harm(ing)?)$'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
         'avm': {'ALL': {'DSH': 'DSH'}},
-        'merge': True
+        'merge': False
     },
     {
         # (deliberately) engage in cutting (behaviour)
@@ -167,6 +237,34 @@ RULES = [
         'merge': False
     },
     {
+        # took 12 paracetamol tablets
+        'name': 'TAKE_NUM_MED_TABLETS',
+        'pattern': [{'LEMMA': 'take'}, {'LEMMA': {'>=': 10}}, {'_': {'LA': 'MED'}}, {'LEMMA': {'IN': ['pill', 'tablet']}}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': False
+    },
+    {
+        # took 28x paracetamol tablets
+        'name': 'TAKE_NUM_MED_TABLETS',
+        'pattern': [{'LEMMA': 'take'}, {'LEMMA': {'REGEX': '(1[0-9]+|[2-9]+)[Xx]'}}, {}, {'LEMMA': {'IN': ['pill', 'tablet']}}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': False
+    },
+    {
+        # took 12 tablets of paracetamol
+        'name': 'TAKE_NUM_MED_TABLETS',
+        'pattern': [{'LEMMA': 'take'}, {'LEMMA': {'>=': 10}}, {'LEMMA': {'IN': ['pill', 'tablet']}}, {'LEMMA': 'of'}, {'_': {'LA': 'MED'}}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': False
+    },
+    {
+        # took a pack of paracetamol tablets
+        'name': 'TAKE_NUM_PACK_MED_TABLETS',
+        'pattern': [{'LEMMA': 'take'}, {'POS': {'IN': ['DET', 'NUM']}}, {'POS': 'ADJ', 'OP': '?'}, {'LEMMA': {'IN': ['box', 'pack', 'packet']}}, {'LEMMA': 'of'}, {'_': {'LA': 'MED'}}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': False
+    },
+    {
         # she has (deep) (self-) lacerations
         'name': 'SHE_HAS_HARM',
         'pattern': [{'LEMMA': 'she'}, {'LEMMA': {'REGEX': '^(be|display|evidence|have|present|show)$'}, 'OP': '+'}, {'POS': 'ADP', 'OP': '?'}, {'POS': 'ADJ', 'OP': '?'}, {'LEMMA': {'REGEX': '^(self-)$'}, 'OP': '?'}, {'_': {'LA': 'HARM_ACTION'}, 'OP': '+'}],
@@ -176,7 +274,7 @@ RULES = [
     {
         # (deliberate) jump off
         'name': 'JUMP_OFF',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'jump'}, {'POS': {'REGEX': '^(ADP|PART)$'}, 'OP': '+'}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'jump'}, {'LEMMA': {'IN': ['from', 'off', 'out']}}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
@@ -184,6 +282,13 @@ RULES = [
         # (deliberate) jump in front of
         'name': 'JUMP_IN_FRONT',
         'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'jump'}, {'LEMMA': 'in'}, {'LEMMA': 'front'}, {'LEMMA': 'of'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
+    },
+    {
+        # (deliberate) throw herself in front of
+        'name': 'THROW_HERSELF',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'throw'}, {'LEMMA': 'herself'}, {'POS': {'IN': ['ADP', 'PART']}, 'OP': '+'}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
     },
@@ -207,5 +312,19 @@ RULES = [
         'pattern': [{'LEMMA': {'REGEX': '^(suicid(al|e))$'}}, {'LEMMA': {'REGEX': '^(act|action|attempt|behaviour|gesture)$'}}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True
+    },
+    {
+        # suicidal thoughts or attempts
+        'name': 'SUICIDAL_N_CONJ_N',
+        'pattern': [{'LEMMA': {'REGEX': '^(suicid(al|e))$'}}, {'POS': {'REGEX': '^N'}}, {'POS': 'CCONJ'}, {'POS': 'NOUN', 'LEMMA': {'REGEX': '^(act|action|attempt|behaviour|gesture)$'}}],
+        'avm': {0: {'DSH': 'DSH'}, 1: {'DSH': 'DSH'}, 'LAST': {'DSH': 'DSH'}},
+        'merge': False
+    },
+    {
+        # violence to self
+        'name': 'VIOLENCE_TO_SELF',
+        'pattern': [{'LEMMA': 'violence'}, {'LEMMA': 'to'}, {'LEMMA': {'REGEX': '^(her)?self$'}}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': False
     }
 ]

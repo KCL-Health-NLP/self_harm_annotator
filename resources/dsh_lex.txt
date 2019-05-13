@@ -8,8 +8,10 @@ o.d	DSH
 o.d.	DSH
 OD	DSH
 overdose	DSH
+overdsose	DSH
 overdosed	DSH
 overdoses	DSH
+overdsoses	DSH
 overdosing	DSH
 parasuicidal	DSH
 parasuicidality	DSH
