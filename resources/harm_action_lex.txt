@@ -91,7 +91,6 @@ stab	HARM_ACTION
 stabbing	HARM_ACTION
 strangle	HARM_ACTION
 strangling	HARM_ACTION
-tear	HARM_ACTION
 tearing	HARM_ACTION
 throttle	HARM_ACTION
 throttling	HARM_ACTION

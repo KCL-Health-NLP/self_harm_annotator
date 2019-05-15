@@ -41,6 +41,12 @@ class TokenSequenceAnnotator(object):
         elif name == 'time':
             from resources.token_sequence_rules_time import RULES_TIME
             self.rules = RULES_TIME
+        elif name == 'negation':
+            from resources.token_sequence_rules_negation import RULES_NEGATION
+            self.rules = RULES_NEGATION
+        elif name == 'status':
+            from resources.token_sequence_rules_status import RULES_STATUS
+            self.rules = RULES_STATUS
         self.nlp = nlp
         self.matcher = None
         self.matches = {}

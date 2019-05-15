@@ -20,6 +20,8 @@ from spacy.symbols import LEMMA
 from xml.dom.minidom import parseString
 from xml.parsers.expat import ExpatError
 
+FWD_OFFSET = 10
+BWD_OFFSET = 10
 
 class DSHAnnotator:
 
@@ -57,6 +59,8 @@ class DSHAnnotator:
         self.load_token_sequence_annotator('level0')
         self.load_token_sequence_annotator('level1')
         self.load_token_sequence_annotator('time')
+        self.load_token_sequence_annotator('negation')
+        self.load_token_sequence_annotator('status')
         
         print('-- Pipeline:', file=sys.stderr)
         print('  -- ' + '\n  -- '.join(self.nlp.pipe_names), file=sys.stderr)
@@ -348,7 +352,7 @@ class DSHAnnotator:
 
                 # Check previous tokens in window going back from mention
                 curr_sent = doc[i].sent
-                start = i - 5
+                start = i - BWD_OFFSET
                 if start < 0:
                     start = curr_sent.start
                 window = doc[start:i]
@@ -367,7 +371,7 @@ class DSHAnnotator:
                         # Definite mentions are positive
                         if not self.is_definite(doc, i) and token._.NEG == 'NEG':
                             doc[i]._.NEG = 'NEG'
-                        if token._.TIME == 'TIME':
+                        if token._.TIME in ['TIME', 'PAST']:
                             doc[i]._.TIME = 'TIME'
                         if token._.MODALITY == 'MODALITY':
                             doc[i]._.MODALITY = 'MODALITY'
@@ -378,7 +382,7 @@ class DSHAnnotator:
         for i in range(len(doc)):
             if doc[i]._.DSH in ['DSH', 'NON_DSH']:
                 curr_sent = doc[i].sent
-                end = i + 5
+                end = i + FWD_OFFSET
                 if end > curr_sent.start + len(curr_sent):
                     end = curr_sent.start + len(curr_sent)
                 window = doc[i:end]
@@ -392,7 +396,7 @@ class DSHAnnotator:
                             if verbose:
                                 print('-- Found subsequent CCONJ', token.text)
                             found_CCONJ = True
-                        if token._.TIME == 'TIME':
+                        if token._.TIME in ['TIME', 'PAST']:
                             doc[i]._.TIME = 'TIME'
                         if token._.MODALITY == 'MODALITY':
                             if not found_CCONJ:
@@ -428,9 +432,9 @@ class DSHAnnotator:
             if token._.DSH:
                 start = i
                 while token._.DSH:
-                    token = doc[i]
                     i += 1
-                end = i - 1
+                    token = doc[i]
+                end = i
                 offsets.append((start, end))
             i += 1
 
@@ -440,7 +444,7 @@ class DSHAnnotator:
         
         with doc.retokenize() as retokenizer:
             for (start, end) in offsets:
-                print('MERGING:', doc[start:end], file=sys.stderr)
+                #print('Merging tokens:', start, end, doc[start:end], file=sys.stderr)
                 retokenizer.merge(doc[start:end])
 
         return doc
@@ -506,7 +510,7 @@ class DSHAnnotator:
                     status = 'UNCERTAIN'
                 if token._.HEDGING == 'HEDGING':
                     status = 'NON-RELEVANT'
-                if token._.TIME == 'TIME':
+                if token._.TIME in ['HISTORICAL', 'TIME']:
                     temporality = 'HISTORICAL'
                 n += 1
                 mentions[mention_id] = {'annotator': annotator,
@@ -532,7 +536,7 @@ class DSHAnnotator:
                 text = token.text
                 if token._.NEG == 'NEG':
                     polarity = 'NEGATIVE'
-                if token._.TIME == 'TIME':
+                if token._.TIME in ['HISTORICAL', 'TIME']:
                     temporality = 'HISTORICAL'
                 n += 1
                 mentions[mention_id] = {'annotator': annotator,
@@ -735,7 +739,7 @@ class DSHAnnotator:
         
         global_mentions = {}
         doc = self.nlp(text)
-        #self.calculate_dsh_mention_attributes(doc)
+        self.calculate_dsh_mention_attributes(doc)
 
         doc = self.merge_spans(doc)
         
@@ -784,9 +788,9 @@ class DateTokenAnnotator(object):
 
 
 if __name__ == "__main__":
-    dsha = DSHAnnotator(verbose=True)
+    dsha = DSHAnnotator(verbose=False)
     #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
-    #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=True)
+    dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=True)
     #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus/01-07-2011_29365502.txt', write_output=True)
 
     text = 'Has no history of taking overdoses'
@@ -999,8 +1003,32 @@ Previous overdose(s)."""
 Risk to others-   Moderate, as patient is currently mentally stable, but has a history of responding to auditory hallucinations by being impulsively physically aggressive."""
     text = 'She was aware the tablets may have harmed her unborn baby but said she had not intended to harm the baby. '
     text = 'She experienced anhedonia, was very negative about the future and had suicidal thoughts and self harmed.'
+    text = 'she cut herself and cut herself.'
+    text = 'To prevent harm to self, baby, others'
+    text = 'This was not intended as a way of harming herself but as a way of coping with angry feelings.'
+    text = 'DSH: none to speak of'
+    text = 'She said they argued last weekend and she was in tears.'
+    text = 'Is hearing voices telling her to harm herself and continues to want to die.'
+    text = 'She also said when she was talking she was jumping from one subject to another.'
+    text = 'However she is no longer angry with her care coordinator, believing that she will get over this hurt like other times she has been hurt.'
+    text = '2. Feels like she is being slashed on the face and receiving jabs behind her legs and arms and that these slashes are getting deeper.'
+    text = 'She has cut down to a couple of beers in the evening.'
+    text = 'She said that she is scared of death.'
+    text = 'She felt that this injury might have been interpreted as cutting her wrist.'
+    text = 'this was a way of alleviating stress  QQQQQ  frustration rather than an actual attempt to end her life.'
+    text = 'She did on occassions, at times of stress hit herself on the head, although there are no signs of injury.'
+    text = 'ZZZZZ  has had no admissions under the Mental Health Act and has had no past suicide attempts or acts of deliberate self harm.'
+    text = 'Current or past risk of suicide (overdose, self harm, starvation, jumping from height etc) : self harm, ( cutting her wrist with table knife)'
+    text = 'Medically cleared from overdose transferred from Aspen ward Lewisham Hospital on the 29th July'
+    text = 'She said she had picked up a kitchen knife once when living with her sister'
+    text = 'signs of self-harm?'
+    text = 'She reported her house was inhabitable and that she had been sleeping on the streets and in buses because she was unable to go home because she was frightened of the voices. She had been hearing the voices for the last 6 months and they had been telling her to die and jump off her balcony. Her mood was found to be low and  ZZZZZ  was tearful during the interview.'
+    text = 'Denies thoughts of self harm or wishing to harm the unborn child.'
+    text = 'ZZZZZ  has a history of deliberate overdose but is not noted to have expressed suicidal ideation recently'
+    text = 'Both parents suffered from mental illness, as did her maternal grandmother, who committed suicide by overdose when she was 28.'
+    text = 'She has a history of taking some tablets in the form of overdosing but said that she never really wanted to die and the last time she believes was two years ago.'
 
-    dsh_annotations = dsha.process_text(text, 'text_001', write_output=False, verbose=True)
+    #dsh_annotations = dsha.process_text(text, 'text_001', write_output=False, verbose=True)
 
     #pin = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text/10015033/corpus/2008-02-21_12643289_30883.txt'
     #dsh_annotations = dsha.process(pin, verbose=True, write_output=True)

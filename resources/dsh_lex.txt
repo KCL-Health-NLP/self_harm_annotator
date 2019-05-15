@@ -3,7 +3,9 @@ D.S.H	DSH
 d.s.h.	DSH
 D.S.H.	DSH
 DSH	DSH
+DSH/	DSH
 dsh	DSH
+dsh/	DSH
 o.d	DSH
 o.d.	DSH
 OD	DSH
@@ -77,8 +79,10 @@ self-destruct	DSH
 self-destruction	DSH
 self-destructive	DSH
 self-harm	DSH
+self-harm/	DSH
 self-harmer	DSH
 self-harming	DSH
+self-harming/	DSH
 self-hit	DSH
 self-hitting	DSH
 self-immolate	DSH
@@ -96,3 +100,4 @@ self-mutilation	DSH
 self-poison	DSH
 self-poisoning	DSH
 selfharm	DSH
+selfharm/	DSH

@@ -11,24 +11,60 @@ from spacy.tokens import Token
 RULES_TIME = [
     # Temporal pre-tagging
     {
+         # 2/7 ago
+        'name': 'NUM_AGO',
+        'pattern': [{'POS': 'NUM'}, {'LEMMA': 'year', 'OP': '?'}, {'LEMMA': 'ago'}],
+        'avm': {'ALL': {'TIME': 'PAST'}},
+        'merge': False
+    },
+    {
+         # 5 years ago
+        'name': 'NUM_YEAR_AGO',
+        'pattern': [{'POS': 'NUM'}, {'LEMMA': 'year'}, {'LEMMA': {'IN': ['ago', 'before', 'previously', 'prior']}}],
+        'avm': {'ALL': {'TIME': 'PAST'}},
+        'merge': False
+    },
+    {
+         # 2 months ago
+        'name': 'NUM_NPRESENT_AGO',
+        'pattern': [{'POS': 'NUM'}, {'LEMMA': {'IN': ['day', 'week', 'month']}}, {'LEMMA': 'ago'}],
+        'avm': {'ALL': {'TIME': 'PRESENTT'}},
+        'merge': False
+    },
+    {
+         # at (age) 16
+        'name': 'AT_AGE_X',
+        'pattern': [{'LEMMA': 'at'}, {'LEMMA': 'age', 'OP': '?'}, {'POS': 'NUM'}],
+        'avm': {'ALL': {'TIME': 'PAST'}},
+        'merge': False
+    },
+    {
+         # when she was 28
+        'name': 'WHEN_SHE_WAS_PAST',
+        'pattern': [{'LEMMA': 'when'}, {'LEMMA': 'she'}, {'LEMMA': 'be'}, {'POS': 'NUM'}],
+        'avm': {'ALL': {'TIME': 'PAST'}},
+        'merge': False
+    },
+    {
          # when she was a kid
         'name': 'WHEN_SHE_WAS_PAST',
         'pattern': [{'LEMMA': 'when'}, {'LEMMA': 'she'}, {'LEMMA': 'be'}, {'LEMMA': 'a', 'OP': '?'}, {'_': {'TIME': 'LIFE_STAGE'}}],
         'avm': {'ALL': {'TIME': 'PAST'}},
         'merge': False
     },
-    {
-         # 5 years ago
-        'name': 'WHEN_SHE_WAS_PAST',
-        'pattern': [{'POS': 'NUM'}, {'LEMMA': 'year'}, {'LEMMA': {'REGEX': '^(ago|before|previously|prior)$'}}],
-        'avm': {'ALL': {'TIME': 'PAST'}},
-        'merge': False
-    },
+
     # Temporal attribute transfer rules
     {
          # history of self-harm
         'name': 'HISTORY_OF_DSH',
         'pattern': [{'_': {'TIME': 'PAST'}}, {'LEMMA': 'of'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        'avm': {'LAST': {'TIME': 'HISTORICAL'}},
+        'merge': False
+    },
+    {
+         # history of trying to self-harm
+        'name': 'HISTORY_OF_TRY_TO_DSH',
+        'pattern': [{'_': {'TIME': 'PAST'}}, {'LEMMA': 'of'}, {'POS': 'VERB'}, {'LEMMA': 'to', 'OP': '?'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
         'avm': {'LAST': {'TIME': 'HISTORICAL'}},
         'merge': False
     },

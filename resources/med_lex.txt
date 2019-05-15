@@ -9,3 +9,13 @@ paracetamol	MED
 respiradone	MED
 respiridone	MED
 sleeping	MED
+Amitriptyline	MED
+Aspirin	MED
+Cocodamol	MED
+Ibuprofen	MED
+Neurofen	MED
+Nurofen	MED
+Olanzapine	MED
+Paracetamol	MED
+Respiradone	MED
+Respiridone	MED

@@ -3,3 +3,4 @@ no	NEG
 never	NEG
 deny	NEG
 denies	NEG
+denie	NEG

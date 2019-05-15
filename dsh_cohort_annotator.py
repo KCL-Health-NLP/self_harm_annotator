@@ -83,7 +83,7 @@ def test():
 
 
 def batch_process():
-    dsha = DSHAnnotator()
+    dsha = DSHAnnotator(verbose=False)
     
     main_dir = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text'
     
@@ -95,7 +95,7 @@ def batch_process():
     
     for pdir in pdirs:
          pin = os.path.join(main_dir, pdir, 'corpus')
-         _ = dsha.process(pin, verbose=False, write_output=True)
+         _ = dsha.process(pin, write_output=True)
          print(i, '/', n, pin)
          i += 1
 
@@ -105,7 +105,7 @@ def batch_process():
         
 
 def process():
-    dsha = DSHAnnotator()
+    dsha = DSHAnnotator(verbose=False)
     df = pd.read_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
     df['dsh'] = False
     n = len(df)
@@ -114,7 +114,7 @@ def process():
     for i, row in df.iterrows():
         docid = row.cn_doc_id
         text = row.text_content
-        mentions = dsha.process_text(text, docid, verbose=False, write_output=False)
+        mentions = dsha.process_text(text, docid, write_output=False)
         df.at[i, 'dsh'] = has_DSH_mention(mentions)
         if i % 1000 == 0:
             print(i, '/', n)
