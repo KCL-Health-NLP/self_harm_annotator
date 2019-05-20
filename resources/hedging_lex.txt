@@ -1,7 +1,5 @@
 able	HEDGING
 about to	HEDGING
-aim	HEDGING
-aiming	HEDGING
 almost	HEDGING
 aspiration	HEDGING
 boyfriend	HEDGING

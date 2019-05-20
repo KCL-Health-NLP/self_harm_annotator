@@ -10,7 +10,7 @@ import sys
 
 from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, Token
-from spacy.symbols import LEMMA
+from spacy.symbols import LEMMA, LOWER
 
 # TODO factorise these classes into a single AnnotatorSequence parent and 
 # various child classes that implement load_lexicon and other methods
@@ -21,10 +21,11 @@ class LexicalAnnotatorSequence(object):
     Creates a set of new pipeline components that annotate tokens accoring to
     a terminology list. Match is only performed on textual surface form.
     """
-    def __init__(self, nlp, pin, attribute, merge=False):
+    def __init__(self, nlp, pin, source_attribute, target_attribute, merge=False):
         self.nlp = nlp
         self.pin = pin
-        self.attribute = attribute
+        self.source_attribute = source_attribute
+        self.target_attribute = target_attribute
         self.annotation_rules = {}
         self.merge = merge
 
@@ -36,6 +37,7 @@ class LexicalAnnotatorSequence(object):
                     term, label = line.split('\t')
                 except Exception as e:
                     print('-- Warning: syntax error in rule file ' + self.pin + ' at line', n, file=sys.stderr)
+                    print(e, file=sys.stderr)
                 term = term.strip()
                 label = label.strip()
                 terms = self.annotation_rules.get(label, [])
@@ -60,7 +62,7 @@ class LexicalAnnotatorSequence(object):
                 name += '_'
 
             if name not in self.nlp.pipe_names:
-                component = LexicalAnnotator(self.nlp, terms, self.attribute, label, name, merge=self.merge)
+                component = LexicalAnnotator(self.nlp, terms, self.source_attribute, self.target_attribute, label, name, merge=self.merge)
                 self.nlp.add_pipe(component, last=True)
             else:
                 print('-- ', name, 'exists already. Component not added.')
@@ -74,17 +76,17 @@ class LexicalAnnotator(object):
     terminology list. Match is only performed on textual surface form.
     """
     
-    def __init__(self, nlp, terms, attribute, label, name, merge=False):
+    def __init__(self, nlp, terms, source_attribute, target_attribute, label, name, merge=False):
         self.name = name
         self.nlp = nlp
         self.label = label  # get entity label ID
-        self.attribute = attribute
+        self.target_attribute = target_attribute
         self.merge = merge
 
-        patterns = [self.nlp(text) for text in terms]
-        self.matcher = PhraseMatcher(self.nlp.vocab)
+        patterns = [self.nlp(text) for text in terms] # using make_doc as nlp() causes UseWarning saying that it may be much slower for tokenizer-based attributes (ORTH, LOWER)
+        self.matcher = PhraseMatcher(self.nlp.vocab, attr=source_attribute)
         self.matcher.add(label, None, *patterns)
-        Token.set_extension(attribute, default=False, force=True)
+        Token.set_extension(target_attribute, default=False, force=True)
 
     def __call__(self, doc):
         matches = self.matcher(doc)
@@ -97,7 +99,7 @@ class LexicalAnnotator(object):
             # Copy tense attribute to entity (for DSH annotator)
             tense = '_'
             for token in entity:
-                token._.set(self.attribute, self.label)
+                token._.set(self.target_attribute, self.label)
                 if token.pos_ == 'VERB':
                     tense = token.tag_
             for token in entity:
@@ -110,6 +112,7 @@ class LexicalAnnotator(object):
         # Merge all entities
         # TO DO spaCy stores ALL matches so we get 'deliberate' and 'self-harm' annotated separately - fix
         if self.merge:
+            print('-- Merging spans...', file=sys.stderr)
             for ent in doc.ents:
                 if ent.label_ == self.label:
                     ent.merge(lemma=''.join([token.lemma_ + token.whitespace_ for token in ent]).strip())
@@ -244,6 +247,7 @@ class LemmaAnnotator(object):
         # Merge all entities
         # TO DO spaCy stores ALL matches so we get 'deliberate' and 'self-harm' annotated separately - fix
         if self.merge:
+            print('-- Merging spans...', file=sys.stderr)
             for ent in doc.ents:
                 if ent.label_ == self.label:
                     ent.merge(lemma=''.join([token.lemma_ + token.whitespace_ for token in ent]).strip())
@@ -295,7 +299,7 @@ if __name__ == '__main__':
     text = 'This patient, made an attempt to commit suicide, but shows signs of self-harm, but denies deliberate ' \
            'self-harm. However, see she has been cutting herself.'
     pin = 'T:/Andre Bittar/workspace/dsh_annotator/resources/dsh_lex.txt'
-    lsa = LexicalAnnotatorSequence(nlp, pin, 'is_dsh')
+    lsa = LexicalAnnotatorSequence(nlp, pin, LOWER, 'is_dsh')
     lsa.load_lexicon()
     nlp = lsa.add_components()
     doc = nlp(text)

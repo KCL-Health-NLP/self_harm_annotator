@@ -5,6 +5,7 @@ Created on Tue Mar 26 11:18:29 2019
 @author: ABittar
 """
 
+import datetime
 import os
 import pandas as pd
 import sys
@@ -12,9 +13,10 @@ import sys
 sys.path.append('T:/Andre Bittar/workspace/utils')
 
 from dsh_annotator import DSHAnnotator
-from ehost_annotation_reader import convert_file_annotations
+from ehost_annotation_reader import convert_file_annotations, get_corpus_files, load_mentions_with_attributes
 from pandas import Timestamp
 from pprint import pprint
+from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support
 from time import time
 
 
@@ -38,6 +40,22 @@ def has_DSH_mention(mentions):
 
     return False
 
+
+def count_true_DSH_mentions(mentions):
+    mentions = convert_file_annotations(mentions)
+    count = 0
+    for mention in mentions:
+        polarity = mention.get('polarity', None)
+        status = mention.get('status', None)
+        temporality = mention.get('temporality', None)
+
+        if polarity == 'POSITIVE' and temporality == 'CURRENT' and \
+        status == 'RELEVANT':
+            count += 1
+            #print(mention['text'])
+    
+    return count
+            
 
 def output_for_batch_processing(target_dir):
     # use target_dir: 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text/'
@@ -82,10 +100,78 @@ def test():
     pprint(global_mentions)
 
 
-def batch_process():
+def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
+    """
+    Load gold/train data into a DataFrame and count the number of "true" 
+    DSH mentions per patient
+    """
+    df = pin = None
+
+    if sys_or_gold == 'sys':
+        pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient.pickle'
+    else:
+        pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev_patient.pickle'
+
+    if os.path.isfile(pin) and not recalculate:
+        print('-- Loading file:', pin, file=sys.stderr)
+        df = pd.read_pickle(pin)
+    else:
+        print('-- Recalculating data...', file=sys.stderr)
+        if sys_or_gold == 'sys':
+            files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
+        else:
+            files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev_patient/files')
+        xml = [f for f in files if 'xml' in f]
+        txt = [f for f in files if 'xml' not in f]
+
+        entries = []
+        for (x, t) in zip(xml, txt):
+            t_split = t.replace('\\', '/').split('/')
+            brcid = t_split[7]
+            docid = t_split[9].replace('.txt', '').split('_')[-1]
+            text_content = open(t, 'r').read()
+            mentions = load_mentions_with_attributes(x)
+            hm = count_true_DSH_mentions(mentions)
+            #hm = has_DSH_mention(mentions)
+            entries.append((t, brcid, docid, text_content, hm))
+        df = pd.DataFrame(entries, columns=['file', 'brcid', 'cn_doc_id', 'text_content', 'dsh'])
+        df.to_pickle(pin)
+        print('-- Done.', file=sys.stderr)
+    
+    results = {}
+    for brcid in df.groupby('brcid'):
+        c = 0
+        for i, row in brcid[1].iterrows():
+            if row.dsh > 0:
+                c += row.dsh
+        results[brcid[0]] = c
+
+    return df, results
+
+
+def evaluate_sys(results, sys_results):
+    x_gold = []
+    x_sys = []
+    for brcid in results:
+        x_gold.append(results.get(brcid) > 0)
+        x_sys.append(sys_results.get(brcid) > 0)
+    
+    prf_micro = precision_recall_fscore_support(x_gold, x_sys, average='micro')
+    prf_macro = precision_recall_fscore_support(x_gold, x_sys, average='macro')
+    kappa = cohen_kappa_score(x_gold, x_sys)
+    
+    print('prf (macro):', prf_macro[:-1])
+    print('prf (micro):', prf_micro[:-1])
+    print('kappa      :', kappa)
+
+
+def batch_process(main_dir):
+    """
+    Runs on actual files and outputs new XML.
+    """
     dsha = DSHAnnotator(verbose=False)
     
-    main_dir = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text'
+    #main_dir = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text'
     
     pdirs = os.listdir(main_dir)
     n = len(pdirs)
@@ -94,7 +180,7 @@ def batch_process():
     t0 = time()
     
     for pdir in pdirs:
-         pin = os.path.join(main_dir, pdir, 'corpus')
+         pin = os.path.join(main_dir, pdir, 'corpus').replace('\\', '/')
          _ = dsha.process(pin, write_output=True)
          print(i, '/', n, pin)
          i += 1
@@ -102,11 +188,21 @@ def batch_process():
     t1 = time()
     
     print(t1 - t0)
-        
 
-def process():
+
+def process(pin):
+    """
+    Runs on a DataFrame that contains the text for each file.
+    Outputs True for documents with relevant mention.
+    Does not write new XML.
+    All saved to the DataFrame.
+    """
+    
+    now = datetime.datetime.now().strftime('%Y%m%d')
+    
     dsha = DSHAnnotator(verbose=False)
-    df = pd.read_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
+    #df = pd.read_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
+    df = pd.read_pickle(pin)
     df['dsh'] = False
     n = len(df)
     
@@ -123,10 +219,14 @@ def process():
     
     print(t1 - t0)
     
+    df.to_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed_' + now + '.pickle')
+    
     return df
 
 
 if __name__ == '__main__':
+    print('-- Run one of the two functions...', file=sys.stderr)
     #test()
-    #df_processed = process()
-    batch_process()
+    #df_processed = process('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
+    #batch_process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
+    

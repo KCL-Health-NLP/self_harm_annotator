@@ -433,6 +433,9 @@ class DSHAnnotator:
                 start = i
                 while token._.DSH:
                     i += 1
+                    if i == len(doc):
+                        print('-- Warning: index is equal to document length:', i, token, len(doc), file=sys.stderr)
+                        break
                     token = doc[i]
                 end = i
                 offsets.append((start, end))
@@ -445,7 +448,8 @@ class DSHAnnotator:
         with doc.retokenize() as retokenizer:
             for (start, end) in offsets:
                 #print('Merging tokens:', start, end, doc[start:end], file=sys.stderr)
-                retokenizer.merge(doc[start:end])
+                attrs = {'LEMMA': ' '.join([token.lemma_ for token in doc[start:end]])}
+                retokenizer.merge(doc[start:end], attrs=attrs)
 
         return doc
         
