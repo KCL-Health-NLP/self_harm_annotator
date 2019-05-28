@@ -109,8 +109,12 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
 
     if sys_or_gold == 'sys':
         pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient.pickle'
-    else:
+    elif sys_or_gold == 'gold':
         pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev_patient.pickle'
+    elif sys_or_gold == 'cohort':
+        pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/text'
+    else:
+        raise ValueError('-- Incorrect argument:', sys_or_gold, 'use "sys" or "gold".')
 
     if os.path.isfile(pin) and not recalculate:
         print('-- Loading file:', pin, file=sys.stderr)
@@ -119,8 +123,10 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
         print('-- Recalculating data...', file=sys.stderr)
         if sys_or_gold == 'sys':
             files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
-        else:
+        elif sys_or_gold == 'gold':
             files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev_patient/files')
+        else:
+            files = get_corpus_files(pin)
         xml = [f for f in files if 'xml' in f]
         txt = [f for f in files if 'xml' not in f]
 
@@ -134,9 +140,43 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
             hm = count_true_DSH_mentions(mentions)
             #hm = has_DSH_mention(mentions)
             entries.append((t, brcid, docid, text_content, hm))
+
         df = pd.DataFrame(entries, columns=['file', 'brcid', 'cn_doc_id', 'text_content', 'dsh'])
-        df.to_pickle(pin)
+        
+        if sys_or_gold != 'cohort':
+            df.to_pickle(pin)
+        
         print('-- Done.', file=sys.stderr)
+    
+    results = {}
+    for brcid in df.groupby('brcid'):
+        c = 0
+        for i, row in brcid[1].iterrows():
+            if row.dsh > 0:
+                c += row.dsh
+        results[brcid[0]] = c
+
+    return df, results
+
+
+def count_cohort_mentions():
+    files = get_corpus_files('Z:/Andre Bittar/Projects/KA_Self-harm/data/text')
+    xml = [f for f in files if 'xml' in f]
+    txt = [f for f in files if 'xml' not in f]
+    entries = []
+    for (x, t) in zip(xml, txt):
+        t_split = t.replace('\\', '/').split('/')
+        brcid = t_split[6]
+        docid = t_split[8].replace('.txt', '').split('_')[-1]
+        text_content = open(t, 'r', encoding='latin-1').read()
+        mentions = load_mentions_with_attributes(x)
+        hm = count_true_DSH_mentions(mentions)
+        #hm = has_DSH_mention(mentions)
+        entries.append((t, brcid, docid, text_content, hm))
+
+    df = pd.DataFrame(entries, columns=['file', 'brcid', 'cn_doc_id', 'text_content', 'dsh'])
+    df.to_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/')
+    print('-- Done.', file=sys.stderr)
     
     results = {}
     for brcid in df.groupby('brcid'):

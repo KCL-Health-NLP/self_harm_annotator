@@ -107,7 +107,9 @@ class LexicalAnnotator(object):
 
             # avoid adding entities twice, but CAREFUL make sure this doesn't stop several annotations being added to the same token sequence
             if entity not in doc.ents:
-                doc.ents = list(doc.ents) + [entity]
+                # check for overlap
+                if self.check_entity_overlap(doc, entity):
+                    doc.ents = list(doc.ents) + [entity]
 
         # Merge all entities
         # TO DO spaCy stores ALL matches so we get 'deliberate' and 'self-harm' annotated separately - fix
@@ -118,6 +120,24 @@ class LexicalAnnotator(object):
                     ent.merge(lemma=''.join([token.lemma_ + token.whitespace_ for token in ent]).strip())
 
         return doc
+
+    def check_entity_overlap(self, doc, entity):
+        ent_offsets = [(ent.start, ent.end) for ent in doc.ents]
+        for (start, end) in ent_offsets:
+            # no overlap, no problem
+            if entity.start > end:
+                continue
+            if entity.end < start:
+                continue
+            # overlap - retain the new entity if it is longer
+            if (entity.end - entity.start) > (end - start):
+                #print('-- Replacing entity', ent.start, ent.end, ent, 'with', entity.end, entity.start, entity, file=sys.stderr)
+                new_ents = [ent for ent in doc.ents if ent.start != start and ent.end != end]
+                doc.ents = new_ents
+                return True
+            if (entity.end - entity.start) == (end - start):
+                print('-- Warning: exactly overlapping entities:', entity.end, entity.start, entity, '&', start, end, doc[start:end], file=sys.stderr)
+        return False
 
     def get_longest_matches(self, matches):
         """
@@ -237,12 +257,11 @@ class LemmaAnnotator(object):
             for token in entity:
                 token._.set('tense', tense)
 
+            # avoid adding entities twice, but CAREFUL make sure this doesn't stop several annotations being added to the same token sequence
             if entity not in doc.ents:
-                try:
+                # check for overlap
+                if self.check_entity_overlap(doc, entity):
                     doc.ents = list(doc.ents) + [entity]
-                except ValueError as e:
-                    print('-- Warning: entity overlap for', entity)
-                    print(e)
 
         # Merge all entities
         # TO DO spaCy stores ALL matches so we get 'deliberate' and 'self-harm' annotated separately - fix
@@ -253,6 +272,24 @@ class LemmaAnnotator(object):
                     ent.merge(lemma=''.join([token.lemma_ + token.whitespace_ for token in ent]).strip())
 
         return doc
+
+    def check_entity_overlap(self, doc, entity):
+        ent_offsets = [(ent.start, ent.end) for ent in doc.ents]
+        for (start, end) in ent_offsets:
+            # no overlap, no problem
+            if entity.start > end:
+                continue
+            if entity.end < start:
+                continue
+            # overlap - retain the new entity if it is longer
+            if (entity.end - entity.start) > (end - start):
+                #print('-- Replacing entity', ent.start, ent.end, ent, 'with', entity.end, entity.start, entity, file=sys.stderr)
+                new_ents = [ent for ent in doc.ents if ent.start != start and ent.end != end]
+                doc.ents = new_ents
+                return True
+            if (entity.end - entity.start) == (end - start):
+                print('-- Warning: exactly overlapping entities:', entity.end, entity.start, entity, '&', start, end, doc[start:end], file=sys.stderr)
+        return False
 
     def get_longest_matches(self, matches):
         """

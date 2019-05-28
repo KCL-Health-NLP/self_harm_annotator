@@ -53,3 +53,4 @@ __pycache__
 .idea
 test.py
 test.txt.knowtator.xml
+*.bkp

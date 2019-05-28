@@ -18,6 +18,13 @@ SAVED_RULES = [
         'pattern': [{'LEMMA': {'IN': ['evidence', 'sign']}}, {'LEMMA': 'of'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
         'avm': {2: {'DSH': 'DSH'}, 3: {'DSH': 'DSH'}},
         'merge': False
+    },
+    {
+        # (deliberate) self-injurious (behaviour) -- same as DSH_1
+        'name': 'DSH_2',
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^(self-.+)$'}, '_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': True
     }
 ]
 
@@ -215,13 +222,6 @@ RULES = [
     {
         # (deliberate) self-harm (behaviour)
         'name': 'DSH_1',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^(self-.+)$'}, '_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
-        'avm': {'ALL': {'DSH': 'DSH'}},
-        'merge': True
-    },
-    {
-        # (deliberate) self-injurious (behaviour)
-        'name': 'DSH_2',
         'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': {'REGEX': '^(self-.+)$'}, '_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'behaviour', 'OP': '?'}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': True

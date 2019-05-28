@@ -53,7 +53,7 @@ class DSHAnnotator:
         self.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/harm_action_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/med_lex.txt', LEMMA, 'LA')
-        self.load_lexicon('./resources/reported_speech_lex.txt', LEMMA, 'RSPEECH')
+        #self.load_lexicon('./resources/reported_speech_lex.txt', LEMMA, 'RSPEECH')
 
         # Load token sequence annotators
         self.load_token_sequence_annotator('level0')
