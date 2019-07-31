@@ -1,0 +1,8 @@
+family	HISTORY_TYPE
+forensic	HISTORY_TYPE
+medical	HISTORY_TYPE
+medication	HISTORY_TYPE
+personal	HISTORY_TYPE
+psychiatric	HISTORY_TYPE
+psychiatry	HISTORY_TYPE
+social	HISTORY_TYPE

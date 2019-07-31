@@ -32,9 +32,9 @@ RULES_TIME = [
         'merge': False
     },
     {
-         # at (age) 16
+         # at (the) (age) (of) 16
         'name': 'AT_AGE_X',
-        'pattern': [{'LEMMA': 'at'}, {'LEMMA': 'age', 'OP': '?'}, {'POS': 'NUM'}],
+        'pattern': [{'LEMMA': 'at'}, {'LEMMA': 'the', 'OP': '?'}, {'LEMMA': 'age', 'OP': '?'}, {'LEMMA': 'of', 'OP': '?'}, {'POS': 'NUM'}],
         'avm': {'ALL': {'TIME': 'PAST'}},
         'merge': False
     },
@@ -47,12 +47,39 @@ RULES_TIME = [
     },
     {
          # when she was a kid
-        'name': 'WHEN_SHE_WAS_PAST',
+        'name': 'WHEN_SHE_WAS_LIFE_STAGE',
         'pattern': [{'LEMMA': 'when'}, {'LEMMA': 'she'}, {'LEMMA': 'be'}, {'LEMMA': 'a', 'OP': '?'}, {'_': {'TIME': 'LIFE_STAGE'}}],
         'avm': {'ALL': {'TIME': 'PAST'}},
         'merge': False
     },
-
+    {
+         # in her teens
+        'name': 'IN_LIFE_STAGE',
+        'pattern': [{'POS': 'ADP'}, {'LEMMA': 'her', 'OP': '?'}, {'_': {'TIME': 'LIFE_STAGE'}}, {'LEMMA': 'year', 'OP': '?'}],
+        'avm': {'ALL': {'TIME': 'PAST'}},
+        'merge': False
+    },
+    {
+         # in 2002
+        'name': 'IN_YEAR',
+        'pattern': [{'POS': 'ADP'}, {'LEMMA': {'REGEX': '(19[0-9][0-9]|2[01][0-9][0-9])'}}],
+        'avm': {'ALL': {'TIME': 'PAST'}},
+        'merge': False
+    },
+    {
+         # for (over) 12 years
+        'name': 'FOR_N_YEARS',
+        'pattern': [{'LEMMA': 'for'}, {'LEMMA': 'over', 'OP': '?'}, {'LEMMA': 'more', 'OP': '?'}, {'LEMMA': 'than', 'OP': '?'}, {'POS': 'NUM'}, {'LEMMA': 'year'}],
+        'avm': {'ALL': {'TIME': 'PAST'}},
+        'merge': False
+    },
+    {
+         # for (over) a year
+        'name': 'FOR_A_YEAR',
+        'pattern': [{'LEMMA': 'for'}, {'LEMMA': 'over', 'OP': '?'}, {'LEMMA': 'more', 'OP': '?'}, {'LEMMA': 'than', 'OP': '?'}, {'LEMMA': 'a'}, {'LEMMA': 'year'}],
+        'avm': {'ALL': {'TIME': 'PAST'}},
+        'merge': False
+    },
     # Temporal attribute transfer rules
     {
          # history of self-harm

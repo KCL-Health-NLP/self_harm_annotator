@@ -210,6 +210,20 @@ RULES_1 = [
         'pattern': [{'LEMMA': {'IN': ['rather', 'oppose']}}, {'POS': {'NOT_IN': ['VERB']}, 'OP': '+'},  {'_': {'DSH': 'DSH'}, 'OP': '+'}],
         'avm': {'ALL': {'DSH': False}},
         'merge': True
+    },
+    # Form elements
+    {
+        # a) self-harm
+        'name': 'BULLET_DSH',
+        'pattern': [{'_': {'LA': 'BULLET'}}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        'avm': {'ALL': {'HEDGING': 'HEDGING'}},
+        'merge': True
+    },
+    {
+        # a) suicide attempts
+        'name': 'BULLET_SUICIDE',
+        'pattern': [{'_': {'LA': 'BULLET'}}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
+        'avm': {'ALL': {'HEDGING': 'HEDGING'}},
+        'merge': True
     }
-
 ]

@@ -5,3 +5,5 @@ thursday	PRESENT
 friday	PRESENT
 saturday	PRESENT
 sunday	PRESENT
+current	PRESENT
+recent	PRESENT

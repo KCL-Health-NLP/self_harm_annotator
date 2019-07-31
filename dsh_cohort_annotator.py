@@ -20,24 +20,28 @@ from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support
 from time import time
 
 
-def has_DSH_mention(mentions):
+def has_DSH_mention(mentions, check_temporality):
     mentions = convert_file_annotations(mentions)
     for mention in mentions:
         polarity = mention.get('polarity', None)
         status = mention.get('status', None)
         temporality = mention.get('temporality', None)
         
-        # doing these checks separately might save a tiny bit of time
-        if status != 'RELEVANT':
-            continue
+        if not check_temporality:
+            if status == 'RELEVANT' and polarity == 'POSITIVE':
+                return True        
+        else:
+            # doing these checks separately might save a tiny bit of time
+            if status != 'RELEVANT':
+                continue
 
-        # if status is relevant the polarity *should* always be positive, but check just in case
-        if polarity != 'POSITIVE':
-            continue
+            # if status is relevant the polarity *should* always be positive, but check just in case
+            if polarity != 'POSITIVE':
+                continue
 
-        if temporality == 'CURRENT':
-            return True
-
+            if temporality == 'CURRENT':
+                return True
+            
     return False
 
 
@@ -82,10 +86,10 @@ def output_for_batch_processing(target_dir):
     print('Files saved to target directory:', target_dir)
 
 
-def test():
+def test(check_temporality):
     dsha = DSHAnnotator()
     
-    texts = ['She has self-harmed in the past.', 'No evidence of cutting herself, but does have DSH. She is self-harming.']    
+    texts = ['Psychiatric history: she reports having self-harmed.', 'She has self-harmed in the past.', 'No evidence of cutting herself, but does have DSH. She is self-harming.']    
     
     n = 1
     global_mentions = {}
@@ -94,7 +98,7 @@ def test():
         text_id = 'text_' + str(n).zfill(5)
         n += 1
         mentions = dsha.process_text(text, text_id, verbose=False, write_output=False)
-        print('HAS DSH:', has_DSH_mention(mentions))
+        print('HAS DSH:', has_DSH_mention(mentions, check_temporality=check_temporality))
         global_mentions.update(mentions)
     
     pprint(global_mentions)
@@ -122,7 +126,7 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
     else:
         print('-- Recalculating data...', file=sys.stderr)
         if sys_or_gold == 'sys':
-            files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
+            files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_no_temporality_train_dev_patient_20190701/files')
         elif sys_or_gold == 'gold':
             files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev_patient/files')
         else:
@@ -144,6 +148,7 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
         df = pd.DataFrame(entries, columns=['file', 'brcid', 'cn_doc_id', 'text_content', 'dsh'])
         
         if sys_or_gold != 'cohort':
+            print('-- Saved file:', pin)
             df.to_pickle(pin)
         
         print('-- Done.', file=sys.stderr)
@@ -175,6 +180,7 @@ def count_cohort_mentions():
         entries.append((t, brcid, docid, text_content, hm))
 
     df = pd.DataFrame(entries, columns=['file', 'brcid', 'cn_doc_id', 'text_content', 'dsh'])
+    # TODO why is the filename missing here?
     df.to_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/')
     print('-- Done.', file=sys.stderr)
     
@@ -189,20 +195,44 @@ def count_cohort_mentions():
     return df, results
 
 
+def count_flagged_patients(df_processed):
+    n = 0
+    t = 0
+    for g in df_processed.groupby('brcid'):
+        for i, row in g[1].iterrows():
+            if row.dsh == True:
+                n += 1
+                break
+        t += 1
+    
+    print('Flagged patients:', n)
+    print('Total patients  :', t)
+    print('% flagged       :', n / t * 100)
+
+
 def evaluate_sys(results, sys_results):
     x_gold = []
     x_sys = []
+    
     for brcid in results:
         x_gold.append(results.get(brcid) > 0)
         x_sys.append(sys_results.get(brcid) > 0)
     
-    prf_micro = precision_recall_fscore_support(x_gold, x_sys, average='micro')
-    prf_macro = precision_recall_fscore_support(x_gold, x_sys, average='macro')
-    kappa = cohen_kappa_score(x_gold, x_sys)
-    
-    print('prf (macro):', prf_macro[:-1])
-    print('prf (micro):', prf_micro[:-1])
-    print('kappa      :', kappa)
+    report_string = 'Patient-level performance metrics\n'
+    report_string += '---------------------------------\n'
+    scores = {}
+    scores['macro'] = precision_recall_fscore_support(x_gold, x_sys, average='macro')
+    scores['micro'] = precision_recall_fscore_support(x_gold, x_sys, average='micro')
+            
+    for score in scores:
+        report_string += 'precision (' + score + '): ' + str(scores[score][0]) + '\n'
+        report_string += 'recall    (' + score + '): ' + str(scores[score][1]) + '\n'
+        report_string += 'f-score   (' + score + '): ' + str(scores[score][2]) + '\n'
+
+    k = cohen_kappa_score(x_gold, x_sys)
+    report_string += 'kappa            : ' + str(k) + '\n'
+
+    print(report_string)
 
 
 def batch_process(main_dir):
@@ -230,7 +260,7 @@ def batch_process(main_dir):
     print(t1 - t0)
 
 
-def process(pin):
+def process(pin, check_temporality=True):
     """
     Runs on a DataFrame that contains the text for each file.
     Outputs True for documents with relevant mention.
@@ -251,22 +281,30 @@ def process(pin):
         docid = row.cn_doc_id
         text = row.text_content
         mentions = dsha.process_text(text, docid, write_output=False)
-        df.at[i, 'dsh'] = has_DSH_mention(mentions)
+        df.at[i, 'dsh'] = has_DSH_mention(mentions, check_temporality=check_temporality)
         if i % 1000 == 0:
             print(i, '/', n)
         
-    t1 = time()    
+    t1 = time()
     
     print(t1 - t0)
     
-    df.to_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed_' + now + '.pickle')
+    if check_temporality:
+        pout = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed' + now + '.pickle'
+    else:
+        pout = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed_no_temporality_' + now + '.pickle'
+
+    print('-- Wrote file:', pout)
+    df.to_pickle(pout)
     
     return df
 
 
 if __name__ == '__main__':
+    print('-- Check has_DSH_mention() internal settings...', file=sys.stderr)
+    print('-- Check process() internal settings...', file=sys.stderr)
     print('-- Run one of the two functions...', file=sys.stderr)
-    #test()
-    #df_processed = process('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
-    #batch_process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
+    #test(check_temporality=True)
+    #df_processed = process('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text.pickle', check_temporality=True)
+    #batch_process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_no_temporality_train_dev_patient/files')
     

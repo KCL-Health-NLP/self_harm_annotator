@@ -13,8 +13,6 @@ from spacy.tokens import Span
 
 # Ad hoc import selection
 
-
-
 # This is an ad hoc workaround to avoid trying to overwrite default attributes
 # TODO Find a better, cleaner solution
 DEFAULT_ATTRIBUTES = ['DEP', 'HEAD', 'IS_ALPHA', 'IS_ASCII', 'IS_BRACKET', 
@@ -47,6 +45,9 @@ class TokenSequenceAnnotator(object):
         elif name == 'status':
             from resources.token_sequence_rules_status import RULES_STATUS
             self.rules = RULES_STATUS
+        elif name == 'history':
+            from resources.token_sequence_rules_history import RULES_HISTORY
+            self.rules = RULES_HISTORY
         self.nlp = nlp
         self.matcher = None
         self.matches = {}
@@ -71,7 +72,7 @@ class TokenSequenceAnnotator(object):
             # TODO add possibility of setting new attributes for merged spans in the rules
             # attrs = rule.get('attrs', [])
 
-            self.matcher = Matcher(self.nlp.vocab, validate=False)  # Need to do this for each rule separately unfortunately
+            self.matcher = Matcher(self.nlp.vocab)  # Need to do this for each rule separately unfortunately
             self.matcher.add(name, None, pattern)
 
             matches = self.matcher(doc)

@@ -1,7 +1,11 @@
+adolescence	LIFE_STAGE
 adolescent	LIFE_STAGE
 child	LIFE_STAGE
+childhood	LIFE_STAGE
 kid	LIFE_STAGE
+little	LIFE_STAGE
 teen	LIFE_STAGE
 teenager	LIFE_STAGE
 young	LIFE_STAGE
+younger	LIFE_STAGE
 youngster	LIFE_STAGE

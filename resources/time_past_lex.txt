@@ -4,15 +4,19 @@ at age	PAST
 since	PAST
 when	PAST
 #history	PAST # conflict with family history in HEDGING when assigning entity, in rules_0
+historical	PAST
 Hx	PAST
 hx	PAST
 h/o	PAST
-use to	PAST
+used to	PAST
+past	PAST
 the past	PAST
+previous	PAST
 previous year	PAST
 previously	PAST
 earlier	PAST
 year old	PAST
+years old	PAST
 at the time	PAST
 at that time	PAST
 tendency	PAST

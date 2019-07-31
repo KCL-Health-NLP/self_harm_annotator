@@ -34,12 +34,20 @@ SAVED_RULES = [
 
 RULES = [
     {
+     # Form elements
+        # a)
+        'name': 'FORM_BULLET',
+        'pattern': [{'LEMMA': {'REGEX': '^([a-z]|[1-9][0-9]?)$'}}, {'LEMMA': {'IN': [')', '.', '-', ':']}}],
+        'avm': {'ALL': {'LA': 'BULLET'}},
+        'merge': False
+    },
+    {
         # history
         'name': 'HISTORY',
         'pattern': [{'LEMMA': 'history'}],
         'avm': {0: {'TIME': 'PAST'}},
         'merge': False
-     },
+    },
     # suicidal NON-RELEVANT
     {
         # suicidal ideation
@@ -131,6 +139,13 @@ RULES = [
         # self harm/ suicide
         'name': 'HARM_LEMMA',
         'pattern': [{'LEMMA': 'self'}, {'LEMMA': { 'REGEX': 'harm\W'}}],
+        'avm': {'ALL': {'DSH': 'DSH'}},
+        'merge': False
+    },
+    {
+        # self-harm/substance misuse
+        'name': 'SELF_HARM_SPLIT',
+        'pattern': [{'LEMMA': 'self'}, {'LEMMA': '-'}, {'LEMMA': 'harm'}],
         'avm': {'ALL': {'DSH': 'DSH'}},
         'merge': False
     },
