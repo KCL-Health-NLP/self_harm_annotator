@@ -2,7 +2,7 @@
 # Token sequence rules, Level 1 #
 #################################
 
-# NB rules that use custom attributes added in previous rules go here and be applied in a second application
+# NB rules that use custom attributes added in previous rules go here and are applied in a second application
 
 RULES_1 = [
     {

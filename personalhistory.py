@@ -32,7 +32,7 @@ def interiorcheck(checkpoint):
         return True
     else:
         return False
-    
+
 def freetextcheck(checkpoint):
     textset = checkpoint.text
     textsetlow = textset.text.lower()

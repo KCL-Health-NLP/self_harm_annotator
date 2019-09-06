@@ -168,7 +168,7 @@ RULES = [
         # pull her hair
         'name': 'PULL_HER_HAIR',
         'pattern': [{'LEMMA': {'IN': ['pull', 'tug', 'yank', 'pulling', 'tugging', 'yanking']}}, {'LEMMA': 'her'}, {'LEMMA': 'hair'}],
-        'avm': {'ALL': {'DSH': 'DSH'}},
+        'avm': {'ALL': {'DSH': 'DSH', 'HEDGING': 'UNCERTAIN'}},
         'merge': True
     },
     {

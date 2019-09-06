@@ -126,7 +126,7 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
     else:
         print('-- Recalculating data...', file=sys.stderr)
         if sys_or_gold == 'sys':
-            files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_no_temporality_train_dev_patient_20190701/files')
+            files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
         elif sys_or_gold == 'gold':
             files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev_patient/files')
         else:
@@ -195,12 +195,15 @@ def count_cohort_mentions():
     return df, results
 
 
-def count_flagged_patients(df_processed):
+def count_flagged_patients(df_processed, key):
+    """
+    key: dsh_YYYYMMDD_tmp or dsh_YYYYMMDD_notmp
+    """
     n = 0
     t = 0
     for g in df_processed.groupby('brcid'):
         for i, row in g[1].iterrows():
-            if row.dsh == True:
+            if row[key] == True:
                 n += 1
                 break
         t += 1
@@ -211,15 +214,24 @@ def count_flagged_patients(df_processed):
 
 
 def evaluate_sys(results, sys_results):
+    """
+    
+    """
     x_gold = []
     x_sys = []
     
     for brcid in results:
         x_gold.append(results.get(brcid) > 0)
         x_sys.append(sys_results.get(brcid) > 0)
+ 
+    n = len(x_gold)
+    n_gold = len([x for x in x_gold if x == True])
+    n_sys = len([x for x in x_sys if x == True])
     
     report_string = 'Patient-level performance metrics\n'
     report_string += '---------------------------------\n'
+    report_string += 'Gold patients:' + str(n_gold) + ' (' + str(n_gold / n * 100) + '%)\n'
+    report_string += 'Sys patients :' + str(n_sys) + ' (' + str(n_sys / n * 100) + '%)\n'
     scores = {}
     scores['macro'] = precision_recall_fscore_support(x_gold, x_sys, average='macro')
     scores['micro'] = precision_recall_fscore_support(x_gold, x_sys, average='micro')
@@ -269,6 +281,11 @@ def process(pin, check_temporality=True):
     """
     
     now = datetime.datetime.now().strftime('%Y%m%d')
+
+    if check_temporality:
+        now += '_tmp'
+    else:
+        now += '_notmp'
     
     dsha = DSHAnnotator(verbose=False)
     #df = pd.read_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
@@ -281,21 +298,19 @@ def process(pin, check_temporality=True):
         docid = row.cn_doc_id
         text = row.text_content
         mentions = dsha.process_text(text, docid, write_output=False)
-        df.at[i, 'dsh'] = has_DSH_mention(mentions, check_temporality=check_temporality)
+        df.at[i, 'dsh_' + now] = has_DSH_mention(mentions, check_temporality=check_temporality)
         if i % 1000 == 0:
             print(i, '/', n)
-        
+        if i % 10000 == 0:
+            print('-- Creating backup:', pin)
+            df.to_pickle(pin)
+
     t1 = time()
     
     print(t1 - t0)
     
-    if check_temporality:
-        pout = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed' + now + '.pickle'
-    else:
-        pout = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed_no_temporality_' + now + '.pickle'
-
-    print('-- Wrote file:', pout)
-    df.to_pickle(pout)
+    print('-- Wrote file:', pin)
+    df.to_pickle(pin)
     
     return df
 
@@ -306,5 +321,5 @@ if __name__ == '__main__':
     print('-- Run one of the two functions...', file=sys.stderr)
     #test(check_temporality=True)
     #df_processed = process('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text.pickle', check_temporality=True)
-    #batch_process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_no_temporality_train_dev_patient/files')
+    #batch_process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
     

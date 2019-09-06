@@ -357,3 +357,9 @@ text = """Historical Facts and Background Information
 from 2002-2005 
 
 ? History of Mother known to police due to public disorder offenses, weapons and other criminal offences."""
+
+text = "She is a great risk to herself"
+text = "Her mother is concerned that ZZZZZ is showing suicidal behaviour"
+text = 'She has burns on her arms'
+text = 'She might cut herself.'
+text = 'She has been pulling her hair.'

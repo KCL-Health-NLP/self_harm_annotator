@@ -137,6 +137,11 @@ class DSHAnnotator:
         # TODO check encoding
         f = open(path, 'r', encoding='Latin-1')
         self.text = f.read()
+
+        if len(self.text) >= 1000000:
+            print('-- Unable to process very long text text:', path)
+            return None
+
         doc = self.nlp(self.text)
         
         return doc
@@ -543,6 +548,8 @@ class DSHAnnotator:
                     status = 'UNCERTAIN'
                 if token._.HEDGING == 'HEDGING':
                     status = 'NON-RELEVANT'
+                if token._.HEDGING == 'UNCERTAIN':
+                    status = 'UNCERTAIN'
                 if token._.TIME in ['HISTORICAL', 'TIME']:
                     temporality = 'HISTORICAL'
                 n += 1
@@ -589,7 +596,7 @@ class DSHAnnotator:
         ehost_pout = os.path.splitext(pin.replace('corpus', 'saved'))[0] + '.txt.knowtator.xml'
 
         root = ET.Element('annotations')
-        root.attrib['textSource'] = os.path.basename(os.path.splitext(pin.replace('.knowtatot.xml', ''))[0] + '.txt')
+        root.attrib['textSource'] = os.path.basename(os.path.splitext(pin.replace('.knowtator.xml', ''))[0] + '.txt')
 
         n = 1
         m = 1000
@@ -714,8 +721,13 @@ class DSHAnnotator:
                 print('-- Processing file:', pin, file=sys.stderr)
                 if self.verbose:
                     print('-- Processing file:', pin, file=sys.stderr)
+
                 # Annotate and print results
                 doc = self.annotate_file(pin)
+                
+                if doc is None:
+                    return global_mentions
+                
                 self.calculate_dsh_mention_attributes(doc)
                 
                 doc = self.merge_spans(doc)
@@ -732,6 +744,10 @@ class DSHAnnotator:
         elif os.path.isfile(path):
             print('-- Processing file:', path, file=sys.stderr)
             doc = self.annotate_file(path)
+            
+            if doc is None:
+                return global_mentions
+            
             self.calculate_dsh_mention_attributes(doc)
             
             doc = self.merge_spans(doc)
@@ -771,10 +787,14 @@ class DSHAnnotator:
             print('-- Processing text string:', text, file=sys.stderr)
         
         global_mentions = {}
+        if len(text) >= 1000000:
+            print('-- Unable to process very long text text with id:', text_id)
+            return global_mentions
+        
         doc = self.nlp(text)
         flag = self.calculate_dsh_mention_attributes(doc)
         if flag:
-            print('-- text id:', text_id)
+            print('-- Found history section in text with id:', text_id)
 
         doc = self.merge_spans(doc)
         
@@ -823,7 +843,7 @@ class DateTokenAnnotator(object):
 
 
 if __name__ == "__main__":
-    if True:
+    if False:
         dsha = DSHAnnotator(verbose=False)
         #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
         dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=True)
