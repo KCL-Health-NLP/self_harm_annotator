@@ -3,10 +3,6 @@ from bs4 import BeautifulSoup
 import csv
 from csv import writer
 
-"""
-AB: use this:
-    '(past\s)*(family|forensic|medica(l|tion)|personal|psychiatr(ic|y)|social)(\s+and\s+(family|forensic|medical|personal|psychiatr(ic|y)|social))?\s+(background|history)'
-"""
 
 def stopcheck(c):
     if (c.name=="h1" or c.name=="h2" or c.name =='h6' or(c.name=="p" and \

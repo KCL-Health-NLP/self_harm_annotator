@@ -45,25 +45,34 @@ def has_DSH_mention(mentions, check_temporality):
     return False
 
 
-def count_true_DSH_mentions(mentions):
+def count_true_DSH_mentions(mentions, check_temporality):
     mentions = convert_file_annotations(mentions)
     count = 0
     for mention in mentions:
         polarity = mention.get('polarity', None)
         status = mention.get('status', None)
-        temporality = mention.get('temporality', None)
 
-        if polarity == 'POSITIVE' and temporality == 'CURRENT' and \
-        status == 'RELEVANT':
-            count += 1
-            #print(mention['text'])
+        if not check_temporality:
+            if polarity == 'POSITIVE' and status == 'RELEVANT':
+                count += 1
+                #print(mention['text'])
+        else:
+            temporality = mention.get('temporality', None)
+
+            if polarity == 'POSITIVE' and temporality == 'CURRENT' and \
+            status == 'RELEVANT':
+                count += 1
+                #print(mention['text'])
     
     return count
-            
 
-def output_for_batch_processing(target_dir):
+
+def output_for_batch_processing(path, target_dir):
     # use target_dir: 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text/'
-    df = pd.read_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
+    #df = pd.read_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
+    # 'T:/Andre Bittar/Projects/CC_Eating_Disorder/balanced_sample_700.pickle'
+    df = pd.read_pickle(path)
+    df.rename(columns={'viewdate': 'date'}, inplace=True)
     df['date'] = df.viewdate.map(Timestamp.date)
 
     for i, row in df.iterrows():
@@ -112,9 +121,11 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
     df = pin = None
 
     if sys_or_gold == 'sys':
-        pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient.pickle'
+        #pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient.pickle'
+        pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_test_patient.pickle'
     elif sys_or_gold == 'gold':
-        pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev_patient.pickle'
+        #pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev_patient.pickle'
+        pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/test_patient.pickle'
     elif sys_or_gold == 'cohort':
         pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/text'
     else:
@@ -126,9 +137,11 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
     else:
         print('-- Recalculating data...', file=sys.stderr)
         if sys_or_gold == 'sys':
-            files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
+            #files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
+            files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_test_patient/files')
         elif sys_or_gold == 'gold':
-            files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev_patient/files')
+            #files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev_patient/files')
+            files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/test_patient/files')
         else:
             files = get_corpus_files(pin)
         xml = [f for f in files if 'xml' in f]
@@ -165,7 +178,8 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
 
 
 def count_cohort_mentions():
-    files = get_corpus_files('Z:/Andre Bittar/Projects/KA_Self-harm/data/text')
+    #files = get_corpus_files('Z:/Andre Bittar/Projects/KA_Self-harm/data/text')
+    files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/test_patient')
     xml = [f for f in files if 'xml' in f]
     txt = [f for f in files if 'xml' not in f]
     entries = []
@@ -175,13 +189,12 @@ def count_cohort_mentions():
         docid = t_split[8].replace('.txt', '').split('_')[-1]
         text_content = open(t, 'r', encoding='latin-1').read()
         mentions = load_mentions_with_attributes(x)
-        hm = count_true_DSH_mentions(mentions)
+        hm = count_true_DSH_mentions(mentions, check_temporality=True)
         #hm = has_DSH_mention(mentions)
         entries.append((t, brcid, docid, text_content, hm))
 
     df = pd.DataFrame(entries, columns=['file', 'brcid', 'cn_doc_id', 'text_content', 'dsh'])
-    # TODO why is the filename missing here?
-    df.to_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/')
+    df.to_pickle('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/test_patient.pickle')
     print('-- Done.', file=sys.stderr)
     
     results = {}
@@ -195,7 +208,7 @@ def count_cohort_mentions():
     return df, results
 
 
-def count_flagged_patients(df_processed, key):
+def count_flagged_patients(df_processed, key, check_counts=True):
     """
     key: dsh_YYYYMMDD_tmp or dsh_YYYYMMDD_notmp
     """
@@ -203,7 +216,11 @@ def count_flagged_patients(df_processed, key):
     t = 0
     for g in df_processed.groupby('brcid'):
         for i, row in g[1].iterrows():
-            if row[key] == True:
+            if check_counts:
+                if row[key] > 0:
+                    n += 1
+                    break
+            elif row[key] == True:
                 n += 1
                 break
         t += 1
@@ -224,6 +241,9 @@ def evaluate_sys(results, sys_results):
         x_gold.append(results.get(brcid) > 0)
         x_sys.append(sys_results.get(brcid) > 0)
  
+    print(x_gold)
+    print(x_sys)
+    
     n = len(x_gold)
     n_gold = len([x for x in x_gold if x == True])
     n_sys = len([x for x in x_sys if x == True])
@@ -272,7 +292,7 @@ def batch_process(main_dir):
     print(t1 - t0)
 
 
-def process(pin, check_temporality=True):
+def process(pin, check_counts=True, check_temporality=True):
     """
     Runs on a DataFrame that contains the text for each file.
     Outputs True for documents with relevant mention.
@@ -298,7 +318,10 @@ def process(pin, check_temporality=True):
         docid = row.cn_doc_id
         text = row.text_content
         mentions = dsha.process_text(text, docid, write_output=False)
-        df.at[i, 'dsh_' + now] = has_DSH_mention(mentions, check_temporality=check_temporality)
+        if check_counts:
+            df.at[i, 'dsh_' + now] = count_true_DSH_mentions(mentions, check_temporality=check_temporality)
+        else:
+            df.at[i, 'dsh_' + now] = has_DSH_mention(mentions, check_temporality=check_temporality)
         if i % 1000 == 0:
             print(i, '/', n)
         if i % 10000 == 0:
@@ -320,6 +343,6 @@ if __name__ == '__main__':
     print('-- Check process() internal settings...', file=sys.stderr)
     print('-- Run one of the two functions...', file=sys.stderr)
     #test(check_temporality=True)
-    #df_processed = process('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text.pickle', check_temporality=True)
+    #df_processed = process('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle', check_counts=True, check_temporality=True)
     #batch_process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
     

@@ -714,6 +714,7 @@ class DSHAnnotator:
         global_mentions = {}
 
         if os.path.isdir(path):
+            
             files = os.listdir(path)
             
             for f in files:
@@ -846,8 +847,9 @@ if __name__ == "__main__":
     if False:
         dsha = DSHAnnotator(verbose=False)
         #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
-        dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=True)
+        #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=True)
         #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus/01-07-2011_29365502.txt', write_output=True)
+        dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_test_20190909/files/corpus/', write_output=True)
     else:
         dsha = DSHAnnotator(verbose=True)
         dsh_annotations = dsha.process_text(text, 'text_001', write_output=False, verbose=True)
