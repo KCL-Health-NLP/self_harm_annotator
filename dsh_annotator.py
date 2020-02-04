@@ -1,8 +1,24 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Mar 12 14:27:31 2018
 
-@author: ABittar
+"""
+    Delibrate Self-Harm (DSH) annotator
+
+    This annotator marks up mentions of deliberate self-harm (DSH) in clinical
+    texts. The algorithm determines whether a mention is negated or not,
+    whether it is current or historical and whether it is relevant or not, as 
+    defined by the parameters of the study.
+    Output is in the XML stand-off annotation format that is used
+    by the eHOST annotation tool (see https://code.google.com/archive/p/ehost/).
+
+    Tag: Self-harm
+    Attributes and values:
+        polarity - NEGATIVE or POSITIVE
+        status  - RELEVANT or NON-RELEVANT
+        temporality - CURRENT or HISTORICAL
+
+    Several methods can be called to perform annotation:
+        - TODO
+
 """
 
 import os
@@ -23,12 +39,24 @@ from xml.parsers.expat import ExpatError
 # store examples outside of main code
 from examples.test_examples import text
 
+__author__ = "André Bittar"
+__copyright__ = "Copyright 2020, André Bittar"
+__credits__ = ["André Bittar"]
+__license__ = "GPL"
+__email__ = "andre.bittar@kcl.ac.uk"
+
 FWD_OFFSET = 10
 BWD_OFFSET = 10
 
 class DSHAnnotator:
 
     def __init__(self, verbose=False):
+        """
+        Deliberate Self-Harm (DSH) annotator
+        
+        Arguments:
+            - verbose: boolean; print all messages if True, else only default messages
+        """
         print('DSH annotator')
         self.nlp = spacy.load('en_core_web_sm', disable=['ner'])
         self.text = None
@@ -74,6 +102,14 @@ class DSHAnnotator:
     def load_lexicon(self, path, source_attribute, target_attribute, merge=False):
         """
         Load a lexicon/terminology file for annotation.
+        
+        Arguments:
+            - path: string; the path to the lexicon file
+            - source_attribute: spaCy symbol; the token attribute to match 
+              on (e.g .LEMMA)
+            - target_attribute: spaCy symbol; the token attribute to add the 
+              lexical annotations to (e.g. TAG, or custom attribute LA, DSH)
+            - merge: boolean; merge annotated spans into a single span
         """
         print(path, source_attribute, target_attribute, merge)
         if source_attribute == LEMMA:
@@ -84,6 +120,11 @@ class DSHAnnotator:
         self.nlp = lsa.add_components()
 
     def load_pronoun_lemma_corrector(self):
+        """
+        Load a pipeline component to convert spaCy pronoun lemma (-PRON-) into
+        the corresponding word form
+        e.g. ORTH=her LEMMA=-PRON- -> ORTH=her, LEMMA=her
+        """
         component = LemmaCorrector()
         pipe_name = component.name
 
@@ -93,6 +134,10 @@ class DSHAnnotator:
             print('-- ', pipe_name, 'exists already. Component not added.')
 
     def load_date_annotator(self):
+        """
+        Load a pipeline component to match and annotate certain date 
+        expressions.
+        """
         component = DateTokenAnnotator()
         pipe_name = component.name
 
@@ -103,36 +148,77 @@ class DSHAnnotator:
 
     def load_detokenizer(self, path):
         """
-        Load all detokenization rules.
+        Load a pipeline component that stores detokenization rules loaded from 
+        a file.
+        
+        Arguments:
+            - path: string; the path to the file containing detokenization rules
         """
         print('-- Detokenizer')
         self.nlp = Detokenizer(self.nlp).load_detokenization_rules(path, verbose=self.verbose)
 
     def load_token_sequence_annotator(self, name):
         """
-        Load all token sequence annotators.
+        Load a token sequence annotator pipeline component
         TODO allow for multiple annotators, cf. lemma and lexical annotators.
         TODO add path argument to specify rule file.
+        
+        Arguments:
+            - name: string; the name of the token sequence annotator - this 
+                    *must* be the name (without the .py extension) of the file
+                    containing the token sequence rules
         """
         tsa = TokenSequenceAnnotator(self.nlp, name, verbose=self.verbose)
         if tsa.name not in self.nlp.pipe_names:
             self.nlp.add_pipe(tsa)
 
     def get_text(self):
+        """
+        Return the text of the current annotator instance
+        
+        Return:
+            - text: string; the text of the document being processed
+        """
         return self.text
 
     def normalise(self, text):
         """
-        Add normalisation rules if we want to clean things up first
+        Normalise the text
+        TODO: Add normalisation rules if we want to clean things up first
+        
+        Arguments:
+            - text: string; the text to be normalised
+        
+        Return:
+            - text: string; the normalised text
         """
         text = re.sub(' +', ' ', text)
         return text
 
     def annotate_text(self, text):
+        """
+        Annotate a text string
+        
+        Arguments:
+            - text: string; the text to annotate
+        
+        Return:
+            - doc: spaCy Doc; the annotated Doc object
+        """
         self.text = text
-        return self.nlp(text)
+        doc = self.nlp(text)
+        return doc
 
     def annotate_file(self, path):
+        """
+        Annotate the contents of a text file
+        
+        Arguments:
+            - path: string; the path to a text file to annotate
+        
+        Return:
+            - doc: spacy Doc; the annotated Doc object
+        """
         # TODO check for file in input
         # TODO check encoding
         f = open(path, 'r', encoding='Latin-1')
@@ -146,93 +232,138 @@ class DSHAnnotator:
         
         return doc
 
-    def has_negation_ancestor(self, cur_token, verbose=False):
+    def has_negation_ancestor(self, curr_token, verbose=False):
         """
-        Basic rule-based negation search in dependency tree.
+        Search the dependency tree for a negation marker
+        
+        Arguments:
+            - curr_token: spaCy Token; the token to start searching from
+            - verbose: boolean; print all messages if True, else only default messages
+        
+        Return: boolean; True if negation found, else False
         """
         if verbose:
-            print('-- Detecting negations...', cur_token)
+            print('-- Detecting negations...', curr_token)
 
-        if cur_token.lemma_ in ['report', 'say', 'claim', 'announce', 'insist']:
-            for child in cur_token.children:
+        if curr_token.lemma_ in ['report', 'say', 'claim', 'announce', 'insist']:
+            for child in curr_token.children:
                 if verbose:
-                    print('  -- Checking child', child, 'of', cur_token)
+                    print('  -- Checking child', child, 'of', curr_token)
                 if child.dep_ == 'neg':
                     return True
             #return False
 
-        elif cur_token.lemma_ in ['deny']:
+        elif curr_token.lemma_ in ['deny']:
             return True
 
-        elif cur_token.pos_.startswith('N'):
-            for child in cur_token.children:
+        elif curr_token.pos_.startswith('N'):
+            for child in curr_token.children:
                 if verbose:
-                    print('  -- Checking child', child, 'of', cur_token)
+                    print('  -- Checking child', child, 'of', curr_token)
                 if child.dep_ == 'neg' or child.lemma_ in ['no']:
                     return True
             #return False
 
-        elif cur_token.pos_.startswith('V'):
-            for child in cur_token.children:
+        elif curr_token.pos_.startswith('V'):
+            for child in curr_token.children:
                 if verbose:
-                    print('  -- Checking child', child, 'of', cur_token)
+                    print('  -- Checking child', child, 'of', curr_token)
                 if child.dep_ == 'neg':
                     return True
             #return False
 
-        if cur_token.dep_ == 'ROOT':
+        if curr_token.dep_ == 'ROOT':
             # ROOT
             return False
 
-        return self.has_negation_ancestor(cur_token.head, verbose=verbose)
+        return self.has_negation_ancestor(curr_token.head, verbose=verbose)
 
-    def has_historical_ancestor(self, cur_token, verbose=False):
-        if verbose:
-            print('-- Detecting historical ancestors...', cur_token)
+    def has_historical_ancestor(self, curr_token, verbose=False):
+        """
+        Search the dependency tree for an ancestor of the current node that is
+        a marker of historical temporality
         
-        if cur_token._.TIME == 'TIME':
+        Arguments:
+            - curr_token: spaCy Token; the token to start searching from
+            - verbose: boolean; print all messages if True, else only default messages
+        
+        Return: boolean; True if historical marker found, else False
+        """
+        if verbose:
+            print('-- Detecting historical ancestors...', curr_token)
+        
+        if curr_token._.TIME == 'TIME':
             return True
 
-        if cur_token.dep_ == 'ROOT':
-            # ROOT
+        if curr_token.dep_ == 'ROOT':
             return False
 
-        return self.has_historical_ancestor(cur_token.head, verbose=verbose)
+        return self.has_historical_ancestor(curr_token.head, verbose=verbose)
 
-    def has_historical_dependent(self, cur_token, verbose=False):
+    def has_historical_dependent(self, curr_token, verbose=False):
+        """
+        Search the dependency tree for an dependent of the current node that is
+        a marker of historical temporality
+
+        Arguments:
+            - curr_token: spaCy Token; the token to start searching from
+            - verbose: boolean; print all messages if True, else only default messages
+        
+        Return: boolean; True if historical marker found, else False
+        """
         if verbose:
-            print('-- Detecting historical modifiers...', cur_token)
+            print('-- Detecting historical modifiers...', curr_token)
 
-        if cur_token.tag_ in ['VBG', 'VBN']:
-            for child in cur_token.children:
+        if curr_token.tag_ in ['VBG', 'VBN']:
+            for child in curr_token.children:
                 if verbose:
-                    print('  -- Checking child', child, 'of', cur_token)
+                    print('  -- Checking child', child, 'of', curr_token)
                 if child.lower_ == 'had':
                     return True
                 self.has_historical_dependent(child, verbose=verbose)
 
-        if cur_token.pos_[0] in ['N', 'V']:
-            for child in cur_token.children:
+        if curr_token.pos_[0] in ['N', 'V']:
+            for child in curr_token.children:
                 if verbose:
-                    print('  -- Checking child', child, 'of', cur_token)
+                    print('  -- Checking child', child, 'of', curr_token)
                 if child._.TIME == 'TIME':
                     return True
                 self.has_historical_dependent(child, verbose=verbose)
 
         return False
 
-    def has_hedging_ancestor(self, cur_token, verbose=True):
-        if cur_token._.HEDGING == 'HEDGING':
+    def has_hedging_ancestor(self, curr_token, verbose=True):
+        """
+        Search the dependency tree for an ancestor of the current node that is
+        a marker of hedging
+        
+        Arguments:
+            - curr_token: spaCy Token; the token to start searching from
+            - verbose: boolean; print all messages if True, else only default messages
+        
+        Return: boolean; True if hedging marker found, else False
+        """
+        if curr_token._.HEDGING == 'HEDGING':
             return True
         
-        if cur_token.dep_ == 'ROOT':
+        if curr_token.dep_ == 'ROOT':
             # ROOT
             return False
         
-        return self.has_hedging_ancestor(cur_token.head, verbose=verbose)
+        return self.has_hedging_ancestor(curr_token.head, verbose=verbose)
     
-    def has_hedging_dependent(self, cur_token, verbose=True):
-        for child in cur_token.children:
+    def has_hedging_dependent(self, curr_token, verbose=True):
+        """
+        Search the dependency tree for an dependent of the current node that is
+        a marker of hedging
+
+        Arguments:
+            - curr_token: spaCy Token; the token to start searching from
+            - verbose: boolean; print all messages if True, else only default messages
+        
+        Return: boolean; True if hedging marker found, else False
+        """
+        for child in curr_token.children:
             if child._.HEDGING == 'HEDGING':
                 return True
             self.has_hedging_dependent(child, verbose=verbose)
@@ -240,8 +371,17 @@ class DSHAnnotator:
         return False
 
     def has_hedging_noun_previous(self, doc, i, verbose=False):
-        """ Check anywhere right up to the start of the sentence (
-        as opposed to 5 previous tokens"""
+        """
+        Search for a hedging noun in the preceding tokens within the current
+        sentence
+        
+        Arguments:
+            - doc: spaCy Doc; the current Doc object
+            - i: integer; the token index in the current Doc object to 
+                 search from
+        
+        Return: boolean; True if hedging noun found, else False
+        """
         start = doc[i].sent.start
         end = doc[i].i
         if verbose:
@@ -261,46 +401,77 @@ class DSHAnnotator:
 
         return False
     
-    # This has a disastrous effect on results
     def has_past_tense_governor(self, curr_token):
-        """ Check if governor is a past tense verb """
+        """
+        Check if the current token's governor is a past tense verb
+        WARNING: This had a disastrous effect on results; not in use
+        
+        Arguments:
+            - curr_token: spacy Token; the current token
+        
+        Return: boolean; True if past tense governor found, else False
+        """
         return curr_token.head.tag_ in ['VBD', 'VBN', 'VHD', 'VHN', 'VVD', 'VVN']
     
-    def has_propatt_ancestor(self, cur_token):
-        """ Check if DSH mention has a propositional attitude ancestor"""
-        if cur_token.head.pos_ == 'VERB':
-            if cur_token.head.lemma_ in ['believe', 'desire', 'dream', 'feel', 'imagine', 'think', 'want', 'wish', 'wonder']:
+    def has_propatt_ancestor(self, curr_token):
+        """
+        Search the dependency tree for a propositional attitude ancestor of the
+        current token
+        
+        Arguments:
+            - curr_token: spaCy Token; the token to start searching from
+        
+        Return: boolean; True if propositional attitude marker found, else False
+        """
+        if curr_token.head.pos_ == 'VERB':
+            if curr_token.head.lemma_ in ['believe', 'desire', 'dream', 'feel', 'imagine', 'think', 'want', 'wish', 'wonder']:
                 return True
 
-        if cur_token.head.pos_ == 'NOUN':
-            if cur_token.head.lemma_ in ['assumption', 'belief', 'feeling', 'desire', 'dream', 'idea', 'opinion', 'wish', 'view']:
+        if curr_token.head.pos_ == 'NOUN':
+            if curr_token.head.lemma_ in ['assumption', 'belief', 'feeling', 'desire', 'dream', 'idea', 'opinion', 'wish', 'view']:
                 return True
 
-        if cur_token.head._.DSH == 'NON_DSH':
+        if curr_token.head._.DSH == 'NON_DSH':
             # e.g. suicidal thoughts   
-            match = re.search('idea(tion)?|intent|thought', cur_token.head.lemma_, flags=re.I)
+            match = re.search('idea(tion)?|intent|thought', curr_token.head.lemma_, flags=re.I)
             return match is not None
 
-        if cur_token.dep_ == 'ROOT':
+        if curr_token.dep_ == 'ROOT':
             # ROOT
             return False
 
-        return self.has_propatt_ancestor(cur_token.head)
+        return self.has_propatt_ancestor(curr_token.head)
     
-    def is_reported_speech(self, cur_token):
-        """ Check if the current node is governed by a reported speech verb 
-        -- NOT IN USE
+    def is_reported_speech(self, curr_token):
         """
-        if cur_token.head._.RSPEECH == 'TRUE':
+        Check if the current token's governor is a reported speech verb
+        NOTE: not in use
+        
+        Arguments:
+            - curr_token: spacy Token; the current token
+        
+        Return: boolean; True if reported speech verb found, else False
+        """
+        if curr_token.head._.RSPEECH == 'TRUE':
             return True
 
-        if cur_token.dep_ == 'ROOT':
+        if curr_token.dep_ == 'ROOT':
             # ROOT
             return False
 
-        return self.is_reported_speech(cur_token.head.head)
+        return self.is_reported_speech(curr_token.head.head)
     
     def is_section_header(self, doc, i, verbose=True):
+        """
+        Check if a given position in the document is part of a section header
+        
+        Arguments:
+            - doc: spaCy Doc; the current Doc object
+            - i: integer; the token index in the current Doc object to 
+                search from
+
+        Return: boolean; True if section header, else False
+        """
         cur_sent = doc[i].sent
         end = len(cur_sent) - 1
         window = cur_sent[i:end].text
@@ -309,17 +480,50 @@ class DSHAnnotator:
         return False
     
     def is_singleton(self, doc, i):
+        """
+        Check if the token at a specified index is the only one in the sentence
+        
+        Arguments:
+            - doc: spaCy Doc; the current Doc object
+            - i: integer; the token index in the current Doc object to check
+        
+        Return: boolean; True if section header, else False
+        """
         if doc[i].text == doc[i].sent.text:
             return True
         return False
     
     def is_definite(self, doc, i):
+        """
+        Check if the token at a specified position governs a definite or 
+        possessive determiner
+        
+        Arguments:
+            - doc: spaCy Doc; the current Doc object
+            - i: integer; the token index in the current Doc object to check
+        
+        Return: boolean; True if definite or possessive determiner found, else False
+        """
         for child in doc[i].children:
             if child.lemma_ in ['the', 'this', 'that', 'her']:
                 return True
         return False
     
     def calculate_dsh_mention_attributes(self, doc, verbose=False):
+        """
+        Using previously added annotations, calculate the attribute values for 
+        all detected mentions, and determine whether the document has a history
+        section
+        
+        Arguments:
+            - doc: spaCy Doc; the current Doc object
+            - verbose: boolean; print all messages if True, else only default messages
+        
+        Return:
+            - has_history_section: boolean; True if a history section was detected
+                                   in the document, else False
+        
+        """
         # Hack: get attributes from window of 5 tokens before DSH mention
         has_history_section = False
         for i in range(len(doc)):
@@ -440,9 +644,27 @@ class DSHAnnotator:
         return has_history_section
 
     def merge_spans(self, doc):
+        """
+        Merge all longest matching DSH token sequences into single spans
+        
+        Arguments:
+            - doc: spaCy Doc; the current Doc object
+        
+        Return:
+            - doc: spaCy Doc; the current Doc object with merged longest spans
+        """
 
         def get_longest_spans(offsets):
-            """ Get a unique list of all overlapping span offsets """
+            """
+            Get a unique list of all overlapping span offsets
+            
+            Arguments:
+                - offsets: list; the list of offsets
+            
+            Return:
+                - offsets: list; the list of offsets sorted in decreasing order
+                           of difference between start and end
+            """
             overlaps = {}
             for offset in offsets:
                 o = [(i[0], i[1]) for i in offsets if
@@ -487,8 +709,17 @@ class DSHAnnotator:
 
         return doc
         
-    def print_tokens(self, doc):
-        with open('T:/Andre Bittar/workspace/ka_dsh/output/report.txt', 'w') as fout:
+    def print_tokens(self, doc, path):
+        """
+        Output all tokens in CoNLL-style token annotations to stdout and write 
+        to file
+        
+        Arguments:
+            - doc: spaCy Doc; the current Doc object
+            - path: string; the file path to write output to (will overwrite 
+                    any existing file)
+        """
+        with open(path, 'w') as fout:
             for token in doc:
                 string = '{:<10}{:<15}{:<15}{:<15}{:<15}{:<15}{:<15}'.format(token.i, token.text, token.lemma_, token.tag_, dsha.nlp.vocab.strings[token._.dsh] or '_', dsha.nlp.vocab.strings[token._.sem] or '_', token.head.i, token.dep_)
                 print(string, file=fout)
@@ -496,6 +727,12 @@ class DSHAnnotator:
         fout.close()
 
     def print_spans(self, doc):
+        """
+        Output all spans in CoNLL-style token annotations to stdout
+
+        Arguments:
+            - doc: spaCy Doc; the current Doc object
+        """
         s = '\n'
         s += 'PIPELINE:\n-- ' + '\n-- '.join(self.nlp.pipe_names)
         s += '\n\n'
@@ -517,16 +754,26 @@ class DSHAnnotator:
         for a in cext:
             s += '{:<10}'.format('-' * len(a))
 
-        print(s, file=sys.stderr)
+        print(s)
         
         for token in doc:
             s = '{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}'.format(token.i, token.text, token.lemma_, token.lower_, token.tag_, token.pos_, token.head.i, token.dep_)
             for a in cext:
                 val = token._.get(a)
                 s += '{:10}'.format(val or '_')
-            print(s, file=sys.stderr)
+            print(s)
 
     def build_ehost_output(self, doc):
+        """
+        Construct a dictionary representation of all annotations
+
+        Arguments:
+            - doc: spacy Doc; the processed spaCy Doc object
+        
+        Return:
+            - mentions: dict; a dictionary containing all annotations ready for
+                        output in eHOST XML format
+        """
         mentions = {}
         n = 1
         for token in doc:
@@ -593,6 +840,17 @@ class DSHAnnotator:
         return mentions
 
     def write_ehost_output(self, pin, annotations, verbose=False):
+        """
+        Write an annotated eHOST XML file to disk.
+        
+        Arguments:
+            - pin: string; the input file path (must be in eHOST directory structure)
+            - annotations: dict; the dictionary of detected annotations
+            - verbose: boolean; print all messages if True, else only default messages
+        
+        Return:
+            - root: Element; the root node of the new XML ElementTree object
+        """
         ehost_pout = os.path.splitext(pin.replace('corpus', 'saved'))[0] + '.txt.knowtator.xml'
 
         root = ET.Element('annotations')
@@ -711,6 +969,17 @@ class DSHAnnotator:
         return root
 
     def process(self, path, write_output=True):
+        """
+        Process a single document or directory structure.
+        
+        Arguments:
+            - path: string; indicates text file or directory to process. If a directory, the
+                structure must be that used by the eHOST annotation tool.
+            - write_output: boolean; save the annotated output to file.
+        
+        Return:
+            - global_mentions: dict; a dictionary containing all annotated mentions
+        """
         global_mentions = {}
 
         if os.path.isdir(path):
@@ -783,11 +1052,25 @@ class DSHAnnotator:
         return global_mentions
 
     def process_text(self, text, text_id, write_output=False, verbose=False):
+        """
+        Process a text string
+        
+        Arguments:
+            - text: string; the input text
+            - text_id: string; a user-defined identifier for the text
+
+        Return:
+            - global_mentions: dict; a dictionary containing all annotated mentions
+        """
         self.verbose = verbose
         if self.verbose:
             print('-- Processing text string:', text, file=sys.stderr)
         
         global_mentions = {}
+        if text is None:
+            print('-- Empty text:', text_id)
+            return global_mentions
+            
         if len(text) >= 1000000:
             print('-- Unable to process very long text text with id:', text_id)
             return global_mentions
@@ -814,6 +1097,9 @@ class DSHAnnotator:
 
 class LemmaCorrector(object):
     def __init__(self):
+        """
+        Lemma Corrector
+        """
         self.name = 'pronoun_lemma_corrector'
 
     def __call__(self, doc):
@@ -827,6 +1113,9 @@ class LemmaCorrector(object):
 
 class DateTokenAnnotator(object):
     def __init__(self):
+        """
+        Date Token Annotator
+        """
         self.name = 'date_token_annotator'
 
     def __call__(self, doc):
