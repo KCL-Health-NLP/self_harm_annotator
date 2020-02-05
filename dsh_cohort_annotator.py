@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Mar 26 11:18:29 2019
-
-@author: ABittar
+    This is a utility script to annotate specific cohorts, e.g. Karyn Ayre's
+    perinatal DSH cohort, Charlotte Cliffe's eating disorder cohort.
+    Execution examples are provided in comments in the main() method.
 """
 
 import datetime
@@ -12,6 +12,7 @@ import sys
 
 sys.path.append('T:/Andre Bittar/workspace/utils')
 
+from db_connection import fetch_dataframe, db_name, server_name
 from dsh_annotator import DSHAnnotator
 from ehost_annotation_reader import convert_file_annotations, get_corpus_files, load_mentions_with_attributes
 from pandas import Timestamp
@@ -19,8 +20,20 @@ from pprint import pprint
 from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support
 from time import time
 
+__author__ = "André Bittar"
+__copyright__ = "Copyright 2020, André Bittar"
+__credits__ = ["André Bittar"]
+__license__ = "GPL"
+__email__ = "andre.bittar@kcl.ac.uk"
+
 
 def has_DSH_mention(mentions, check_temporality):
+    """
+    Check if any of the mentions are positive depending on the predefined study
+    criteria. e.g. for Karyn's project these are polarty=POSITIVE, 
+    status=RELEVANT, temporality=CURRENT.
+    Returns True if a positive mention is found, False otherwise
+    """
     mentions = convert_file_annotations(mentions)
     for mention in mentions:
         polarity = mention.get('polarity', None)
@@ -46,6 +59,9 @@ def has_DSH_mention(mentions, check_temporality):
 
 
 def count_true_DSH_mentions(mentions, check_temporality):
+    """
+    Count the number of positive mentions.
+    """
     mentions = convert_file_annotations(mentions)
     count = 0
     for mention in mentions:
@@ -68,6 +84,10 @@ def count_true_DSH_mentions(mentions, check_temporality):
 
 
 def output_for_batch_processing(path, target_dir):
+    """
+    From a DataFrame containing all text data extracted from CRIS, create an
+    eHOST directory structure ready for files to be manually annotated.
+    """
     # use target_dir: 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text/'
     #df = pd.read_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
     # 'T:/Andre Bittar/Projects/CC_Eating_Disorder/balanced_sample_700.pickle'
@@ -115,7 +135,7 @@ def test(check_temporality):
 
 def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
     """
-    Load gold/train data into a DataFrame and count the number of "true" 
+    Load gold/train data into a DataFrame and count the number of "true" (positive)
     DSH mentions per patient
     """
     df = pin = None
@@ -178,6 +198,10 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
 
 
 def count_cohort_mentions():
+    """
+    Count all positive DSH mentions in the manually annotated cohort documents
+    (in eHOST) format.
+    """
     #files = get_corpus_files('Z:/Andre Bittar/Projects/KA_Self-harm/data/text')
     files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/test_patient')
     xml = [f for f in files if 'xml' in f]
@@ -210,8 +234,12 @@ def count_cohort_mentions():
 
 def count_flagged_patients(df_processed, key, check_counts=True):
     """
+    Count all patients flagged with a postive mention.
     key: dsh_YYYYMMDD_tmp or dsh_YYYYMMDD_notmp
+    Return a DataFrame of brcids indicating presence/absence of DSH
     """
+    df = pd.DataFrame(columns=['brcid', 'dsh'])
+    
     n = 0
     t = 0
     for g in df_processed.groupby('brcid'):
@@ -232,7 +260,8 @@ def count_flagged_patients(df_processed, key, check_counts=True):
 
 def evaluate_sys(results, sys_results):
     """
-    
+    Perform evaluation of the app in comparison with the gold standard manual
+    annotations.
     """
     x_gold = []
     x_sys = []
@@ -269,7 +298,7 @@ def evaluate_sys(results, sys_results):
 
 def batch_process(main_dir):
     """
-    Runs on actual files and outputs new XML.
+    Run the dsh_annotator on text files and output new XML.
     """
     dsha = DSHAnnotator(verbose=False)
     
@@ -292,9 +321,130 @@ def batch_process(main_dir):
     print(t1 - t0)
 
 
+def process_CC_EE():
+    """
+    Run entire process from CRIS query to flagging of patients.
+    This will get latest data from CRIS.
+    """
+    # load and store new data for Attachement
+    print('-- Fetching Attachment data...', end='')
+    query_att = open('T:/Andre Bittar/Projects/CC_Eating_Disorder/CC_Eating_Disorder_get_texts_Attachment_query.sql', 'r').read()
+    df_att = fetch_dataframe(server_name, db_name, query_att)
+    df_att.rename(columns={'BrcId': 'brcid', 'CN_Doc_ID': 'cn_doc_id', 'ViewDate': 'viewdate', 'Attachment_Text': 'text_content'}, inplace=True)
+    print('Done.')
+    
+    # load and store new data for Event
+    print('-- Fetching Event data...', end='')
+    query_evt = open('T:/Andre Bittar/Projects/CC_Eating_Disorder/CC_Eating_disorder_get_texts_Event_query.sql', 'r').read()
+    df_evt = fetch_dataframe(server_name, db_name, query_evt)
+    df_evt.rename(columns={'BrcId': 'brcid', 'CN_Doc_ID': 'cn_doc_id', 'ViewDate': 'viewdate', 'Comments': 'text_content'}, inplace=True)
+    print('Done.')
+    
+    df_new = pd.concat([df_att, df_evt])
+    df_new.reset_index(drop=True, inplace=True)
+    
+    del df_att
+    del df_evt
+    
+    now = datetime.datetime.now().strftime('%Y%m%d')
+    new_p = 'T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_DSH_new_' + now + '.pickle'
+    df_new.to_pickle(new_p)
+    
+    print('-- Processing...')
+    df_new = process(new_p, check_counts=False, check_temporality=False)
+    df_new.to_pickle(new_p)
+    
+    # output an Excel spreadsheet with flagged patients
+    df_flags = pd.DataFrame(columns=['brcid', 'dsh'])
+    for g in df_new.groupby('brcid'):
+        brcid = g[0]
+        flag = False
+        for i, row in g[1].iterrows():
+            if row['dsh_' + now + '_notmp'] == True:
+                tmp = pd.DataFrame({'brcid': [brcid], 'dsh': [True]})
+                df_flags = pd.concat([df_flags, tmp])
+                flag = True
+                break
+        if flag == False:
+            tmp = pd.DataFrame({'brcid': [brcid], 'dsh': [False]})
+            df_flags = pd.concat([df_flags, tmp])
+    
+    df_flags.reset_index(drop=True, inplace=True)
+    df_flags.sort_values(by='brcid', inplace=True)
+    df_flags.to_excel('T:/Andre Bittar/Projects/CC_Eating_Disorder/flagged_patients_full_cohort_' + now + '.xlsx')
+    
+    return df_flags
+
+
+def process_CC_EE_update():
+    """
+    Run process on new data only and merge with old data.
+    """
+    # Load original data
+    print('-- Loading original data...', end='')
+    df = pd.read_pickle('T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_DSH.pickle')
+    print('Done.')
+    
+    # load and store new data for Attachement
+    print('-- Fetching Attachment data...', end='')
+    query_att = open('T:/Andre Bittar/Projects/CC_Eating_Disorder/CC_Eating_Disorder_get_texts_Attachment_query.sql', 'r').read()
+    df_att = fetch_dataframe(server_name, db_name, query_att)
+    df_att.rename(columns={'BrcId': 'brcid', 'CN_Doc_ID': 'cn_doc_id', 'ViewDate': 'viewdate', 'Attachment_Text': 'text_content'}, inplace=True)
+    df_att = df_att.loc[~df_att.cn_doc_id.isin(df.cn_doc_id)]
+    print('Done.')
+    
+    # load and store new data for Event
+    print('-- Fetching Event data...', end='')
+    query_evt = open('T:/Andre Bittar/Projects/CC_Eating_Disorder/CC_Eating_disorder_get_texts_Event_query.sql', 'r').read()
+    df_evt = fetch_dataframe(server_name, db_name, query_evt)
+    df_evt.rename(columns={'BrcId': 'brcid', 'CN_Doc_ID': 'cn_doc_id', 'ViewDate': 'viewdate', 'Comments': 'text_content'}, inplace=True)
+    df_evt = df_evt.loc[~df_evt.cn_doc_id.isin(df.cn_doc_id)]
+    print('Done.')
+    
+    df_new = pd.concat([df_att, df_evt])
+    df_new.reset_index(drop=True, inplace=True)
+    
+    del df_att
+    del df_evt
+    
+    now = datetime.datetime.now().strftime('%Y%m%d')
+    new_p = 'T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_DSH_new_' + now + '.pickle'
+    df_new.to_pickle(new_p)
+    
+    print('-- Processing...')
+    df_new = process(new_p, check_counts=False, check_temporality=False)
+    df_new.to_pickle(new_p)
+    
+    # now merge the latest column from df with the new one from df_new
+    latest_key = [t for t in sorted(list(df.columns)) if '_notmp' in t][-1]
+    df_tmp = df[['brcid', 'cn_doc_id', 'viewdate', 'text_content', 'age', latest_key]]
+    df_tmp.rename(columns={latest_key: 'dsh_' + now + '_notmp'}, inplace=True)
+    
+    # TODO do the merge
+    
+    # output an Excel spreadsheet with flagged patients
+    df_flags = pd.DataFrame(columns=['brcid', 'dsh'])
+    for g in df_tmp.groupby('brcid'):
+        brcid = g[0]
+        flag = False
+        for i, row in g[1].iterrows():
+            if row['dsh_20200128_notmp'] == True:
+                tmp = pd.DataFrame({'brcid': [brcid], 'dsh': [True]})
+                df_flags = pd.concat([df_flags, tmp])
+                flag = True
+                break
+        if flag == False:
+            tmp = pd.DataFrame({'brcid': [brcid], 'dsh': [False]})
+            df_flags = pd.concat([df_flags, tmp])
+    
+    df_flags.to_excel('T:/Andre Bittar/Projects/CC_Eating_Disorder/flagged_patients_updated_cohort' + now + '.xlsx')
+    
+    return df_flags
+
+
 def process(pin, check_counts=True, check_temporality=True):
     """
-    Runs on a DataFrame that contains the text for each file.
+    Run dsh_annotator on a DataFrame that contains the text for each file.
     Outputs True for documents with relevant mention.
     Does not write new XML.
     All saved to the DataFrame.

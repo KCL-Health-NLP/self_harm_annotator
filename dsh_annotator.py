@@ -49,13 +49,18 @@ FWD_OFFSET = 10
 BWD_OFFSET = 10
 
 class DSHAnnotator:
+    """
+    Deliberate Self-Harm (DSH) annotator
+    
+    Annotate mentions of deliberate self-harm (DSH) in clinical texts.
+    """
 
     def __init__(self, verbose=False):
         """
-        Deliberate Self-Harm (DSH) annotator
+        Create a new DSHAnnotator instance.
         
         Arguments:
-            - verbose: boolean; print all messages if True, else only default messages
+            - verbose: bool; print all messages if True, else only default messages.
         """
         print('DSH annotator')
         self.nlp = spacy.load('en_core_web_sm', disable=['ner'])
@@ -104,12 +109,12 @@ class DSHAnnotator:
         Load a lexicon/terminology file for annotation.
         
         Arguments:
-            - path: string; the path to the lexicon file
-            - source_attribute: spaCy symbol; the token attribute to match 
-              on (e.g .LEMMA)
+            - path: str; the path to the lexicon file.
+            - source_attribute: spaCy symbol; the token attribute to match
+              on (e.g. LEMMA).
             - target_attribute: spaCy symbol; the token attribute to add the 
-              lexical annotations to (e.g. TAG, or custom attribute LA, DSH)
-            - merge: boolean; merge annotated spans into a single span
+              lexical annotations to (e.g. TAG, or custom attribute LA, DSH).
+            - merge: bool; merge annotated spans into a single span.
         """
         print(path, source_attribute, target_attribute, merge)
         if source_attribute == LEMMA:
@@ -122,8 +127,8 @@ class DSHAnnotator:
     def load_pronoun_lemma_corrector(self):
         """
         Load a pipeline component to convert spaCy pronoun lemma (-PRON-) into
-        the corresponding word form
-        e.g. ORTH=her LEMMA=-PRON- -> ORTH=her, LEMMA=her
+        the corresponding word form,
+        e.g. ORTH=her LEMMA=-PRON- -> ORTH=her, LEMMA=her.
         """
         component = LemmaCorrector()
         pipe_name = component.name
@@ -152,21 +157,21 @@ class DSHAnnotator:
         a file.
         
         Arguments:
-            - path: string; the path to the file containing detokenization rules
+            - path: str; the path to the file containing detokenization rules.
         """
         print('-- Detokenizer')
         self.nlp = Detokenizer(self.nlp).load_detokenization_rules(path, verbose=self.verbose)
 
     def load_token_sequence_annotator(self, name):
         """
-        Load a token sequence annotator pipeline component
+        Load a token sequence annotator pipeline component.
         TODO allow for multiple annotators, cf. lemma and lexical annotators.
         TODO add path argument to specify rule file.
         
         Arguments:
-            - name: string; the name of the token sequence annotator - this 
+            - name: str; the name of the token sequence annotator - this 
                     *must* be the name (without the .py extension) of the file
-                    containing the token sequence rules
+                    containing the token sequence rules.
         """
         tsa = TokenSequenceAnnotator(self.nlp, name, verbose=self.verbose)
         if tsa.name not in self.nlp.pipe_names:
@@ -174,36 +179,36 @@ class DSHAnnotator:
 
     def get_text(self):
         """
-        Return the text of the current annotator instance
+        Return the text of the current annotator instance.
         
         Return:
-            - text: string; the text of the document being processed
+            - text: str; the text of the document being processed.
         """
         return self.text
 
     def normalise(self, text):
         """
-        Normalise the text
-        TODO: Add normalisation rules if we want to clean things up first
+        Normalise the text.
+        # TODO: Add normalisation rules if we want to clean things up first.
         
         Arguments:
-            - text: string; the text to be normalised
+            - text: str; the text to be normalised.
         
         Return:
-            - text: string; the normalised text
+            - text: str; the normalised text.
         """
         text = re.sub(' +', ' ', text)
         return text
 
     def annotate_text(self, text):
         """
-        Annotate a text string
+        Annotate a text string.
         
         Arguments:
-            - text: string; the text to annotate
+            - text: str; the text to annotate.
         
         Return:
-            - doc: spaCy Doc; the annotated Doc object
+            - doc: spaCy Doc; the annotated Doc object.
         """
         self.text = text
         doc = self.nlp(text)
@@ -211,13 +216,13 @@ class DSHAnnotator:
 
     def annotate_file(self, path):
         """
-        Annotate the contents of a text file
+        Annotate the contents of a text file.
         
         Arguments:
-            - path: string; the path to a text file to annotate
+            - path: str; the path to a text file to annotate.
         
         Return:
-            - doc: spacy Doc; the annotated Doc object
+            - doc: spacy Doc; the annotated Doc object.
         """
         # TODO check for file in input
         # TODO check encoding
@@ -234,13 +239,13 @@ class DSHAnnotator:
 
     def has_negation_ancestor(self, curr_token, verbose=False):
         """
-        Search the dependency tree for a negation marker
+        Search the dependency tree for a negation marker.
         
         Arguments:
-            - curr_token: spaCy Token; the token to start searching from
-            - verbose: boolean; print all messages if True, else only default messages
+            - curr_token: spaCy Token; the token to start searching from.
+            - verbose: bool; print all messages if True, else only default messages.
         
-        Return: boolean; True if negation found, else False
+        Return: bool; True if negation found, else False.
         """
         if verbose:
             print('-- Detecting negations...', curr_token)
@@ -281,13 +286,13 @@ class DSHAnnotator:
     def has_historical_ancestor(self, curr_token, verbose=False):
         """
         Search the dependency tree for an ancestor of the current node that is
-        a marker of historical temporality
+        a marker of historical temporality.
         
         Arguments:
-            - curr_token: spaCy Token; the token to start searching from
-            - verbose: boolean; print all messages if True, else only default messages
+            - curr_token: spaCy Token; the token to start searching from.
+            - verbose: bool; print all messages if True, else only default messages.
         
-        Return: boolean; True if historical marker found, else False
+        Return: bool; True if historical marker found, else False.
         """
         if verbose:
             print('-- Detecting historical ancestors...', curr_token)
@@ -303,13 +308,13 @@ class DSHAnnotator:
     def has_historical_dependent(self, curr_token, verbose=False):
         """
         Search the dependency tree for an dependent of the current node that is
-        a marker of historical temporality
+        a marker of historical temporality.
 
         Arguments:
-            - curr_token: spaCy Token; the token to start searching from
-            - verbose: boolean; print all messages if True, else only default messages
+            - curr_token: spaCy Token; the token to start searching from.
+            - verbose: bool; print all messages if True, else only default messages.
         
-        Return: boolean; True if historical marker found, else False
+        Return: bool; True if historical marker found, else False.
         """
         if verbose:
             print('-- Detecting historical modifiers...', curr_token)
@@ -335,13 +340,13 @@ class DSHAnnotator:
     def has_hedging_ancestor(self, curr_token, verbose=True):
         """
         Search the dependency tree for an ancestor of the current node that is
-        a marker of hedging
+        a marker of hedging.
         
         Arguments:
-            - curr_token: spaCy Token; the token to start searching from
-            - verbose: boolean; print all messages if True, else only default messages
+            - curr_token: spaCy Token; the token to start searching from.
+            - verbose: bool; print all messages if True, else only default messages.
         
-        Return: boolean; True if hedging marker found, else False
+        Return: bool; True if hedging marker found, else False.
         """
         if curr_token._.HEDGING == 'HEDGING':
             return True
@@ -355,13 +360,13 @@ class DSHAnnotator:
     def has_hedging_dependent(self, curr_token, verbose=True):
         """
         Search the dependency tree for an dependent of the current node that is
-        a marker of hedging
+        a marker of hedging.
 
         Arguments:
-            - curr_token: spaCy Token; the token to start searching from
-            - verbose: boolean; print all messages if True, else only default messages
+            - curr_token: spaCy Token; the token to start searching from.
+            - verbose: bool; print all messages if True, else only default messages.
         
-        Return: boolean; True if hedging marker found, else False
+        Return: bool; True if hedging marker found, else False.
         """
         for child in curr_token.children:
             if child._.HEDGING == 'HEDGING':
@@ -373,14 +378,14 @@ class DSHAnnotator:
     def has_hedging_noun_previous(self, doc, i, verbose=False):
         """
         Search for a hedging noun in the preceding tokens within the current
-        sentence
+        sentence.
         
         Arguments:
-            - doc: spaCy Doc; the current Doc object
-            - i: integer; the token index in the current Doc object to 
-                 search from
+            - doc: spaCy Doc; the current Doc object.
+            - i: int; the token index in the current Doc object to 
+                 search from.
         
-        Return: boolean; True if hedging noun found, else False
+        Return: bool; True if hedging noun found, else False.
         """
         start = doc[i].sent.start
         end = doc[i].i
@@ -403,25 +408,25 @@ class DSHAnnotator:
     
     def has_past_tense_governor(self, curr_token):
         """
-        Check if the current token's governor is a past tense verb
-        WARNING: This had a disastrous effect on results; not in use
+        Check if the current token's governor is a past tense verb.
+        WARNING: This had a disastrous effect on results; not in use.
         
         Arguments:
-            - curr_token: spacy Token; the current token
+            - curr_token: spacy Token; the current token.
         
-        Return: boolean; True if past tense governor found, else False
+        Return: bool; True if past tense governor found, else False.
         """
         return curr_token.head.tag_ in ['VBD', 'VBN', 'VHD', 'VHN', 'VVD', 'VVN']
     
     def has_propatt_ancestor(self, curr_token):
         """
         Search the dependency tree for a propositional attitude ancestor of the
-        current token
+        current token.
         
         Arguments:
-            - curr_token: spaCy Token; the token to start searching from
+            - curr_token: spaCy Token; the token to start searching from.
         
-        Return: boolean; True if propositional attitude marker found, else False
+        Return: bool; True if propositional attitude marker found, else False.
         """
         if curr_token.head.pos_ == 'VERB':
             if curr_token.head.lemma_ in ['believe', 'desire', 'dream', 'feel', 'imagine', 'think', 'want', 'wish', 'wonder']:
@@ -444,13 +449,13 @@ class DSHAnnotator:
     
     def is_reported_speech(self, curr_token):
         """
-        Check if the current token's governor is a reported speech verb
-        NOTE: not in use
+        Check if the current token's governor is a reported speech verb.
+        NOTE: not in use.
         
         Arguments:
-            - curr_token: spacy Token; the current token
+            - curr_token: spacy Token; the current token.
         
-        Return: boolean; True if reported speech verb found, else False
+        Return: bool; True if reported speech verb found, else False.
         """
         if curr_token.head._.RSPEECH == 'TRUE':
             return True
@@ -463,14 +468,13 @@ class DSHAnnotator:
     
     def is_section_header(self, doc, i, verbose=True):
         """
-        Check if a given position in the document is part of a section header
+        Check if a given position in the document is part of a section header.
         
         Arguments:
-            - doc: spaCy Doc; the current Doc object
-            - i: integer; the token index in the current Doc object to 
-                search from
+            - doc: spaCy Doc; the current Doc object.
+            - i: int; the token index in the current Doc object to search from.
 
-        Return: boolean; True if section header, else False
+        Return: bool; True if section header, else False.
         """
         cur_sent = doc[i].sent
         end = len(cur_sent) - 1
@@ -481,13 +485,13 @@ class DSHAnnotator:
     
     def is_singleton(self, doc, i):
         """
-        Check if the token at a specified index is the only one in the sentence
+        Check if the token at a specified index is the only one in the sentence.
         
         Arguments:
-            - doc: spaCy Doc; the current Doc object
-            - i: integer; the token index in the current Doc object to check
+            - doc: spaCy Doc; the current Doc object.
+            - i: int; the token index in the current Doc object to check.
         
-        Return: boolean; True if section header, else False
+        Return: bool; True if section header, else False.
         """
         if doc[i].text == doc[i].sent.text:
             return True
@@ -496,13 +500,13 @@ class DSHAnnotator:
     def is_definite(self, doc, i):
         """
         Check if the token at a specified position governs a definite or 
-        possessive determiner
+        possessive determiner.
         
         Arguments:
-            - doc: spaCy Doc; the current Doc object
-            - i: integer; the token index in the current Doc object to check
+            - doc: spaCy Doc; the current Doc object.
+            - i: int; the token index in the current Doc object to check.
         
-        Return: boolean; True if definite or possessive determiner found, else False
+        Return: bool; True if definite or possessive determiner found, else False.
         """
         for child in doc[i].children:
             if child.lemma_ in ['the', 'this', 'that', 'her']:
@@ -513,15 +517,15 @@ class DSHAnnotator:
         """
         Using previously added annotations, calculate the attribute values for 
         all detected mentions, and determine whether the document has a history
-        section
+        section.
         
         Arguments:
-            - doc: spaCy Doc; the current Doc object
-            - verbose: boolean; print all messages if True, else only default messages
+            - doc: spaCy Doc; the current Doc object.
+            - verbose: bool; print all messages if True, else only default messages.
         
         Return:
-            - has_history_section: boolean; True if a history section was detected
-                                   in the document, else False
+            - has_history_section: bool; True if a history section was detected
+                                   in the document, else False.
         
         """
         # Hack: get attributes from window of 5 tokens before DSH mention
@@ -645,25 +649,25 @@ class DSHAnnotator:
 
     def merge_spans(self, doc):
         """
-        Merge all longest matching DSH token sequences into single spans
+        Merge all longest matching DSH token sequences into single spans.
         
         Arguments:
-            - doc: spaCy Doc; the current Doc object
+            - doc: spaCy Doc; the current Doc object.
         
         Return:
-            - doc: spaCy Doc; the current Doc object with merged longest spans
+            - doc: spaCy Doc; the current Doc object with merged longest spans.
         """
 
         def get_longest_spans(offsets):
             """
-            Get a unique list of all overlapping span offsets
+            Get a unique list of all overlapping span offsets.
             
             Arguments:
-                - offsets: list; the list of offsets
+                - offsets: list; the list of offsets.
             
             Return:
                 - offsets: list; the list of offsets sorted in decreasing order
-                           of difference between start and end
+                           of difference between start and end.
             """
             overlaps = {}
             for offset in offsets:
@@ -712,12 +716,12 @@ class DSHAnnotator:
     def print_tokens(self, doc, path):
         """
         Output all tokens in CoNLL-style token annotations to stdout and write 
-        to file
+        to file.
         
         Arguments:
-            - doc: spaCy Doc; the current Doc object
-            - path: string; the file path to write output to (will overwrite 
-                    any existing file)
+            - doc: spaCy Doc; the current Doc object.
+            - path: str; the file path to write output to (will overwrite 
+                    any existing file).
         """
         with open(path, 'w') as fout:
             for token in doc:
@@ -765,14 +769,14 @@ class DSHAnnotator:
 
     def build_ehost_output(self, doc):
         """
-        Construct a dictionary representation of all annotations
+        Construct a dictionary representation of all annotations.
 
         Arguments:
-            - doc: spacy Doc; the processed spaCy Doc object
+            - doc: spacy Doc; the processed spaCy Doc object.
         
         Return:
             - mentions: dict; a dictionary containing all annotations ready for
-                        output in eHOST XML format
+                        output in eHOST XML format.
         """
         mentions = {}
         n = 1
@@ -844,12 +848,12 @@ class DSHAnnotator:
         Write an annotated eHOST XML file to disk.
         
         Arguments:
-            - pin: string; the input file path (must be in eHOST directory structure)
-            - annotations: dict; the dictionary of detected annotations
-            - verbose: boolean; print all messages if True, else only default messages
+            - pin: str; the input file path (must be in eHOST directory structure).
+            - annotations: dict; the dictionary of detected annotations.
+            - verbose: bool; print all messages if True, else only default messages.
         
         Return:
-            - root: Element; the root node of the new XML ElementTree object
+            - root: Element; the root node of the new XML ElementTree object.
         """
         ehost_pout = os.path.splitext(pin.replace('corpus', 'saved'))[0] + '.txt.knowtator.xml'
 
@@ -951,7 +955,7 @@ class DSHAnnotator:
         try:
             pxmlstr = parseString(xmlstr)
         except ExpatError as e:
-            with open('Z:/Andre Bittar/Projects/KA_Self-harm/data/batch_err.log', 'a') as b_err:
+            with open('./batch_err.log', 'a') as b_err:
                 print('Unable to create XML file:', ehost_pout, file=b_err)
             b_err.close()
             return root
@@ -959,10 +963,10 @@ class DSHAnnotator:
         if verbose:
             print(pxmlstr.toprettyxml(indent='\t'), file=sys.stderr)
 
-        # Write to file
-        #tree = ET.ElementTree(root)
-        #tree.write(ehost_pout, encoding="utf-8", xml_declaration=True)
-        open(ehost_pout, 'w').write(pxmlstr.toprettyxml(indent='\t'))
+        with open(ehost_pout, 'w') as fout:
+            fout.write(pxmlstr.toprettyxml(indent='\t'))
+        fout.close()
+
         if verbose:
             print('-- Wrote EHOST file: ' + ehost_pout, file=sys.stderr)
 
@@ -973,12 +977,12 @@ class DSHAnnotator:
         Process a single document or directory structure.
         
         Arguments:
-            - path: string; indicates text file or directory to process. If a directory, the
+            - path: str; indicates text file or directory to process. If a directory, the
                 structure must be that used by the eHOST annotation tool.
-            - write_output: boolean; save the annotated output to file.
+            - write_output: bool; save the annotated output to file.
         
         Return:
-            - global_mentions: dict; a dictionary containing all annotated mentions
+            - global_mentions: dict; a dictionary containing all annotated mentions.
         """
         global_mentions = {}
 
@@ -1053,14 +1057,14 @@ class DSHAnnotator:
 
     def process_text(self, text, text_id, write_output=False, verbose=False):
         """
-        Process a text string
+        Process a text string.
         
         Arguments:
-            - text: string; the input text
-            - text_id: string; a user-defined identifier for the text
+            - text: str; the input text.
+            - text_id: str; a user-defined identifier for the text.
 
         Return:
-            - global_mentions: dict; a dictionary containing all annotated mentions
+            - global_mentions: dict; a dictionary containing all annotated mentions.
         """
         self.verbose = verbose
         if self.verbose:

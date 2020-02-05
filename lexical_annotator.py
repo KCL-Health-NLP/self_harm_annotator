@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Aug  3 11:49:14 2018
+    Lexical Annotator
+    
+    This is a spaCy pipeline component to add lexical annotations to tokens in 
+    a document according to a specified external lexicon file. A lexicon file
+    is loaded when the component is added to the pipeline and applied when the 
+    pipeline is executed.
+    
+    # TODO factorise these classes into a single AnnotatorSequence parent and 
+    # various child classes that implement load_lexicon() and other methods
+    # TODO implement TokenSequenceAnnotator
 
-@author: ABittar
 """
 
 import spacy
@@ -12,16 +20,35 @@ from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, Token
 from spacy.symbols import LEMMA, LOWER
 
-# TODO factorise these classes into a single AnnotatorSequence parent and 
-# various child classes that implement load_lexicon and other methods
+__author__ = "André Bittar"
+__copyright__ = "Copyright 2020, André Bittar"
+__credits__ = ["André Bittar"]
+__license__ = "GPL"
+__email__ = "andre.bittar@kcl.ac.uk"
 
 
 class LexicalAnnotatorSequence(object):
     """
-    Creates a set of new pipeline components that annotate tokens accoring to
-    a terminology list. Match is only performed on textual surface form.
+    Lexical Annotator Sequence
+    
+    Create a set of new pipeline components that annotate tokens according to
+    a word list provided in an external file. Match is only performed on textual
+    surface form.
     """
+    
     def __init__(self, nlp, pin, source_attribute, target_attribute, merge=False):
+        """
+        Create a new LexicalAnnotatorSequence instance.
+        
+        Arguments:
+            - nlp: spaCy Language; a spaCy text processing pipeline instance.
+            - pin: str; the input path of a lexical rule file.
+            - source_attribute: spaCy symbol; the token attribute to match
+              on (e.g. LEMMA).
+            - target_attribute: spaCy symbol; the token attribute to add the 
+              lexical annotations to (e.g. TAG, or custom attribute LA, DSH).
+            - merge: bool; merge annotated spans into a single span.
+        """
         self.nlp = nlp
         self.pin = pin
         self.source_attribute = source_attribute
@@ -30,6 +57,9 @@ class LexicalAnnotatorSequence(object):
         self.merge = merge
 
     def load_lexicon(self):
+        """
+        Load the lexical rules from the input file.
+        """
         n = 1
         with open(self.pin, 'r') as fin:
             for line in fin:
@@ -47,12 +77,32 @@ class LexicalAnnotatorSequence(object):
         fin.close()
 
     def get_labels(self):
+        """
+        Get the labels.
+        
+        Return: dict_keys; the labels that are added to matched tokens.
+        """
         return self.annotation_rules.keys()
 
     def get_annotation_rules(self):
+        """
+        Get the annotation rules.
+        
+        Return: dict; a dictionary containing all loaded lexical annotation rules.
+        """
         return self.annotation_rules
 
     def add_components(self, merge=False):
+        """
+        Add components to the pipeline.
+        
+        Arguments:
+            - merge: bool; merge annotated spans into a single span.
+
+        Return:
+            - self.nlp: spaCy Lang; the loaded spaCy pipeline object with added 
+                        annotation rules.
+        """
         for label in self.annotation_rules:
             terms = self.annotation_rules[label]
 
@@ -72,11 +122,27 @@ class LexicalAnnotatorSequence(object):
 
 class LexicalAnnotator(object):
     """
-    Initialises a single new component that annotates tokens accoring to a 
-    terminology list. Match is only performed on textual surface form.
+    Lexical Annotator
+    
+    Initialises a single new spaCy pipeline component that annotates tokens 
+    accoring to a word list. Match is only performed on textual surface form.
     """
     
     def __init__(self, nlp, terms, source_attribute, target_attribute, label, name, merge=False):
+        """
+        Create a new LexicalAnnotator instance.
+        
+        Arguments:
+            - nlp: spaCy Language; a spaCy text processing pipeline instance.
+            - terms: list; the terms to be annotated.
+            - source_attribute: spaCy symbol; the token attribute to match
+              on (e.g. LEMMA).
+            - target_attribute: spaCy symbol; the token attribute to add the 
+              lexical annotations to (e.g. TAG, or custom attribute LA, DSH).
+            - label: str; the label to add to the tokens' target attribute.
+            - name: str; the name of the pipeline component.
+            - merge: bool; merge annotated spans into a single span.
+        """
         self.name = name
         self.nlp = nlp
         self.label = label  # get entity label ID
@@ -122,6 +188,15 @@ class LexicalAnnotator(object):
         return doc
 
     def check_entity_overlap(self, doc, entity):
+        """
+        Check the document for overlapping entities.
+        
+        Arguments:
+            - doc: spaCy Doc; a spaCy document instance.
+            - entity: spaCy Span; an entity span to check for overlap.
+        
+        Return: bool; True if entities are foudn that overlap with entity, else False
+        """
         ent_offsets = [(ent.start, ent.end) for ent in doc.ents]
         for (start, end) in ent_offsets:
             # no overlap, no problem
@@ -142,7 +217,12 @@ class LexicalAnnotator(object):
     def get_longest_matches(self, matches):
         """
         Remove all shortest matching overlapping spans.
-        :return: matches list of all longest matches only
+        
+        Arguments:
+            - matches: list; a list of matched entities.
+        
+        Return:
+            - matches: list; all longest matches only.
         """
         offsets = [(match[1], match[2]) for match in matches]
         overlaps = {}
@@ -168,10 +248,23 @@ class LexicalAnnotator(object):
 
 class LemmaAnnotatorSequence(object):
     """
-    Creates a set of new pipeline components that annotate tokens accoring to
-    a terminology list. Match is only performed on token lemma.
+    Lemma Annotator Sequence
+    
+    Creates a set of new spaCy pipeline components that annotate tokens accoring
+    to a word list. Match is only performed on token lemma.
     """
     def __init__(self, nlp, pin, attribute, ignore_case=True, merge=False):
+        """
+        Create a new LemmaAnnotatorSequence instance.
+        
+        Arguments:
+            - nlp: spaCy Language; a spaCy text processing pipeline instance.
+            - pin: str; the input path of a lexical rule file.
+            - attribute: spaCy symbol; the token attribute to add the lexical 
+                         annotations to (e.g. TAG, or custom attribute LA, DSH).
+            - ignore_case: bool; make matching case-insensitive
+            - merge: bool; merge annotated spans into a single span.
+        """
         self.nlp = nlp
         self.pin = pin
         self.attribute = attribute
@@ -180,6 +273,9 @@ class LemmaAnnotatorSequence(object):
         self.merge = merge
 
     def load_lexicon(self):
+        """
+        Load the lexical rules from the input file.
+        """
         n = 1
         with open(self.pin, 'r') as fin:
             for line in fin:
@@ -198,12 +294,32 @@ class LemmaAnnotatorSequence(object):
         fin.close()
 
     def get_labels(self):
+        """
+        Get the labels.
+        
+        Return: dict_keys; the labels that are added to matched tokens.
+        """
         return self.annotation_rules.keys()
 
     def get_annotation_rules(self):
+        """
+        Get the annotation rules.
+        
+        Return: dict; a dictionary containing all loaded lexical annotation rules.
+        """
         return self.annotation_rules
 
     def add_components(self):
+        """
+        Add component to the pipeline.
+        
+        Arguments:
+            - merge: bool; merge annotated spans into a single span.
+            
+        Return:
+            - self.nlp: spaCy Lang; the loaded spaCy pipeline object with added 
+                        annotation rules
+        """
         for label in self.annotation_rules:
             lemma_sequences = self.annotation_rules[label]
 
@@ -222,8 +338,26 @@ class LemmaAnnotatorSequence(object):
 
 
 class LemmaAnnotator(object):
+    """
+    Lemma Annotator
+    
+    Initialises a single new spaCy pipeline component that annotates tokens 
+    according to a word list. Match is only performed on word lemma.
+    """
 
     def __init__(self, nlp, lemma_sequences, attribute, label, name, merge=False):
+        """
+        Create a new LemmaAnnotator instance.
+        
+        Arguments:
+            - nlp: spaCy Language; a spaCy text processing pipeline instance.
+            - lemma_sequences: list; the lemmas to be annotated.
+            - attribute: spaCy symbol; the token attribute to add the 
+              lexical annotations to (e.g. TAG, or custom attribute LA, DSH).
+            - label: str; the label to add to the tokens' target attribute.
+            - name: str; the name of the pipeline component.
+            - merge: bool; merge annotated spans into a single span.
+        """
         self.name = name
         self.nlp = nlp
         self.label = label
@@ -274,6 +408,15 @@ class LemmaAnnotator(object):
         return doc
 
     def check_entity_overlap(self, doc, entity):
+        """
+        Check the document for overlapping entities.
+        
+        Arguments:
+            - doc: spaCy Doc; a spaCy document instance.
+            - entity: spaCy Span; an entity span to check for overlap.
+        
+        Return: bool; True if entities are foudn that overlap with entity, else False
+        """
         ent_offsets = [(ent.start, ent.end) for ent in doc.ents]
         for (start, end) in ent_offsets:
             # no overlap, no problem
@@ -294,7 +437,12 @@ class LemmaAnnotator(object):
     def get_longest_matches(self, matches):
         """
         Remove all shortest matching overlapping spans.
-        :return: matches list of all longest matches only
+        
+        Arguments:
+            - matches: list; a list of matched entities.
+        
+        Return:
+            - matches: list; all longest matches only.
         """
         offsets = [(match[1], match[2]) for match in matches]
         overlaps = {}
@@ -319,6 +467,9 @@ class LemmaAnnotator(object):
 
 
 class TokenSequenceAnnotatorSequence(object):
+    """
+    # TODO implement
+    """
     
     def __init__(self, nlp, pin):
         pass

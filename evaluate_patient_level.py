@@ -1,14 +1,30 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Apr  4 15:21:28 2019
-
-@author: ABittar
+    This is a utility script to calculate agreement for Karyn Ayre's project.
 """
 
 from ehost_annotation_reader import convert_file_annotations, get_corpus_files, load_mentions_with_attributes
 
+__author__ = "André Bittar"
+__copyright__ = "Copyright 2020, André Bittar"
+__credits__ = ["André Bittar"]
+__license__ = "GPL"
+__email__ = "andre.bittar@kcl.ac.uk"
+
 
 def has_DSH_mention(mentions):
+    """
+    Check if a given set of annotated mentions contains a true DSH mention,
+    as per the project's definition, namely polarity=POSITIVE, status=RELEVANT,
+    temporality=CURRENT
+    
+    Arguments:
+        - mentions: dict; a dictionary containing all annotated mentions for a
+                    document
+
+    Return:
+        - bool: True if true mention is found, else False
+    """
     mentions = convert_file_annotations(mentions)
     for mention in mentions:
         polarity = mention.get('polarity', None)
@@ -23,8 +39,18 @@ def has_DSH_mention(mentions):
 
 
 def get_brcid_mapping(ctype):
-    # determine the brcids for each file in the gold standard corpus
-    # to get results use train_dev as gold and system_train_dev as system
+    """
+    Determine the BRCIDs for each file in the gold standard corpus. To get 
+    results use 'train_dev' as gold and 'system_train_dev' as system.
+    
+    Arguments:
+        - ctype: str; the corpus type ('sys' for the system annotations, 'gold'
+                 for the manually annotated corpus)
+
+    Return:
+        - brcid_mapping: dict; the mapping of BRCIDs
+        - files: list; the list of files in the corpus
+    """
     if ctype == 'gold':
         files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev')
     elif ctype == 'system':
@@ -50,6 +76,13 @@ def get_brcid_mapping(ctype):
 def evaluate_patient_level(brcid_mapping, files):
     """
     Determine patient-level performance on the gold standard corpus.
+    
+    Arguments:
+        - brcid_mapping: dict; a dictionary of BRCID mappings
+        - files: list; a list of files in a corpus
+    
+    Return:
+        - relevant_brcids: list; the list of BRCIDs for which a true DSH mention was found
     """
     
     # count relevant mentions in each file
