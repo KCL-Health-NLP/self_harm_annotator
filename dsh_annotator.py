@@ -16,9 +16,6 @@
         status  - RELEVANT or NON-RELEVANT
         temporality - CURRENT or HISTORICAL
 
-    Several methods can be called to perform annotation:
-        - TODO
-
 """
 
 import os
