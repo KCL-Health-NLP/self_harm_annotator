@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module detokenizer</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>detokenizer</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:t%3A%5Candre%20bittar%5Cworkspace%5Cdsh_annotator%5Cdetokenizer.py">t:\andre bittar\workspace\dsh_annotator\detokenizer.py</a></font></td></tr></table>
+    <p><tt><a href="#Detokenizer">Detokenizer</a><br>
+&nbsp;<br>
+This&nbsp;is&nbsp;a&nbsp;spaCy&nbsp;pipeline&nbsp;component&nbsp;to&nbsp;modify&nbsp;default&nbsp;tokenization.<br>
+New&nbsp;tokenization&nbsp;rules&nbsp;are&nbsp;specified&nbsp;in&nbsp;an&nbsp;external&nbsp;resource&nbsp;file.&nbsp;These&nbsp;<br>
+rules&nbsp;are&nbsp;loaded&nbsp;when&nbsp;the&nbsp;component&nbsp;is&nbsp;added&nbsp;to&nbsp;the&nbsp;pipeline&nbsp;and&nbsp;applied&nbsp;<br>
+when&nbsp;the&nbsp;pipeline&nbsp;is&nbsp;executed.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="os.html">os</a><br>
+</td><td width="25%" valign=top><a href="spacy.html">spacy</a><br>
+</td><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="detokenizer.html#Detokenizer">Detokenizer</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Detokenizer">class <strong>Detokenizer</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Detokenizer">Detokenizer</a>(nlp)<br>
+&nbsp;<br>
+<a href="#Detokenizer">Detokenizer</a><br>
+&nbsp;<br>
+Detokenize&nbsp;a&nbsp;text&nbsp;according&nbsp;to&nbsp;a&nbsp;set&nbsp;of&nbsp;specified&nbsp;rules.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Detokenizer-__init__"><strong>__init__</strong></a>(self, nlp)</dt><dd><tt>Create&nbsp;a&nbsp;new&nbsp;<a href="#Detokenizer">Detokenizer</a>&nbsp;instance.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;nlp:&nbsp;spaCy&nbsp;Language;&nbsp;a&nbsp;spaCy&nbsp;text&nbsp;processing&nbsp;pipeline&nbsp;instance.</tt></dd></dl>
+
+<dl><dt><a name="Detokenizer-load_detokenization_rules"><strong>load_detokenization_rules</strong></a>(self, path, verbose=False)</dt><dd><tt>Load&nbsp;rules&nbsp;to&nbsp;undo&nbsp;tokenization.<br>
+&nbsp;<br>
+Arguments:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;path:&nbsp;str;&nbsp;the&nbsp;path&nbsp;to&nbsp;the&nbsp;rule&nbsp;file<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;verbose:&nbsp;bool;&nbsp;print&nbsp;all&nbsp;messages<br>
+&nbsp;<br>
+Return:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;self.<strong>nlp</strong>:&nbsp;spaCy&nbsp;Lang;&nbsp;the&nbsp;loaded&nbsp;spaCy&nbsp;piepline&nbsp;<a href="builtins.html#object">object</a>&nbsp;with&nbsp;added&nbsp;detokenization&nbsp;rules</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>LEMMA</strong> = 73<br>
+<strong>LOWER</strong> = 66<br>
+<strong>ORTH</strong> = 65<br>
+<strong>POS</strong> = 74<br>
+<strong>TAG</strong> = 75<br>
+<strong>__copyright__</strong> = 'Copyright 2020, André Bittar'<br>
+<strong>__email__</strong> = 'andre.bittar@kcl.ac.uk'<br>
+<strong>__license__</strong> = 'GPL'</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">André&nbsp;Bittar</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#7799ee">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Credits</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">['André&nbsp;Bittar']</td></tr></table>
+</body></html>
