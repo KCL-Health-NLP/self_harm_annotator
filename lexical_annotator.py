@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    Lexical Annotator
+    Lexical Annotators
     
     This is a spaCy pipeline component to add lexical annotations to tokens in 
     a document according to a specified external lexicon file. A lexicon file

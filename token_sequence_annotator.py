@@ -1,8 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Aug  3 15:44:07 2018
-
-@author: ABittar
+    Token Sequence Annotator
+    
+    This is a spaCy pipeline component that loads token sequence annotation
+    rules specified in an external grammar file (Python script the is imported).
+    Rules match tokens on (linguistic) attributes and annotations are added to
+    matching sequences.
+    
+    See sthe following spaCy documentation for further implementation details:
+    - rule-based matching: https://spacy.io/usage/rule-based-matching
+    - custom extension attributes: https://spacy.io/usage/processing-pipelines#custom-components-attributes
+    
+    # TODO remove use of hard-coded conditional imports to load rule files.
+    # Replace this with a grammar rule parser (e.g. PLY).
 """
 
 import spacy
@@ -14,7 +24,7 @@ from spacy.tokens import Span
 # Ad hoc import selection
 
 # This is an ad hoc workaround to avoid trying to overwrite default attributes
-# TODO Find a better, cleaner solution
+# TODO Find a better, cleaner solution as this will not apply to version changes
 DEFAULT_ATTRIBUTES = ['DEP', 'HEAD', 'IS_ALPHA', 'IS_ASCII', 'IS_BRACKET', 
                       'IS_CURRENCY', 'IS_DIGIT', 'IS_LEFT_PUNCT', 'IS_LOWER',
                       'IS_OOV', 'IS_PUNCT', 'IS_QUOTE', 'IS_RIGHT_PUNCT',
@@ -25,12 +35,29 @@ DEFAULT_ATTRIBUTES = ['DEP', 'HEAD', 'IS_ALPHA', 'IS_ASCII', 'IS_BRACKET',
 
 
 class TokenSequenceAnnotator(object):
+    """
+    Token Sequence Annotator
+    
+    Initialises a single new spaCy pipeline component that annotates tokens 
+    according to a set of grammar rules specified in an external file.
+    """
 
     def __init__(self, nlp, name, verbose=True):
+        """
+        Create a new TokenSequenceAnnotator instance.
+        
+        Arguments:
+            - nlp: spaCy Language; a spaCy text processing pipeline instance.
+            - name: str; the name suffix of the component.
+            - verbose: bool; print all messages
+        """
         self.name = 'token_sequence_annotator_' + name
-        # filthy conditional import while we aren't parsing rule files
+        # using conditional import while waiting to implement gramar parser
         self.rules = []
-        if name == 'level0':
+        if name == 'test':
+            from resources.token_sequence_rules_test import TEST_RULES
+            self.rules = TEST_RULES
+        elif name == 'level0':
             from resources.token_sequence_rules import RULES
             self.rules = RULES
         elif name == 'level1':
@@ -54,14 +81,11 @@ class TokenSequenceAnnotator(object):
         self.verbose = verbose
 
     def __call__(self, doc):
-        """
-        :param doc: the current spaCy document object
-        :return: the matches
-        """
         if self.verbose:
             print('-- Token sequence annotator:', self.name)
         
-        # clear matches - this is required as we initialise this component only once and matches from previous documents need to be erased
+        # clear matches - this is required as we initialise this component only
+        # once and matches from previous documents need to be erased
         self.matches = {}
         
         for rule in self.rules:
@@ -118,13 +142,12 @@ class TokenSequenceAnnotator(object):
         return doc
     
     def load_rules(self):
-        # TODO this is where we need to parse the rule file - specify path as an argument
+        # TODO write grammar parser
         pass
 
     def get_longest_matches(self):
         """
         Remove all shortest matching overlapping spans.
-        :return: None
         """
 
         def get_overlapping_spans(spans):
@@ -151,18 +174,19 @@ class TokenSequenceAnnotator(object):
                 for ss in shortest_spans:
                     # avoid trying to remove a span more than once
                     if ss in all_spans:
-                        #print(ss, file=sys.stderr)
                         all_spans.pop(ss)
 
     def add_annotation(self, doc, matches, rule_name, rule_avm):
         """
         Add annotations to the specified tokens in a match.
-        Does not work with operators.
-        :param doc: the spaCy document object
-        :param matches: the matches
-        :param rule_avm: the attribute-value pair dictionary specified in the annotation rule
-        :param merge: merge matched spans or not
-        :return: None
+        NOTE: does not work with operators.
+        
+        Arguments:
+            - doc: spaCy Doc; the current spaCy document object.
+            - matches: list; the matched token sequences
+            - rule_avm: dict; the attribute-value pair dictionary specified in
+                        the annotation rule
+            - merge: bool; merge matched spans
         """
         # TODO this is really ugly, tidy it up
         for match in matches:
@@ -179,8 +203,7 @@ class TokenSequenceAnnotator(object):
                         token = span[j]
                         val = new_annotations[new_attr]
                         if new_attr in DEFAULT_ATTRIBUTES:
-                            # TODO check if modification of built-in attributes is possible
-                            print('  -- Warning: cannot modify built-in attribute', new_attr, file=sys.stderr)
+                            print('  -- Warning: cannot modify built-in attribute', new_attr, ' in rule', rule_name, file=sys.stderr)
                         else:
                             token._.set(new_attr, val)
             else:
@@ -191,8 +214,7 @@ class TokenSequenceAnnotator(object):
                         token = span[len(span) - 1]
                         val = new_annotations[new_attr]
                         if new_attr in DEFAULT_ATTRIBUTES:
-                            # TODO check if modification of built-in attributes is possible
-                            print('  -- Warning: cannot modify built-in attribute', new_attr, file=sys.stderr)
+                            print('  -- Warning: cannot modify built-in attribute', new_attr, ' in rule', rule_name,  file=sys.stderr)
                         else:
                             token._.set(new_attr, val)
 
@@ -208,12 +230,17 @@ class TokenSequenceAnnotator(object):
                                     token = span[j]
                                     val = new_annotations[new_attr]
                                     if new_attr in DEFAULT_ATTRIBUTES:
-                                        # TODO check if modification of built-in attributes is possible
-                                        print('  -- Warning: cannot modify built-in attribute', new_attr, file=sys.stderr)
+                                        print('  -- Warning: cannot modify built-in attribute', new_attr, ' in rule', rule_name,  file=sys.stderr)
                                     else:
                                         token._.set(new_attr, val)
 
     def print_spans(self, doc):
+        """
+        Output all spans in CoNLL-style token annotations to stdout
+
+        Arguments:
+            - doc: spaCy Doc; the current Doc object
+        """
         s = '\n'
         s += '{:<10}{:<10}{:<10}{:<10}{:<10}'.format('INDEX', 'WORD', 'LEMMA', 'POS1', 'POS2')
 
@@ -246,7 +273,8 @@ class TokenSequenceAnnotator(object):
 if __name__ == '__main__':
     nlp = spacy.load('en_core_web_sm')
 
-    text = 'This self-harm has not been done by Elizabeth Callaghan who cut her arm and cut her legs. I will be very very very happy. I have apple and banana'
+    text = 'No signs of self-harm reported by patient, but her mother cut her arm and \
+    cut her legs. I will be very very very happy. I have apples and bananas.'
 
     tsa = TokenSequenceAnnotator(nlp, 'test')
     nlp.add_pipe(tsa)
