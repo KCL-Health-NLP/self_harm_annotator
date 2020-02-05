@@ -1100,14 +1100,21 @@ class DSHAnnotator:
 
 
 class LemmaCorrector(object):
+    """
+    Lemma Corrector
+    
+    Replace spaCy's default lemma for relevant pronouns and other words.
+    """
+
     def __init__(self):
         """
-        Lemma Corrector
+        Create a new LemmaCorrector instance.
         """
         self.name = 'pronoun_lemma_corrector'
 
     def __call__(self, doc):
         for token in doc:
+            # relevant pronouns for peri-natal study
             if token.lower_ in ['she', 'her', 'herself', 'themselves']:
                 token.lemma_ = token.lower_
             if token.lower_ == 'overdoses':
@@ -1116,9 +1123,15 @@ class LemmaCorrector(object):
 
 
 class DateTokenAnnotator(object):
+    """
+    Date Token Annotator
+    
+    Annotate specific and easily matched date patterns.
+    """
+
     def __init__(self):
         """
-        Date Token Annotator
+        Create a new DateTokenAnnotator instance.
         """
         self.name = 'date_token_annotator'
 
