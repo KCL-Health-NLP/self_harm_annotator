@@ -18,6 +18,7 @@
 
 """
 
+import argparse
 import os
 import re
 import spacy
@@ -755,14 +756,14 @@ class DSHAnnotator:
         for a in cext:
             s += '{:<10}'.format('-' * len(a))
 
-        print(s)
+        print(s, file=sys.stderr)
         
         for token in doc:
             s = '{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}'.format(token.i, token.text, token.lemma_, token.lower_, token.tag_, token.pos_, token.head.i, token.dep_)
             for a in cext:
                 val = token._.get(a)
                 s += '{:10}'.format(val or '_')
-            print(s)
+            print(s, file=sys.stderr)
 
     def build_ehost_output(self, doc):
         """
@@ -965,7 +966,7 @@ class DSHAnnotator:
         fout.close()
 
         if verbose:
-            print('-- Wrote EHOST file: ' + ehost_pout, file=sys.stderr)
+            print('-- Wrote eHOST file: ' + ehost_pout, file=sys.stderr)
 
         return root
 
@@ -1147,15 +1148,33 @@ class DateTokenAnnotator(object):
 
 
 if __name__ == "__main__":
-    if False:
-        dsha = DSHAnnotator(verbose=False)
-        #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system/files/corpus')
-        #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus', write_output=True)
-        #dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev/files/corpus/01-07-2011_29365502.txt', write_output=True)
-        dsh_annotations = dsha.process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_test_20190909/files/corpus/', write_output=True)
-    else:
-        dsha = DSHAnnotator(verbose=True)
+    parser = argparse.ArgumentParser(description='Deliberate Self-Harm (DSH) Annotator')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-d', '--input_dir', type=str, nargs=1, help='the path to the directory containing text files to process.', required=False)
+    group.add_argument('-f', '--input_file', type=str, nargs=1, help='the path to a text file to process.', required=False)
+    group.add_argument('-t', '--text', type=str, nargs=1, help='a text string to process.', required=False)
+    group.add_argument('-e', '--examples', action='store_true', help='run on test examples.', required=False)
+    parser.add_argument('-w', '--write_output', action='store_true', help='write output to file.', required=False)
+    parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode.', required=False)
+    
+    args = parser.parse_args()
+    
+    dsha = DSHAnnotator(verbose=args.verbose)
+    
+    if args.text is not None:
+        dsh_annotations = dsha.process_text(args.text[0], 'text_001', write_output=args.write_output, verbose=args.verbose)
+    elif args.input_dir is not None:
+        if os.path.isdir(args.input_dir[0]):
+            dsh_annotations = dsha.process(args.input_dir[0], write_output=args.write_output)
+        else:
+            print('-- Error: argument -d/--input_dir must be an existing directory.\n')
+            parser.print_help()
+    elif args.input_file is not None:
+        if os.path.isfile(args.input_file[0]):
+            dsh_annotations = dsha.process(args.input_file[0], write_output=args.write_output)
+        else:
+            print('-- Error: argument -f/--input_file must be an existing text file.\n')
+            parser.print_help()            
+    elif args.examples:
+        print('-- Running examples...', file=sys.stderr)
         dsh_annotations = dsha.process_text(text, 'text_001', write_output=False, verbose=True)
-
-    #pin = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text/10015033/corpus/2008-02-21_12643289_30883.txt'
-    #dsh_annotations = dsha.process(pin, verbose=True, write_output=True)
