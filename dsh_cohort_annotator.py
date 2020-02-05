@@ -32,7 +32,11 @@ def has_DSH_mention(mentions, check_temporality):
     Check if any of the mentions are positive depending on the predefined study
     criteria. e.g. for Karyn's project these are polarty=POSITIVE, 
     status=RELEVANT, temporality=CURRENT.
-    Returns True if a positive mention is found, False otherwise
+    
+    Arguments:
+        - mentions: dict; a dictionary of annotations.
+
+    Return: bool; True if a positive mention is found, else False.
     """
     mentions = convert_file_annotations(mentions)
     for mention in mentions:
@@ -116,6 +120,9 @@ def output_for_batch_processing(path, target_dir):
 
 
 def test(check_temporality):
+    """
+    Run some test examples.
+    """
     dsha = DSHAnnotator()
     
     texts = ['Psychiatric history: she reports having self-harmed.', 'She has self-harmed in the past.', 'No evidence of cutting herself, but does have DSH. She is self-harming.']    
