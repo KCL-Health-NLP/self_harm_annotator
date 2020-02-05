@@ -46,6 +46,7 @@ __email__ = "andre.bittar@kcl.ac.uk"
 FWD_OFFSET = 10
 BWD_OFFSET = 10
 
+
 class DSHAnnotator:
     """
     Deliberate Self-Harm (DSH) annotator
@@ -58,7 +59,7 @@ class DSHAnnotator:
         Create a new DSHAnnotator instance.
         
         Arguments:
-            - verbose: bool; print all messages if True, else only default messages.
+            - verbose: bool; print all messages.
         """
         print('DSH annotator')
         self.nlp = spacy.load('en_core_web_sm', disable=['ner'])
@@ -241,7 +242,7 @@ class DSHAnnotator:
         
         Arguments:
             - curr_token: spaCy Token; the token to start searching from.
-            - verbose: bool; print all messages if True, else only default messages.
+            - verbose: bool; print all messages.
         
         Return: bool; True if negation found, else False.
         """
@@ -288,7 +289,7 @@ class DSHAnnotator:
         
         Arguments:
             - curr_token: spaCy Token; the token to start searching from.
-            - verbose: bool; print all messages if True, else only default messages.
+            - verbose: bool; print all messages.
         
         Return: bool; True if historical marker found, else False.
         """
@@ -310,7 +311,7 @@ class DSHAnnotator:
 
         Arguments:
             - curr_token: spaCy Token; the token to start searching from.
-            - verbose: bool; print all messages if True, else only default messages.
+            - verbose: bool; print all messages.
         
         Return: bool; True if historical marker found, else False.
         """
@@ -342,7 +343,7 @@ class DSHAnnotator:
         
         Arguments:
             - curr_token: spaCy Token; the token to start searching from.
-            - verbose: bool; print all messages if True, else only default messages.
+            - verbose: bool; print all messages.
         
         Return: bool; True if hedging marker found, else False.
         """
@@ -362,7 +363,7 @@ class DSHAnnotator:
 
         Arguments:
             - curr_token: spaCy Token; the token to start searching from.
-            - verbose: bool; print all messages if True, else only default messages.
+            - verbose: bool; print all messages.
         
         Return: bool; True if hedging marker found, else False.
         """
@@ -519,7 +520,7 @@ class DSHAnnotator:
         
         Arguments:
             - doc: spaCy Doc; the current Doc object.
-            - verbose: bool; print all messages if True, else only default messages.
+            - verbose: bool; print all messages.
         
         Return:
             - has_history_section: bool; True if a history section was detected
@@ -848,7 +849,7 @@ class DSHAnnotator:
         Arguments:
             - pin: str; the input file path (must be in eHOST directory structure).
             - annotations: dict; the dictionary of detected annotations.
-            - verbose: bool; print all messages if True, else only default messages.
+            - verbose: bool; print all messages.
         
         Return:
             - root: Element; the root node of the new XML ElementTree object.
@@ -1060,6 +1061,8 @@ class DSHAnnotator:
         Arguments:
             - text: str; the input text.
             - text_id: str; a user-defined identifier for the text.
+            - write_output: bool; write output to file.
+            - verbose: bool; print all messages.
 
         Return:
             - global_mentions: dict; a dictionary containing all annotated mentions.
