@@ -74,9 +74,9 @@ class Detokenizer(object):
 
 
 if __name__ == '__main__':
-    nlp = spacy.load('en')
+    nlp = spacy.load('en_core_web_sm')
     
-    text = 'This is a start-up.'
+    text = 'Evidence of self-harm'
     
     doc = nlp(text)
 

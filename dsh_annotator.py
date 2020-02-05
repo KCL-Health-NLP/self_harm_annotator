@@ -1095,7 +1095,7 @@ class DSHAnnotator:
         global_mentions[text_id] = mentions
 
         if write_output:
-            self.write_ehost_output('test.txt', mentions, verbose=self.verbose)
+            self.write_ehost_output('output/test.txt', mentions, verbose=self.verbose)
         
         return global_mentions
 
@@ -1156,9 +1156,12 @@ if __name__ == "__main__":
     group.add_argument('-d', '--input_dir', type=str, nargs=1, help='the path to the directory containing text files to process.', required=False)
     group.add_argument('-f', '--input_file', type=str, nargs=1, help='the path to a text file to process.', required=False)
     group.add_argument('-t', '--text', type=str, nargs=1, help='a text string to process.', required=False)
-    group.add_argument('-e', '--examples', action='store_true', help='run on test examples.', required=False)
+    group.add_argument('-e', '--examples', action='store_true', help='run on test examples (no output to file).', required=False)
     parser.add_argument('-w', '--write_output', action='store_true', help='write output to file.', required=False)
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode.', required=False)
+    
+    if len(sys.argv) <= 1:
+        parser.print_help()
     
     args = parser.parse_args()
     

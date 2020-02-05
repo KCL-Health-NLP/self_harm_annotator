@@ -486,7 +486,7 @@ if __name__ == '__main__':
     
     text = 'This patient, made an attempt to commit suicide, but shows signs of self-harm, but denies deliberate ' \
            'self-harm. However, see she has been cutting herself.'
-    pin = 'T:/Andre Bittar/workspace/dsh_annotator/resources/dsh_lex.txt'
+    pin = 'resources/dsh_lex.txt'
     lsa = LexicalAnnotatorSequence(nlp, pin, LOWER, 'is_dsh')
     lsa.load_lexicon()
     nlp = lsa.add_components()
@@ -500,7 +500,7 @@ if __name__ == '__main__':
     print('------------------------')
     
     text = 'This patient scratches herself and cuts up her arms.'
-    pin = 'T:/Andre Bittar/workspace/dsh_annotator/resources/harm_action_lex.txt'
+    pin = 'resources/harm_action_lex.txt'
     lem_sa = LemmaAnnotatorSequence(nlp, pin, 'is_harm_action')
     lem_sa.load_lexicon()
     nlp = lem_sa.add_components()
