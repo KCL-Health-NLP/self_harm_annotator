@@ -1162,6 +1162,7 @@ if __name__ == "__main__":
     
     if len(sys.argv) <= 1:
         parser.print_help()
+        sys.exit(0)
     
     args = parser.parse_args()
     
