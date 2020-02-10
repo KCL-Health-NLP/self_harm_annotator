@@ -2,4 +2,4 @@
 
 **Deliberate self-harm (DSH) annotator**
 
-Annotates mentions of deliberate self-harm in clinical notes
+Annotates mentions of deliberate self-harm in clinical notes.
