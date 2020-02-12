@@ -58,7 +58,7 @@ class TokenSequenceAnnotator(object):
             - verbose: bool; print all messages
         """
         self.name = 'token_sequence_annotator_' + name
-        # using conditional import while waiting to implement gramar parser
+        # using conditional import while waiting to implement a grammar parser
         self.rules = []
         if name == 'test':
             from resources.token_sequence_rules_test import TEST_RULES
