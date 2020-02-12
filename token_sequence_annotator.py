@@ -21,6 +21,12 @@ import sys
 from spacy.matcher import Matcher
 from spacy.tokens import Span
 
+__author__ = "André Bittar"
+__copyright__ = "Copyright 2020, André Bittar"
+__credits__ = ["André Bittar"]
+__license__ = "GPL"
+__email__ = "andre.bittar@kcl.ac.uk"
+
 # Ad hoc import selection
 
 # This is an ad hoc workaround to avoid trying to overwrite default attributes
