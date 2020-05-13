@@ -7,7 +7,7 @@
     Rules match tokens on (linguistic) attributes and annotations are added to
     matching sequences.
     
-    See sthe following spaCy documentation for further implementation details:
+    See the following spaCy documentation for further implementation details:
     - rule-based matching: https://spacy.io/usage/rule-based-matching
     - custom extension attributes: https://spacy.io/usage/processing-pipelines#custom-components-attributes
     
@@ -47,7 +47,7 @@ class TokenSequenceAnnotator(object):
     Initialises a single new spaCy pipeline component that annotates tokens 
     according to a set of grammar rules specified in an external file.
     """
-
+    
     def __init__(self, nlp, name, verbose=True):
         """
         Create a new TokenSequenceAnnotator instance.
