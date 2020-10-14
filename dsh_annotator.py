@@ -1077,7 +1077,7 @@ class DSHAnnotator:
             return global_mentions
             
         if len(text) >= 1000000:
-            print('-- Unable to process very long text text with id:', text_id)
+            print('-- Unable to process very long text with id:', text_id)
             return global_mentions
         
         doc = self.nlp(text)
