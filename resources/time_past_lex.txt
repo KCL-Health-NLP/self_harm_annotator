@@ -3,7 +3,6 @@ at the age of	PAST
 at age	PAST
 since	PAST
 when	PAST
-#history	PAST # conflict with family history in HEDGING when assigning entity, in rules_0
 historical	PAST
 Hx	PAST
 hx	PAST

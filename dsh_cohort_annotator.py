@@ -65,6 +65,7 @@ def has_DSH_mention(mentions, check_temporality):
 def count_true_DSH_mentions(mentions, check_temporality):
     """
     Count the number of positive mentions.
+    This is for heuristics that look only at the number of mentions.
     """
     mentions = convert_file_annotations(mentions)
     count = 0
@@ -86,6 +87,32 @@ def count_true_DSH_mentions(mentions, check_temporality):
     
     return count
 
+def get_true_DSH_mentions(mentions, check_temporality):
+    """
+    Get the text of all positive mentions.
+    This is for heuristics that compare the text of mentions.
+    """
+    mentions = convert_file_annotations(mentions)
+    texts = []
+    for mention in mentions:
+        polarity = mention.get('polarity', None)
+        status = mention.get('status', None)
+        text = mention.get('text', None)
+
+        if not check_temporality:
+            if polarity == 'POSITIVE' and status == 'RELEVANT':
+                if text is not None:
+                    texts.append(text)
+        else:
+            temporality = mention.get('temporality', None)
+
+            if polarity == 'POSITIVE' and temporality == 'CURRENT' and \
+            status == 'RELEVANT':
+                if text is not None:
+                    texts.append(text)
+                    #print(mention['text'])
+    
+    return '|'.join(texts)
 
 def output_for_batch_processing(path, target_dir):
     """
@@ -97,19 +124,19 @@ def output_for_batch_processing(path, target_dir):
     # 'T:/Andre Bittar/Projects/CC_Eating_Disorder/balanced_sample_700.pickle'
     df = pd.read_pickle(path)
     df.rename(columns={'viewdate': 'date'}, inplace=True)
-    df['date'] = df.viewdate.map(Timestamp.date)
+    df['date'] = df.date.map(Timestamp.date)
 
     for i, row in df.iterrows():
         brcid = str(int(row.brcid))
         cndocid = str(row.cn_doc_id)
         text = str(row.text_content)
         docdate = str(row.date)
-        if not os.path.isdir(target_dir + brcid):
-            os.makedirs(target_dir + brcid)
-            os.mkdir(target_dir + brcid + '/config')
-            os.mkdir(target_dir + brcid + '/corpus')
-            os.mkdir(target_dir + brcid + '/saved')
-        pout = target_dir + brcid + '/corpus/' + docdate + '_' + cndocid + '_' + str(i) + '.txt'
+        if not os.path.isdir(target_dir + '/' + brcid):
+            os.makedirs(target_dir + '/' + brcid)
+            os.mkdir(target_dir + '/' + brcid + '/config')
+            os.mkdir(target_dir + '/' + brcid + '/corpus')
+            os.mkdir(target_dir + '/' + brcid + '/saved')
+        pout = target_dir + '/' + brcid + '/corpus/' + docdate + '_' + cndocid + '_' + str(i) + '.txt'
         with open(pout, 'w', encoding='utf-8') as fout:
             print(text, file=fout)
         fout.close()
@@ -239,25 +266,42 @@ def count_cohort_mentions():
     return df, results
 
 
-def count_flagged_patients(df_processed, key, check_counts=True):
+def count_flagged_patients(df_processed, key, heuristic='base'):
     """
     Count all patients flagged with a postive mention.
     key: dsh_YYYYMMDD_tmp or dsh_YYYYMMDD_notmp
-    Return a DataFrame of brcids indicating presence/absence of DSH
-    """
-    df = pd.DataFrame(columns=['brcid', 'dsh'])
-    
+    """    
     n = 0
     t = 0
     for g in df_processed.groupby('brcid'):
+        nn = 0
+        true_texts = []
         for i, row in g[1].iterrows():
-            if check_counts:
+            if heuristic == 'base':
                 if row[key] > 0:
                     n += 1
                     break
-            elif row[key] == True:
-                n += 1
-                break
+            elif heuristic == '2m':
+                nn += row[key]
+                if nn > 1:
+                    n += 1
+                    break
+            elif heuristic in ['2m_diff', '2m_diff_strict']:
+                s = row[key].split('|')
+                if '' in s:
+                    s.remove('')
+                true_texts += s
+            elif isinstance(row[key], bool) and row[key]:
+                    n += 1
+                    break
+        if heuristic in ['2m_diff', '2m_diff_strict']:
+            texts_unique = set(true_texts)
+            if heuristic == '2m_diff':
+                if len(true_texts) > 1 and len(texts_unique) > 1:
+                    n += 1
+            elif heuristic == '2m_diff_strict':
+                if len(true_texts) > 1 and len(true_texts) == len(texts_unique):
+                    n += 1
         t += 1
     
     print('Flagged patients:', n)
@@ -449,7 +493,7 @@ def process_CC_EE_update():
     return df_flags
 
 
-def process(pin, check_counts=True, check_temporality=True):
+def process(pin, check_counts=True, check_temporality=True, heuristic='base'):
     """
     Run dsh_annotator on a DataFrame that contains the text for each file.
     Outputs True for documents with relevant mention.
@@ -467,7 +511,7 @@ def process(pin, check_counts=True, check_temporality=True):
     dsha = DSHAnnotator(verbose=False)
     #df = pd.read_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
     df = pd.read_pickle(pin)
-    df['dsh'] = False
+    #df['dsh'] = False
     n = len(df)
     
     t0 = time()
@@ -476,7 +520,12 @@ def process(pin, check_counts=True, check_temporality=True):
         text = row.text_content
         mentions = dsha.process_text(text, docid, write_output=False)
         if check_counts:
-            df.at[i, 'dsh_' + now] = count_true_DSH_mentions(mentions, check_temporality=check_temporality)
+            if heuristic in ['base', '2m']:
+                df.at[i, 'dsh_' + now] = count_true_DSH_mentions(mentions, check_temporality=check_temporality)
+            else:
+                text = get_true_DSH_mentions(mentions, check_temporality=check_temporality)
+                #print(i, docid, text)
+                df.at[i, 'dsh_' + now] = text
         else:
             df.at[i, 'dsh_' + now] = has_DSH_mention(mentions, check_temporality=check_temporality)
         if i % 1000 == 0:
@@ -500,6 +549,6 @@ if __name__ == '__main__':
     print('-- Check process() internal settings...', file=sys.stderr)
     print('-- Run one of the two functions...', file=sys.stderr)
     #test(check_temporality=True)
-    #df_processed = process('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle', check_counts=True, check_temporality=True)
+    #df_processed = process('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle', check_counts=True, check_temporality=True, heuristic='2m_diff')
     #batch_process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
     
