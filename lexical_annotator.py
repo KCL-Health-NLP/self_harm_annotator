@@ -63,6 +63,9 @@ class LexicalAnnotatorSequence(object):
         n = 1
         with open(self.pin, 'r') as fin:
             for line in fin:
+                # ignore comments
+                if line.strip()[0] == '#':
+                    continue
                 try:
                     term, label = line.split('\t')
                 except Exception as e:
@@ -279,7 +282,8 @@ class LemmaAnnotatorSequence(object):
         n = 1
         with open(self.pin, 'r') as fin:
             for line in fin:
-                if line.startswith('#'):
+                # ignore comments
+                if line.strip()[0] == '#':
                     continue
                 try:
                     term, label = line.split('\t')
