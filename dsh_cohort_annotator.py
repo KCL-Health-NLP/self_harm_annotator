@@ -274,7 +274,6 @@ def count_flagged_patients(df_processed, key, heuristic='base'):
     n = 0
     t = 0
     for g in df_processed.groupby('brcid'):
-        nn = 0
         true_texts = []
         for i, row in g[1].iterrows():
             if heuristic == 'base':
@@ -282,8 +281,7 @@ def count_flagged_patients(df_processed, key, heuristic='base'):
                     n += 1
                     break
             elif heuristic == '2m':
-                nn += row[key]
-                if nn > 1:
+                if row[key] > 1:
                     n += 1
                     break
             elif heuristic in ['2m_diff', '2m_diff_strict']:
