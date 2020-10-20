@@ -27,6 +27,9 @@ __license__ = "GPL"
 __email__ = "andre.bittar@kcl.ac.uk"
 
 
+HEURISTICS = ['1m_doc', '2m_doc', '1m_patient', '2m_patient', '2m_diff_doc', '2m_diff_patient', '2m_diff_strict_doc', '2m_diff_strict_patient']
+
+
 def has_DSH_mention(mentions, check_temporality):
     """
     Check if any of the mentions are positive depending on the predefined study
@@ -266,7 +269,86 @@ def count_cohort_mentions():
     return df, results
 
 
-def count_flagged_patients(df_processed, key, heuristic='base'):
+def count_flags(df_processed, key):
+    n_patients = df_processed.brcid.unique().shape[0]
+    results = {}
+    data_type = str(df_processed[key].dtype)
+
+    if data_type == 'object':
+        key_int = key + '_int'
+        counts = [len(x) if x != [''] else 0 for x in df_processed[key].apply(lambda x: x.split('|')).tolist()]
+        df_processed[key_int] = counts
+        
+        # any document with at least one true mention
+        flagged = list(set(df_processed.loc[df_processed[key_int] > 0].brcid.tolist()))
+        results['1m_doc'] = flagged
+        
+        # any document with at least two true mentions
+        flagged = list(set(df_processed.loc[df_processed[key_int] > 1].brcid.tolist()))
+        results['2m_doc'] = flagged
+        
+        base = []
+        tm = []
+        tmd = []
+        tmd_doc = []
+        tmds = []
+        tmds_doc = []
+        for g in df_processed.groupby('brcid'):
+            brcid = g[0]
+            for i, row in g[1].iterrows():
+                # any patient with any document with at least two mentions with different text
+                true_texts = [x for x in row[key].split('|') if x != '']
+                if len(set(true_texts)) > 1:
+                    tmd_doc.append(brcid)
+                if len(true_texts) > 1 and len(set(true_texts)) == len(true_texts):
+                    tmds_doc.append(brcid)
+            text_list = [x.split('|') for x in g[1][key].tolist() if x != '']
+            true_texts = [item for sublist in text_list for item in sublist]
+            # any patient with at least one true mention
+            if len(true_texts) > 0:
+                base.append(brcid)
+            # any patient with at least two true mentions
+            if len(true_texts) > 1:
+                tm.append(brcid)
+            # any patient with at least two true mentions with different text
+            if len(set(true_texts)) > 1:
+                tmd.append(brcid)
+            # any patient with at least two true mentions and all mentions with different text
+            if len(true_texts) > 1 and len(set(true_texts)) == len(true_texts):
+                tmds.append(brcid)
+        results['1m_patient'] = base
+        results['2m_patient'] = tm
+        results['2m_diff_doc'] = tmd_doc
+        results['2m_diff_patient'] = tmd
+        results['2m_diff_strict_doc'] = tmds_doc
+        results['2m_diff_strict_patient'] = tmds
+        
+    elif 'int' in data_type or 'float' in data_type:
+        # any document with at least one true mention
+        flagged = list(set(df_processed.loc[df_processed[key] > 0].brcid.tolist()))
+        results['1m_doc'] = flagged
+
+        # any document with at least two true mentions
+        flagged = list(set(df_processed.loc[df_processed[key] > 1].brcid.tolist()))
+        results['2m_doc'] = flagged
+
+    elif data_type == 'bool':
+        flagged = list(set(df_processed.loc[df_processed[key] == True].brcid.tolist()))
+        results['1m_doc'] = flagged
+    
+    n = 1
+    for heur in HEURISTICS:
+        if heur in results:
+            print(str(n) + '.', 'Heuristic:', heur)
+            print('-- Flagged patients:', len(results[heur]))
+            print('-- Total patients  :', n_patients)
+            print('-- % flagged       :', len(results[heur]) / n_patients * 100)
+            n += 1
+        else:
+            print('-- Heuristics not in results (skipping):', heur)
+
+
+def count_flagged_patients(df_processed, key, heuristic='base', data_type='numeric'):
     """
     Count all patients flagged with a postive mention.
     key: dsh_YYYYMMDD_tmp or dsh_YYYYMMDD_notmp
@@ -276,15 +358,15 @@ def count_flagged_patients(df_processed, key, heuristic='base'):
     for g in df_processed.groupby('brcid'):
         true_texts = []
         for i, row in g[1].iterrows():
-            if heuristic == 'base':
-                if row[key] > 0:
-                    n += 1
-                    break
-            elif heuristic == '2m':
+            if heuristic == 'base' and data_type == 'numeric':
+                    if row[key] > 0:
+                        n += 1
+                        break
+            elif heuristic == '2m' and data_type == 'numeric':
                 if row[key] > 1:
                     n += 1
                     break
-            elif heuristic in ['2m_diff', '2m_diff_strict']:
+            elif data_type == 'string':
                 s = row[key].split('|')
                 if '' in s:
                     s.remove('')
@@ -292,9 +374,17 @@ def count_flagged_patients(df_processed, key, heuristic='base'):
             elif isinstance(row[key], bool) and row[key]:
                     n += 1
                     break
-        if heuristic in ['2m_diff', '2m_diff_strict']:
+            else:
+                raise ValueError('-- Invalid data type')
+        if data_type == 'string':
             texts_unique = set(true_texts)
-            if heuristic == '2m_diff':
+            if heuristic == 'base':
+                if len(true_texts) > 0:
+                    n += 1
+            elif heuristic == '2m':
+                if len(true_texts) > 1:
+                    n += 1
+            elif heuristic == '2m_diff':
                 if len(true_texts) > 1 and len(texts_unique) > 1:
                     n += 1
             elif heuristic == '2m_diff_strict':
@@ -302,6 +392,7 @@ def count_flagged_patients(df_processed, key, heuristic='base'):
                     n += 1
         t += 1
     
+    print('Heuristic:', heuristic)
     print('Flagged patients:', n)
     print('Total patients  :', t)
     print('% flagged       :', n / t * 100)
