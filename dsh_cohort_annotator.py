@@ -488,7 +488,7 @@ def process_CC_EE():
     del df_att
     del df_evt
     
-    now = str(date.today())
+    now = str(date.today()).replace('-', '')
     new_p = 'T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_DSH_new_' + now + '.pickle'
     df_new.to_pickle(new_p)
     
@@ -549,7 +549,7 @@ def process_CC_EE_update():
     del df_att
     del df_evt
     
-    now = str(date.today())
+    now = str(date.today()).replace('-', '')
     new_p = 'T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_DSH_new_' + now + '.pickle'
     df_new.to_pickle(new_p)
     
@@ -707,7 +707,7 @@ def process(pin, check_counts=True, check_temporality=True, heuristic='base'):
     All saved to the DataFrame.
     """
     
-    now = datetime.datetime.now().strftime('%Y%m%d')
+    now = str(date.today()).replace('-', '')
 
     if check_temporality:
         now += '_tmp'
