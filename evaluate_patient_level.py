@@ -40,24 +40,20 @@ def has_DSH_mention(mentions):
     return False
 
 
-def get_brcid_mapping(ctype):
+def get_brcid_mapping(pin):
     """
     Determine the BRCIDs for each file in the gold standard corpus. To get 
     results use 'train_dev' as gold and 'system_train_dev' as system.
     
     Arguments:
-        - ctype: str; the corpus type ('sys' for the system annotations, 'gold'
-                 for the manually annotated corpus)
+        - pin: str; the path to the corpus directory containing annotations
+          i.e. system annotations or gold annotations
 
     Return:
         - brcid_mapping: dict; the mapping of BRCIDs
         - files: list; the list of files in the corpus
     """
-    if ctype == 'gold':
-        """files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Restricted_Cohort_100_patients')"""
-        files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev')
-    elif ctype == 'system':
-        files = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev')
+    files = get_corpus_files(pin)
     files_trunc = [f.split('\\')[-1] for f in files if 'xml' in f]
     
     brcid_mapping = {}
@@ -208,13 +204,18 @@ def evaluate_patient_level(brcid_mapping, files, heuristic='2m', verbose=False):
 
 def process(heuristic='base'):
     """
-    Run the whole evaluation process with a specific heuristic.
+    DEPRECATED - use evaluate_patient_level_with_heuristic in dsh_cohort_annotator.py
+
+    Run the whole evaluation process with a specific heuristic on the whole cohort.
     NB: gold must use the 'base' heuristic which is 1 true mention to flag a patient
     """
-    gold_brcid_mapping, gold_files = get_brcid_mapping('gold')
+    gold_pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev'
+    #gold_pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Restricted_Cohort_100_patients'
+    gold_brcid_mapping, gold_files = get_brcid_mapping(gold_pin)
     gold_brcids = set(evaluate_patient_level(gold_brcid_mapping, gold_files, heuristic='base', verbose=False))
     
-    system_brcid_mapping, system_files = get_brcid_mapping('system')
+    system_pin = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev'
+    system_brcid_mapping, system_files = get_brcid_mapping(system_pin)
     system_brcids = set(evaluate_patient_level(system_brcid_mapping, system_files, heuristic=heuristic, verbose=False))
     
     fn = len(gold_brcids.difference(system_brcids))

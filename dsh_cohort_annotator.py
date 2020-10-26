@@ -5,19 +5,20 @@
     Execution examples are provided in comments in the main() method.
 """
 
-import datetime
 import os
 import pandas as pd
 import sys
 
 sys.path.append('T:/Andre Bittar/workspace/utils')
 
+from datetime import date
 from db_connection import fetch_dataframe, db_name, server_name
 from dsh_annotator import DSHAnnotator
 from ehost_annotation_reader import convert_file_annotations, get_corpus_files, load_mentions_with_attributes
+from evaluate_patient_level import get_brcid_mapping
 from pandas import Timestamp
 from pprint import pprint
-from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support
+from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, classification_report
 from time import time
 
 __author__ = "André Bittar"
@@ -170,6 +171,41 @@ def test(check_temporality):
     pprint(global_mentions)
 
 
+def load_ehost_to_dataframe(pin, key, df=None, map_brcids=True):
+    """
+    Load annotations (mention text) from a directory containing eHOST annotations
+    into a Pandas DataFrame
+    """
+    brcid_mapping = {}
+    files = []
+    
+    if map_brcids:
+        brcid_mapping, files = get_brcid_mapping(pin)
+    else:
+        files =  get_corpus_files(pin)
+        brcid_mapping = {f.split('\\')[-1]: f.split('\\')[1] for f in files}
+
+    xml = [f for f in files if 'xml' in f]
+
+    if df is None:
+        df = pd.DataFrame(columns=['filename', 'brcid', key])
+        df['filename'] = xml
+    
+    for i, f in enumerate(xml):
+        fname = f.split('\\')[-1]
+        brcid = brcid_mapping.get(fname)
+        mentions = load_mentions_with_attributes(f)
+        mentions = convert_file_annotations(mentions)
+        mentions = [m for m in mentions if m.get('status', None) == 'RELEVANT' and \
+                    m.get('polarity', None) == 'POSITIVE' and \
+                    m.get('temporality', None) == 'CURRENT']
+        m_string = '|'.join([m['text'] for m in mentions if m['text']])
+        df.at[i, key] = m_string
+        df.at[i, 'brcid'] = brcid
+
+    return df, brcid_mapping, files
+
+
 def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
     """
     Load gold/train data into a DataFrame and count the number of "true" (positive)
@@ -255,7 +291,7 @@ def count_cohort_mentions():
         entries.append((t, brcid, docid, text_content, hm))
 
     df = pd.DataFrame(entries, columns=['file', 'brcid', 'cn_doc_id', 'text_content', 'dsh'])
-    df.to_pickle('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/test_patient.pickle')
+    #df.to_pickle('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/test_patient.pickle')
     print('-- Done.', file=sys.stderr)
     
     results = {}
@@ -269,7 +305,14 @@ def count_cohort_mentions():
     return df, results
 
 
-def count_flags(df_processed, key):
+def count_flagged_patients(df_processed, key, verbose=True):
+    """
+    Apply all filtering heuristics to outputs stored in a DataFrame.
+    Outputs cam be:
+        - boolean: indicating if a document is flagged or not
+        - integer: indicates number of relevant (e.g. true) mentions
+        - string: the text of all mentions separated by a '|'
+    """
     n_patients = df_processed.brcid.unique().shape[0]
     results = {}
     data_type = str(df_processed[key].dtype)
@@ -316,12 +359,12 @@ def count_flags(df_processed, key):
             # any patient with at least two true mentions and all mentions with different text
             if len(true_texts) > 1 and len(set(true_texts)) == len(true_texts):
                 tmds.append(brcid)
-        results['1m_patient'] = base
-        results['2m_patient'] = tm
-        results['2m_diff_doc'] = tmd_doc
-        results['2m_diff_patient'] = tmd
-        results['2m_diff_strict_doc'] = tmds_doc
-        results['2m_diff_strict_patient'] = tmds
+        results['1m_patient'] = list(set(base))
+        results['2m_patient'] = list(set(tm))
+        results['2m_diff_doc'] = list(set(tmd_doc))
+        results['2m_diff_patient'] = list(set(tmd))
+        results['2m_diff_strict_doc'] = list(set(tmds_doc))
+        results['2m_diff_strict_patient'] = list(set(tmds))
         
     elif 'int' in data_type or 'float' in data_type:
         # any document with at least one true mention
@@ -336,72 +379,31 @@ def count_flags(df_processed, key):
         flagged = list(set(df_processed.loc[df_processed[key] == True].brcid.tolist()))
         results['1m_doc'] = flagged
     
-    n = 1
-    for heur in HEURISTICS:
-        if heur in results:
-            print(str(n) + '.', 'Heuristic:', heur)
-            print('-- Flagged patients:', len(results[heur]))
-            print('-- Total patients  :', n_patients)
-            print('-- % flagged       :', len(results[heur]) / n_patients * 100)
-            n += 1
-        else:
-            print('-- Heuristics not in results (skipping):', heur)
-
-
-def count_flagged_patients(df_processed, key, heuristic='base', data_type='numeric'):
-    """
-    Count all patients flagged with a postive mention.
-    key: dsh_YYYYMMDD_tmp or dsh_YYYYMMDD_notmp
-    """    
-    n = 0
-    t = 0
-    for g in df_processed.groupby('brcid'):
-        true_texts = []
-        for i, row in g[1].iterrows():
-            if heuristic == 'base' and data_type == 'numeric':
-                    if row[key] > 0:
-                        n += 1
-                        break
-            elif heuristic == '2m' and data_type == 'numeric':
-                if row[key] > 1:
-                    n += 1
-                    break
-            elif data_type == 'string':
-                s = row[key].split('|')
-                if '' in s:
-                    s.remove('')
-                true_texts += s
-            elif isinstance(row[key], bool) and row[key]:
-                    n += 1
-                    break
+    if verbose:
+        n = 1
+        for heur in HEURISTICS:
+            if heur in results:
+                print(str(n) + '.', 'Heuristic:', heur)
+                print('-- Flagged patients:', len(results[heur]))
+                print('-- Total patients  :', n_patients)
+                print('-- % flagged       :', len(results[heur]) / n_patients * 100)
+                n += 1
             else:
-                raise ValueError('-- Invalid data type')
-        if data_type == 'string':
-            texts_unique = set(true_texts)
-            if heuristic == 'base':
-                if len(true_texts) > 0:
-                    n += 1
-            elif heuristic == '2m':
-                if len(true_texts) > 1:
-                    n += 1
-            elif heuristic == '2m_diff':
-                if len(true_texts) > 1 and len(texts_unique) > 1:
-                    n += 1
-            elif heuristic == '2m_diff_strict':
-                if len(true_texts) > 1 and len(true_texts) == len(texts_unique):
-                    n += 1
-        t += 1
+                print('-- Heuristics not in results (skipping):', heur)
     
-    print('Heuristic:', heuristic)
-    print('Flagged patients:', n)
-    print('Total patients  :', t)
-    print('% flagged       :', n / t * 100)
+    return results
 
 
 def evaluate_sys(results, sys_results):
     """
+    DEPRECATED - only deal with base heuristic
+    
     Perform evaluation of the app in comparison with the gold standard manual
     annotations.
+    results; dict: gold standard results containing number of mentions per BRCID
+    sys_results, dict: system results containing number of mentions per BRCID
+    
+    NB: use one of the counting methods to create the dictionaries
     """
     x_gold = []
     x_sys = []
@@ -486,7 +488,7 @@ def process_CC_EE():
     del df_att
     del df_evt
     
-    now = datetime.datetime.now().strftime('%Y%m%d')
+    now = str(date.today())
     new_p = 'T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_DSH_new_' + now + '.pickle'
     df_new.to_pickle(new_p)
     
@@ -547,7 +549,7 @@ def process_CC_EE_update():
     del df_att
     del df_evt
     
-    now = datetime.datetime.now().strftime('%Y%m%d')
+    now = str(date.today())
     new_p = 'T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_DSH_new_' + now + '.pickle'
     df_new.to_pickle(new_p)
     
@@ -580,6 +582,121 @@ def process_CC_EE_update():
     df_flags.to_excel('T:/Andre Bittar/Projects/CC_Eating_Disorder/flagged_patients_updated_cohort' + now + '.xlsx')
     
     return df_flags
+
+
+def evaluate_patient_level_with_heuristic(pin_gold, pin_sys, report_dir=None):
+    """
+    Evaluate patient-level against an annotated gold standard.
+    pin_gold = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev'
+    pin_sys = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev'
+    """
+    report_string =  '===============================\n'
+    report_string += 'PATIENT-LEVEL EVALUATION REPORT\n'
+    report_string += '===============================\n\n'
+        
+    report_string += 'Gold  : ' + pin_gold + '\n'
+    report_string += 'System: ' + pin_sys + '\n\n'
+
+    key_gold = 'gold'
+    
+    df_gold, _, _ = load_ehost_to_dataframe(pin_gold, key_gold, df=None, map_brcids=True)
+    df_gold['bool'] = df_gold[key_gold].apply(lambda x: x != '')
+        
+    gold_brcids = set(df_gold.loc[df_gold[key_gold] != ''].brcid.unique().tolist())
+    
+    # build a DataFrame with all BRCIDs and their flags
+    all_brcids = sorted(df_gold.brcid.unique().tolist())
+    df_gold_brcids = pd.DataFrame()
+    df_gold_brcids['brcid'] = all_brcids
+    df_gold_brcids['flag'] = False
+    df_gold_brcids.loc[df_gold_brcids.brcid.isin(gold_brcids), 'flag'] = True
+    
+    # percentage prevalence in the gold standard
+    n_total = len(all_brcids)
+    gold_np = round(len(gold_brcids) / len(all_brcids) * 100, 2)
+    
+    key_sys = 'system'
+    df_sys, _, _ = load_ehost_to_dataframe(pin_sys, key_sys)
+    
+    # count patients flagged by the system for each heuristic and output results
+    res_sys = count_flagged_patients(df_sys, key_sys, verbose=False)
+
+    results_dict = {}
+
+    for heur in res_sys:
+        df_gold[heur] = False
+        for brcid in res_sys[heur]:
+            # calculate boolean value for each document, store in gold dataframe
+            inds = df_gold.loc[df_gold.brcid == brcid].index
+            df_gold.loc[inds, heur] = True
+
+        report_string += 'Heuristic: ' + heur + '\n'
+        report_string += '----------' + '-' * len(heur) + '\n'
+        system_brcids = []
+        for row in df_gold.groupby('brcid'):
+            if row[1][heur].iloc[0] == True:
+                system_brcids.append(row[0])
+        
+        # make the lists of brcids into sets for following operations
+        #gold_brcids = set(gold_brcids)
+        system_brcids = set(system_brcids)
+
+        # create DataFrame for system flags
+        df_sys_brcids = pd.DataFrame()
+        df_sys_brcids['brcid'] = all_brcids
+        df_sys_brcids['flag'] = False
+        df_sys_brcids.loc[df_sys_brcids.brcid.isin(system_brcids), 'flag'] = True
+        
+        fn = len(gold_brcids.difference(system_brcids))
+        fp = len(system_brcids.difference(gold_brcids))
+        tp = len(gold_brcids.intersection(system_brcids))
+
+        sys_n = len(system_brcids)
+        sys_np = round(len(res_sys[heur]) / len(all_brcids) * 100, 2)
+        report_string += 'Gold prevalence     : ' + str(len(gold_brcids)) + '/' + str(n_total) + ' (' + str(gold_np) + '%)\n'
+        report_string += 'System prevalence   : ' + str(sys_n) + '/' + str(n_total) + ' (' + str(sys_np) + '%)\n'
+        report_string += 'Gold and System (TP): ' + str(tp) + '\n'
+        report_string += 'Gold not System (FN): ' + str(fn) + '\n'
+        report_string += 'System not Gold (FP): ' + str(fp) + '\n'
+        y_true = df_gold_brcids.flag
+        y_pred = df_sys_brcids.flag
+        cr = classification_report(y_true, y_pred)
+        cr_d = classification_report(y_true, y_pred, output_dict=True)
+        p = cr_d['True']['precision']
+        r = cr_d['True']['recall']
+        f = cr_d['True']['f1-score']
+        report_string += cr
+        k = round(cohen_kappa_score(y_true, y_pred), 2)
+        results_dict[heur] = {'p': p, 'r': r, 'f': f, 'k': k, 'sys_n': sys_n, 'sys_%': sys_np}
+        report_string += '       kappa       ' + str(k) + '\n'
+        report_string += '====================\n\n'
+    
+    # select best results
+    df_results = pd.DataFrame(results_dict).T.reset_index()
+    df_results.rename(columns={'index': 'heuristic'}, inplace=True)   
+    df_results = df_results[['heuristic', 'p', 'r', 'f', 'k', 'sys_n', 'sys_%']]
+    df_results['sys_n'] = df_results.sys_n.astype(int)
+    df_results = df_results.round(2)
+
+    report_string += 'Global Summary\n'
+    report_string += '--------------\n\n'
+
+    report_string += 'Total patients                   : ' + str(len(all_brcids)) + '\n'
+    report_string += 'Actual prevalence (gold standard): ' + str(len(gold_brcids)) + ' (' + str(gold_np) + '%)\n\n'
+    report_string += str(df_results)
+    
+    print(report_string)    
+    
+    if report_dir is not None:
+        today = str(date.today())
+        label = os.path.basename(os.path.normpath(pin_gold))
+        pout = os.path.join(report_dir, 'patient-level_evaluation_report_' + label + '_' + today + '.txt')
+        fout = open(pout, 'w')
+        print('-- Printed report to file:', pout, file=sys.stderr)
+        fout.write(report_string)
+        fout.close()
+    
+    return df_results
 
 
 def process(pin, check_counts=True, check_temporality=True, heuristic='base'):
