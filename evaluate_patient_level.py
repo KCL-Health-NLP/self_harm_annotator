@@ -138,6 +138,8 @@ def check_prevalence(files, heuristic, cohort='full'):
 
 def evaluate_patient_level(brcid_mapping, files, heuristic='2m', verbose=False):
     """
+    DEPRECATED - use evaluate_patient_level_with_heuristic in dsh_cohort_annotator.py
+    
     Determine patient-level performance on the gold standard corpus.
     
     Arguments:

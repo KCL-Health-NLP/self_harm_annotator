@@ -18,6 +18,7 @@ from ehost_annotation_reader import convert_file_annotations, get_corpus_files, 
 from evaluate_patient_level import get_brcid_mapping
 from pandas import Timestamp
 from pprint import pprint
+from shutil import copy
 from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, classification_report
 from time import time
 
@@ -91,6 +92,7 @@ def count_true_DSH_mentions(mentions, check_temporality):
     
     return count
 
+
 def get_true_DSH_mentions(mentions, check_temporality):
     """
     Get the text of all positive mentions.
@@ -118,7 +120,8 @@ def get_true_DSH_mentions(mentions, check_temporality):
     
     return '|'.join(texts)
 
-def output_for_batch_processing(path, target_dir):
+
+def output_for_batch_processing(source, target_dir, config_file=None):
     """
     From a DataFrame containing all text data extracted from CRIS, create an
     eHOST directory structure ready for files to be manually annotated.
@@ -126,24 +129,33 @@ def output_for_batch_processing(path, target_dir):
     # use target_dir: 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text/'
     #df = pd.read_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
     # 'T:/Andre Bittar/Projects/CC_Eating_Disorder/balanced_sample_700.pickle'
-    df = pd.read_pickle(path)
-    df.rename(columns={'viewdate': 'date'}, inplace=True)
-    df['date'] = df.date.map(Timestamp.date)
+    df = None
+    if isinstance(source, pd.DataFrame):
+        df = source
+    elif isinstance(source, str):
+        df = pd.read_pickle(source)
+        df.rename(columns={'viewdate': 'date'}, inplace=True)
+        df['date'] = df.date.map(Timestamp.date)
+    else:
+        raise TypeError('Invalid argument: source must be a DataFrame or a path string.')
 
     for i, row in df.iterrows():
         brcid = str(int(row.brcid))
         cndocid = str(row.cn_doc_id)
         text = str(row.text_content)
-        docdate = str(row.date)
+        #docdate = str(row.date)
         if not os.path.isdir(target_dir + '/' + brcid):
             os.makedirs(target_dir + '/' + brcid)
             os.mkdir(target_dir + '/' + brcid + '/config')
             os.mkdir(target_dir + '/' + brcid + '/corpus')
             os.mkdir(target_dir + '/' + brcid + '/saved')
-        pout = target_dir + '/' + brcid + '/corpus/' + docdate + '_' + cndocid + '_' + str(i) + '.txt'
+        #pout = target_dir + '/' + brcid + '/corpus/' + docdate + '_' + cndocid + '_' + str(i) + '.txt'
+        pout = target_dir + '/' + brcid + '/corpus/' + cndocid + '_' + str(i) + '.txt'
         with open(pout, 'w', encoding='utf-8') as fout:
             print(text, file=fout)
         fout.close()
+        if config_file is not None:
+            copy(config_file, target_dir + '/' + brcid + '/config')
         if i % 1000 == 0:
             print(i, '/', len(df))
     
@@ -175,6 +187,10 @@ def load_ehost_to_dataframe(pin, key, df=None, map_brcids=True):
     """
     Load annotations (mention text) from a directory containing eHOST annotations
     into a Pandas DataFrame
+    pin, str: the path to the annotated files
+    key, str: a key to name the column in which to store DSH results
+    df, DataFrame: an existing DataFrame to add further results to
+    map_brcids, bool: get a mapping from the gold corpus (True) or from the annotated file names (False)
     """
     brcid_mapping = {}
     files = []
@@ -182,7 +198,7 @@ def load_ehost_to_dataframe(pin, key, df=None, map_brcids=True):
     if map_brcids:
         brcid_mapping, files = get_brcid_mapping(pin)
     else:
-        files =  get_corpus_files(pin)
+        files = get_corpus_files(pin)
         brcid_mapping = {f.split('\\')[-1]: f.split('\\')[1] for f in files}
 
     xml = [f for f in files if 'xml' in f]
@@ -308,7 +324,7 @@ def count_cohort_mentions():
 def count_flagged_patients(df_processed, key, verbose=True):
     """
     Apply all filtering heuristics to outputs stored in a DataFrame.
-    Outputs cam be:
+    Outputs can be:
         - boolean: indicating if a document is flagged or not
         - integer: indicates number of relevant (e.g. true) mentions
         - string: the text of all mentions separated by a '|'
@@ -337,7 +353,7 @@ def count_flagged_patients(df_processed, key, verbose=True):
         tmds = []
         tmds_doc = []
         for g in df_processed.groupby('brcid'):
-            brcid = g[0]
+            brcid = str(int(g[0]))
             for i, row in g[1].iterrows():
                 # any patient with any document with at least two mentions with different text
                 true_texts = [x for x in row[key].split('|') if x != '']
@@ -584,7 +600,7 @@ def process_CC_EE_update():
     return df_flags
 
 
-def evaluate_patient_level_with_heuristic(pin_gold, pin_sys, report_dir=None):
+def evaluate_patient_level_with_heuristics(pin_gold, pin_sys, report_dir=None):
     """
     Evaluate patient-level against an annotated gold standard.
     pin_gold = 'T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/train_dev'
@@ -593,7 +609,7 @@ def evaluate_patient_level_with_heuristic(pin_gold, pin_sys, report_dir=None):
     report_string =  '===============================\n'
     report_string += 'PATIENT-LEVEL EVALUATION REPORT\n'
     report_string += '===============================\n\n'
-        
+    
     report_string += 'Gold  : ' + pin_gold + '\n'
     report_string += 'System: ' + pin_sys + '\n\n'
 
@@ -601,7 +617,7 @@ def evaluate_patient_level_with_heuristic(pin_gold, pin_sys, report_dir=None):
     
     df_gold, _, _ = load_ehost_to_dataframe(pin_gold, key_gold, df=None, map_brcids=True)
     df_gold['bool'] = df_gold[key_gold].apply(lambda x: x != '')
-        
+    
     gold_brcids = set(df_gold.loc[df_gold[key_gold] != ''].brcid.unique().tolist())
     
     # build a DataFrame with all BRCIDs and their flags
@@ -620,6 +636,10 @@ def evaluate_patient_level_with_heuristic(pin_gold, pin_sys, report_dir=None):
     
     # count patients flagged by the system for each heuristic and output results
     res_sys = count_flagged_patients(df_sys, key_sys, verbose=False)
+    
+    # check the brcids are strings
+    assert set([type(item) for sublist in res_sys.values() for item in sublist]) == {str}
+    assert df_gold_brcids.brcid.dtype == 'O'
 
     results_dict = {}
 
