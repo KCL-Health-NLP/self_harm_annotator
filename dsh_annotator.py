@@ -79,6 +79,7 @@ class DSHAnnotator:
         # Load lexical annotators
         self.load_lexicon('./resources/history_type_lex.txt', LOWER, 'LA')
         self.load_lexicon('./resources/dsh_lex.txt', LEMMA, 'DSH')
+        self.load_lexicon('./resources/dsh_type_lex.txt', LEMMA, 'DSH')
         #self.load_lexicon('./resources/time_past_lex.txt', LEMMA, 'TIME')
         self.load_lexicon('./resources/time_past_lex.txt', LOWER, 'TIME')
         self.load_lexicon('./resources/time_present_lex.txt', LEMMA, 'TIME')
