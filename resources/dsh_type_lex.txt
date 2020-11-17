@@ -1,0 +1,103 @@
+d.s.h	SELF-HARM
+D.S.H	SELF-HARM
+d.s.h.	SELF-HARM
+D.S.H.	SELF-HARM
+DSH	SELF-HARM
+DSH/	SELF-HARM
+dsh	SELF-HARM
+dsh/	SELF-HARM
+o.d	OVERDOSE
+o.d.	OVERDOSE
+OD	OVERDOSE
+overdose	OVERDOSE
+overdsose	OVERDOSE
+overdosed	OVERDOSE
+overdoses	OVERDOSE
+overdsoses	OVERDOSE
+overdosing	OVERDOSE
+parasuicidal	SELF-HARM
+parasuicidality	SELF-HARM
+parasuicide	SELF-HARM
+auto mutilate	SELF-HARM
+auto mutilating	SELF-HARM
+auto mutilation	SELF-HARM
+auto- mutilate	SELF-HARM
+auto- mutilating	SELF-HARM
+auto- mutilation	SELF-HARM
+#self abuse	SELF-HARM
+#self cut	SELF-HARM
+#self cutting	SELF-HARM
+#self destruct	SELF-HARM
+#self destruction	SELF-HARM
+#self destructive	SELF-HARM
+#self harm	SELF-HARM
+self harmer	SELF-HARM
+#self harming	SELF-HARM
+#self hit	SELF-HARM
+#self immolate	SELF-HARM
+#self immolating	SELF-HARM
+#self immolation	SELF-HARM
+#self injure	SELF-HARM
+#self injuring	SELF-HARM
+#self injurious	SELF-HARM
+#self injury	SELF-HARM
+#self lacerate	SELF-HARM
+#self laceration	SELF-HARM
+#self mutilate	SELF-HARM
+#self mutilating	SELF-HARM
+#self mutilation	SELF-HARM
+#self poison	SELF-HARM
+#self poisoning	SELF-HARM
+#self- abuse	SELF-HARM
+#self- cut	SELF-HARM
+#self- cutting	SELF-HARM
+#self- destruct	SELF-HARM
+#self- destruction	SELF-HARM
+#self- destructive	SELF-HARM
+#self- harm	SELF-HARM
+self- harmer	SELF-HARM
+#self- harming	SELF-HARM
+#self- hit	SELF-HARM
+#self- immolate	SELF-HARM
+#self- immolating	SELF-HARM
+#self- immolation	SELF-HARM
+#self- injure	SELF-HARM
+#self- injuring	SELF-HARM
+#self- injurious	SELF-HARM
+#self- injury	SELF-HARM
+#self- lacerate	SELF-HARM
+#self- laceration	SELF-HARM
+#self- mutilate	SELF-HARM
+#self- mutilating	SELF-HARM
+#self- mutilation	SELF-HARM
+#self- poison	SELF-HARM
+#self- poisoning	SELF-HARM
+self-abuse	SELF-HARM
+self-cut	SELF-CUTTING
+self-cutting	SELF-CUTTING
+self-destruct	SELF-HARM
+self-destruction	SELF-HARM
+self-destructive	SELF-HARM
+self-harm	SELF-HARM
+self-harm/	SELF-HARM
+self-harmer	SELF-HARM
+self-harming	SELF-HARM
+self-harming/	SELF-HARM
+self-hit	SELF-HITTING
+self-hitting	SELF-HITTING
+self-immolate	SELF-BURNING
+self-immolating	SELF-BURNING
+self-immolation	SELF-BURNING
+self-injure	SELF-HARM
+self-injuring	SELF-HARM
+self-injurious	SELF-HARM
+self-injury	SELF-HARM
+self-lacerate	SELF-CUTTING
+self-laceration	SELF-CUTTING
+self-mutilate	SELF-CUTTING
+self-mutilating	SELF-CUTTING
+self-mutilation	SELF-CUTTING
+self-poison	OVERDOSE
+self-poisoning	OVERDOSE
+selfharm	SELF-HARM
+selfharm/	SELF-HARM
