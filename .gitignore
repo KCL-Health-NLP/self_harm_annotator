@@ -46,6 +46,7 @@ output
 # Files #
 #########
 examples_full.py
+test_examples_full.py
 
 # Miscellaaneous #
 ##################
