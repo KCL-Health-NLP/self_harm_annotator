@@ -12,7 +12,9 @@ __credits__ = ["André Bittar"]
 __license__ = "GPL"
 __email__ = "andre.bittar@kcl.ac.uk"
 
-HEURISTICS = ['base', '2m', '2m_diff', '2m_diff_strict']
+#HEURISTICS = ['base', '2m', '2m_diff', '2m_diff_strict']
+HEURISTICS = ['1m_doc', '2m_doc', '1m_patient', '2m_patient', '2m_diff_doc', '2m_diff_patient', '2m_diff_strict_doc', '2m_diff_strict_patient']
+
 
 
 def has_DSH_mention(mentions):
@@ -64,7 +66,7 @@ def get_brcid_mapping(pin):
     # get the brcids from the original directory structure
     for f in ref:
         s = f.split('\\')
-        brcid = s[1]
+        brcid = str(int(s[1]))
         fname = s[3]
         if fname in files_trunc:
             brcid_mapping[fname] = brcid

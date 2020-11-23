@@ -79,7 +79,7 @@ class DSHAnnotator:
         # Load lexical annotators
         self.load_lexicon('./resources/history_type_lex.txt', LOWER, 'LA')
         self.load_lexicon('./resources/dsh_lex.txt', LEMMA, 'DSH')
-        self.load_lexicon('./resources/dsh_type_lex.txt', LEMMA, 'DSH')
+        self.load_lexicon('./resources/dsh_type_lex.txt', LEMMA, 'DSH_TYPE')
         #self.load_lexicon('./resources/time_past_lex.txt', LEMMA, 'TIME')
         self.load_lexicon('./resources/time_past_lex.txt', LOWER, 'TIME')
         self.load_lexicon('./resources/time_present_lex.txt', LEMMA, 'TIME')
@@ -90,6 +90,7 @@ class DSHAnnotator:
         self.load_lexicon('./resources/intent_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/body_part_lex.txt', LEMMA, 'LA')
         self.load_lexicon('./resources/harm_action_lex.txt', LEMMA, 'LA')
+        self.load_lexicon('./resources/harm_action_type_lex.txt', LEMMA, 'HA_TYPE')
         self.load_lexicon('./resources/med_lex.txt', LEMMA, 'LA')
         #self.load_lexicon('./resources/reported_speech_lex.txt', LEMMA, 'RSPEECH')
 
@@ -537,7 +538,6 @@ class DSHAnnotator:
                 if doc[i]._.HISTORY == 'HISTORY':
                     has_history_section = True
                     doc[i]._.TIME = 'TIME'
-                    print('#####', doc[i])
 
                 if self.has_negation_ancestor(doc[i]) and not self.is_definite(doc, i):
                     if verbose:
@@ -785,6 +785,7 @@ class DSHAnnotator:
                 mention_id = 'EHOST_Instance_' + str(n)
                 annotator = 'SYSTEM'
                 mclass = 'SELF-HARM'
+                dsh_type = token._.DSH_TYPE
                 comment = None
                 start = token.idx
                 end = token.idx + len(token.text)
@@ -806,6 +807,7 @@ class DSHAnnotator:
                 n += 1
                 mentions[mention_id] = {'annotator': annotator,
                                         'class': mclass,
+                                        'dsh_type': dsh_type,
                                         'comment': comment,
                                         'end': str(end),
                                         'polarity': polarity,
@@ -832,6 +834,7 @@ class DSHAnnotator:
                 n += 1
                 mentions[mention_id] = {'annotator': annotator,
                                         'class': mclass,
+                                        'dsh_type': dsh_type,
                                         'comment': comment,
                                         'end': str(end),
                                         'polarity': polarity,
@@ -893,7 +896,19 @@ class DSHAnnotator:
             mention_class_node.attrib['id'] = annotation['class']
             mention_class_node.text = annotation['text']
 
+            # dsh_type
+            val = annotation.get('dsh_type', 'SELF-HARM')
+            slot_mention_node = ET.SubElement(root, 'stringSlotMention')
+            slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(m)
+            mention_slot_node = ET.SubElement(slot_mention_node, 'mentionSlot')
+            mention_slot_node.attrib['id'] = 'dsh_type'
+            string_mention_value_node = ET.SubElement(slot_mention_node, 'stringSlotMentionValue')
+            string_mention_value_node.attrib['value'] = val
+            has_slot_mention_node = ET.SubElement(class_mention, 'hasSlotMention')
+            has_slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(m)
+            
             # polarity
+            m += 1
             val = annotation.get('polarity', 'POSITIVE')
             slot_mention_node = ET.SubElement(root, 'stringSlotMention')
             slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(m)
@@ -1185,4 +1200,5 @@ if __name__ == "__main__":
             parser.print_help()            
     elif args.examples:
         print('-- Running examples...', file=sys.stderr)
-        dsh_annotations = dsha.process_text(text, 'text_001', write_output=False, verbose=True)
+        for example in text:
+            dsh_annotations = dsha.process_text(example, 'text_001', write_output=False, verbose=True)

@@ -4,6 +4,7 @@
 
 # NB rules that use custom attributes added in previous rules go here and are applied in a second application
 
+
 RULES_1 = [
     {
         # DSH and BODY_PART (for coordinated body parts)
@@ -30,14 +31,14 @@ RULES_1 = [
         # attempt (at) suicide
         'name': 'ATTEMPT_AT_SUICIDE',
         'pattern': [{'LEMMA': {'IN': ['attempt', 'try']}}, {'LEMMA': 'at', 'OP': '?'}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
-        'avm': {'LAST': {'DSH': 'DSH'}},
+        'avm': {'LAST': {'DSH': 'DSH', 'DSH_TYPE': 'SUICIDALITY'}},
         'merge': True
     },
     {
         # attempt to commit suicide
         'name': 'ATTEMPT_TO_COMMIT_SUICIDE',
         'pattern': [{'LEMMA': {'IN': ['attempt', 'try', 'attempting', 'trying']}}, {'LEMMA': {'IN': ['at', 'to']}}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
-        'avm': {'LAST': {'DSH': 'DSH'}},
+        'avm': {'LAST': {'DSH': 'DSH', 'DSH_TYPE': 'SUICIDALITY'}},
         'merge': True
     },
     {
@@ -51,7 +52,7 @@ RULES_1 = [
         # voices telling her to kill herself
         'name': 'TELL_TO_ATTEMPT_TO_DSH_SUICIDE',
         'pattern': [{'LEMMA': {'IN': ['command', 'compell', 'incite', 'say', 'tell', 'urge']}}, {'LEMMA': 'to', 'OP': '?'}, {'LEMMA': 'her'}, {'LEMMA': 'to'}, {'POS': 'VERB', 'OP': '?'}, {'POS': 'CCONJ', 'OP': '?'}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
-        'avm': {'LAST': {'DSH': 'DSH', 'HEDGING': 'HEDGING'}},
+        'avm': {'LAST': {'DSH': 'DSH', 'HEDGING': 'HEDGING', 'DSH_TYPE': 'SUICIDALITY'}},
         'merge': True
     },
     {
@@ -72,7 +73,7 @@ RULES_1 = [
         # made a suicide attempt
         'name': 'MAKE_SUICIDE_ATTEMPT',
         'pattern': [{'LEMMA': 'make'}, {'POS': {'IN': ['ADJ', 'DET', 'NUM']}}, {'POS': {'IN': ['ADJ', 'ADV']}, 'OP': '*'}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH': 'DSH'}},
+        'avm': {'ALL': {'DSH': 'DSH', 'DSH_TYPE': 'SUICIDALITY'}},
         'merge': True
     },
     {
@@ -115,7 +116,7 @@ RULES_1 = [
         # harmful thoughts
         'name': 'HARMFUL_THOUGHT',
         'pattern': [{'LEMMA': 'harmful'}, {'LEMMA': 'thought'}],
-        'avm': {'ALL': {'DSH': 'DSH', 'HEDGING': 'HEDGING'}},
+        'avm': {'ALL': {'DSH': 'DSH', 'HEDGING': 'HEDGING', 'DSH_TYPE': 'SELF-HARM'}},
         'merge': True
     },
      # DSH NON-RELEVANT
@@ -123,7 +124,7 @@ RULES_1 = [
         # suicidal or self-harm ideation
         'name': 'SUICIDAL_CCONJ_DSH_IDEATION',
         'pattern': [{'LEMMA': {'IN': ['suicidal', 'suicide']}}, {'POS': 'CCONJ'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}, {'LEMMA': 'ideation'}],
-        'avm': {0: {'DSH': 'DSH', 'HEDGING': 'HEDGING'}, 'LAST': {'HEDGING': 'HEDGING'}},
+        'avm': {0: {'DSH': 'DSH', 'HEDGING': 'HEDGING', 'DSH_TYPE': 'SUICIDALITY'}, 'LAST': {'HEDGING': 'HEDGING', 'DSH_TYPE': 'SUICIDALITY'}},
         'merge': True
     },
     {
@@ -224,6 +225,97 @@ RULES_1 = [
         'name': 'BULLET_SUICIDE',
         'pattern': [{'_': {'LA': 'BULLET'}}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
         'avm': {'ALL': {'HEDGING': 'HEDGING'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: SELF-HARM
+        'name': 'DSH_TYPE_SELF-HARM',
+        'pattern': [{'_': {'HA_TYPE': 'SELF-HARM'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'SELF-HARM'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: SELF-HITTING
+        'name': 'DSH_TYPE_SELF-HITTING',
+        'pattern': [{'_': {'HA_TYPE': 'SELF-HITTING'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'SELF-HITTING'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: OVERDOSE
+        'name': 'DSH_TYPE_OVERDOSE',
+        'pattern': [{'_': {'HA_TYPE': 'OVERDOSE'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'OVERDOSE'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: SUICIDALITY
+        'name': 'DSH_TYPE_SUICIDALITY',
+        'pattern': [{'_': {'HA_TYPE': 'SUICIDALITY'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'SUICIDALITY'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: SELF-CUTTING
+        'name': 'DSH_TYPE_SELF-CUTTING',
+        'pattern': [{'_': {'HA_TYPE': 'SELF-CUTTING'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'SELF-CUTTING'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: SELF-STRANGULATION
+        'name': 'DSH_TYPE_SELF-STRANGULATION',
+        'pattern': [{'_': {'HA_TYPE': 'SELF-STRANGULATION'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'SELF-STRANGULATION'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: SELF-BURNING
+        'name': 'DSH_TYPE_SELF-BURNING',
+        'pattern': [{'_': {'HA_TYPE': 'SELF-BURNING'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'SELF-BURNING'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: SELF-BITING
+        'name': 'DSH_TYPE_SELF-BITING',
+        'pattern': [{'_': {'HA_TYPE': 'SELF-BITING'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'SELF-BITING'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: SELF-STABBING
+        'name': 'DSH_TYPE_SELF-STABBING',
+        'pattern': [{'_': {'HA_TYPE': 'SELF-STABBING'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'SELF-STABBING'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: SELF-TRAUMA
+        'name': 'DSH_TYPE_SELF-TRAUMA',
+        'pattern': [{'_': {'HA_TYPE': 'SELF-TRAUMA'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'SELF-TRAUMA'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: SKIN-PICKING
+        'name': 'DSH_TYPE_SKIN-PICKING',
+        'pattern': [{'_': {'HA_TYPE': 'SKIN-PICKING'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'SKIN-PICKING'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: HAIR-PULLING
+        'name': 'DSH_TYPE_HAIR-PULLING',
+        'pattern': [{'_': {'HA_TYPE': 'HAIR-PULLING'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'HAIR-PULLING'}},
+        'merge': True
+    },
+    {
+        # DSH_TYPE: SELF-HARM as default
+        'name': 'DSH_TYPE_DEFAULT',
+        'pattern': [{'_': {'DSH': 'DSH', 'DSH_TYPE': False}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'SELF-HARM'}},
         'merge': True
     }
 ]
