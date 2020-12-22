@@ -12,6 +12,9 @@
 
     Tag: Self-harm
     Attributes and values:
+        dsh_type - HAIR-PULLING, OVERDOSE, SELF-BITING, SELF-BURNING, 
+                   SELF-CUTTING, SELF-HARM, SELF-HITTING, SELF-STABBING, 
+                   SELF-STRANGULATION, SELF-TRAUMA, SKIN-PICKING, SUICIDALITY
         polarity - NEGATIVE or POSITIVE
         status  - RELEVANT or NON-RELEVANT
         temporality - CURRENT or HISTORICAL

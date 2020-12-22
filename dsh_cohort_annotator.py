@@ -473,7 +473,7 @@ def process_CC_EE_update():
     return df_flags
 
 
-def load_ehost_to_dataframe(pin, key, attribute='text', df=None, map_brcids=True):
+def load_ehost_to_dataframe(pin, key, attribute='text', df=None, pin_ref=None):
     """
     Load annotations (mention text) from a directory containing eHOST annotations
     into a Pandas DataFrame
@@ -485,14 +485,14 @@ def load_ehost_to_dataframe(pin, key, attribute='text', df=None, map_brcids=True
     brcid_mapping = {}
     files = []
     
-    if map_brcids:
-        brcid_mapping, files = get_brcid_mapping(pin)
+    if pin_ref is not None:
+        brcid_mapping, files = get_brcid_mapping(pin, pin_ref)
     else:
         files = get_corpus_files(pin)
         brcid_mapping = {f.split('\\')[-1]: f.split('\\')[1] for f in files}
 
     xml = [f for f in files if 'xml' in f]
-
+    
     if df is None:
         df = pd.DataFrame(columns=['filename', 'brcid', key])
         df['filename'] = xml
@@ -514,7 +514,7 @@ def load_ehost_to_dataframe(pin, key, attribute='text', df=None, map_brcids=True
         m_string = '|'.join([m[attribute] for m in mentions if m[attribute]])
         df.at[i, key] = m_string
         df.at[i, 'brcid'] = brcid
-
+    
     return df, brcid_mapping, files
 
 
@@ -624,20 +624,21 @@ def count_flagged_patients(df_processed, key, cohort='restricted', attribute='te
     elif data_type == 'bool':
         flagged = list(set(df_processed.loc[df_processed[key] == True].brcid.tolist()))
         results['1m_doc'] = flagged
-    
+
+    n = 1
+    df_pat_res = pd.DataFrame(columns=['heur', 'n_flagged', 'n', '%_flagged'])
+    for heur in HEURISTICS:
+        if heur in results:
+            x = len(results[heur]) / n_patients * 100
+            df_pat_res.loc[n, ['heur', 'n_flagged', 'n', '%_flagged']] = [heur, len(results[heur]), n_patients, x]
+            n += 1
+                
     if verbose:
-        n = 1
-        for heur in HEURISTICS:
-            if heur in results:
-                print(str(n) + '.', 'Heuristic:', heur)
-                print('-- Flagged patients:', len(results[heur]))
-                print('-- Total patients  :', n_patients)
-                print('-- % flagged       :', len(results[heur]) / n_patients * 100)
-                n += 1
-            else:
-                print('-- Heuristics not in results (skipping):', heur)
+        print(df_pat_res)
+    else:
+        print('-- Heuristics not in results (skipping):', heur)
     
-    return results
+    return results, df_pat_res
 
 
 def evaluate_patient_level_with_heuristics(pin_gold, pin_sys, attribute='text', report_dir=None):
@@ -657,7 +658,7 @@ def evaluate_patient_level_with_heuristics(pin_gold, pin_sys, attribute='text', 
     
     # the gold corpus should not have the attribute specified as it does not 
     # have annotated attributes and the heuristics are not applied to it.
-    df_gold, _, _ = load_ehost_to_dataframe(pin_gold, key_gold, df=None, map_brcids=True)
+    df_gold, _, _ = load_ehost_to_dataframe(pin_gold, key_gold, df=None, pin_ref='T:/Andre Bittar/Projects/KA_Self-harm/Corpus_full')
     df_gold['brcid'] = df_gold.brcid.astype(int).astype(str)
     
     gold_brcids = set(df_gold.loc[df_gold[key_gold] != ''].brcid.unique().tolist())
@@ -674,11 +675,11 @@ def evaluate_patient_level_with_heuristics(pin_gold, pin_sys, attribute='text', 
     gold_np = round(len(gold_brcids) / len(all_brcids) * 100, 2)
     
     key_sys = 'system'
-    df_sys, _, _ = load_ehost_to_dataframe(pin_sys, key_sys, attribute=attribute, df=None, map_brcids=True)
+    df_sys, _, _ = load_ehost_to_dataframe(pin_sys, key_sys, attribute=attribute, df=None, pin_ref='T:/Andre Bittar/Projects/KA_Self-harm/Corpus_full')
     
     # count patients flagged by the system for each heuristic and output results. Do not use restricited cohort here as
     # not all patients in manually annotated sample are in the restricted cohort
-    res_sys = count_flagged_patients(df_sys, key_sys, cohort='full', attribute=attribute, split_attribute=False, verbose=False)
+    res_sys, _ = count_flagged_patients(df_sys, key_sys, cohort='full', attribute=attribute, split_attribute=False, verbose=False)
     
     # check the brcids are strings
     assert set([type(item) for sublist in res_sys.values() for item in sublist]) == {str}

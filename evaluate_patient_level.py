@@ -42,7 +42,7 @@ def has_DSH_mention(mentions):
     return False
 
 
-def get_brcid_mapping(pin):
+def get_brcid_mapping(pin, pin_ref):
     """
     Determine the BRCIDs for each file in the gold standard corpus. To get 
     results use 'train_dev' as gold and 'system_train_dev' as system.
@@ -60,13 +60,18 @@ def get_brcid_mapping(pin):
     
     brcid_mapping = {}
     
-    ref = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Corpus_full')
+    #ref = get_corpus_files('T:/Andre Bittar/Projects/KA_Self-harm/Corpus_full')
+    #ref = get_corpus_files('T:/Andre Bittar/Projects/ASD_TS/ASD_ALL_SUI_POS_AND_FHx')
+    ref = get_corpus_files(pin_ref)
     ref = [k for k in ref if 'xml' in k]
     
     # get the brcids from the original directory structure
     for f in ref:
         s = f.split('\\')
-        brcid = str(int(s[1]))
+        if isinstance(s[1], float):
+            brcid = str(int(s[1]))
+        else:
+            brcid = str(s[1])
         fname = s[3]
         if fname in files_trunc:
             brcid_mapping[fname] = brcid
