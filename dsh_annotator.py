@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-    Delibrate Self-Harm (DSH) annotator
+    Deliberate Self-Harm (DSH) annotator
 
     This annotator marks up mentions of deliberate self-harm (DSH) in clinical
     texts. The algorithm determines whether a mention is negated or not,
