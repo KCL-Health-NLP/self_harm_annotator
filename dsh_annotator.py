@@ -6,7 +6,8 @@
     This annotator marks up mentions of deliberate self-harm (DSH) in clinical
     texts. The algorithm determines whether a mention is negated or not,
     whether it is current or historical and whether it is relevant or not, as 
-    defined by the parameters of the study.
+    defined by the parameters of the study. The type of self-harm is also annotated
+    in a normalised form.
     Output is in the XML stand-off annotation format that is used
     by the eHOST annotation tool (see https://code.google.com/archive/p/ehost/).
 
