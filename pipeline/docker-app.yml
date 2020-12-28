@@ -1,0 +1,66 @@
+# The docker image that implements this app
+# REQUIRED
+image: "docker-registry.example.com/dsh_annotator:0.1"
+
+# The port number on which the container listens for HTTP connections
+# OPTIONAL - default 8080
+portNumber: 8080
+
+# The URL path at which the container listens for API requests
+# OPTIONAL - default "/process"
+urlPath: "/process"
+
+# Can this endpoint accept cleartext HTTP/2 requests (true) or should we use HTTP/1.1 (false)
+# OPTIONAL - default false
+supportsHttp2: false
+
+# Annotation set name into which un-mapped annotation types should be placed
+# OPTIONAL - see "annotation mappings" documentation for details
+outputASName: "Self-harm"
+
+# Memory settings for the container - numbers accept suffixes k, m or g for
+# kilobytes, megabytes and gigabytes respectively.
+# OPTIONAL - see below
+memory:
+  # Minimum amount of memory required for each replica of this container.  This is
+  # multiplied by the number of replicas to determine the total required memory,
+  # and may result in fewer-than-ideal replicas running if memory is tight.
+  # OPTIONAL - if omitted, there is no minimum memory constraint, which may result
+  # in the platform attempting to start more replicas than there is memory spare
+  min: 128m
+
+  # Maximum amount of memory that should be allowed to be consumed by the running
+  # container.  This is passed on to Docker, which will terminate (and re-start)
+  # the container if it tries to use more than this amount of memory
+  # OPTIONAL - if omitted, no hard limit will be passed on to Docker.  The container
+  # may still be terminated by the operating system if the overall system memory
+  # becomes critically low.
+  max: 1g
+
+# Ideal number of parallel requests that a single instance of this container can
+# handle.  The actual concurrency may be greater than this if there is insufficient
+# memory to run enough replicas.
+# OPTIONAL - if omitted we assume a single replica will always be enough to handle
+# as many parallel requests as there are GCP threads on the processing node
+targetConcurrency: 3
+
+# Environment variables to pass to the container process.  In addition to fixed
+# values, you can use ${APP_CONCURRENCY} to pass in a number giving the actual
+# expected concurrency level for this container (which may be more than
+# targetConcurrency if memory is low, but capped at the number of GCP threads).
+# The container may wish to use this value to size its internal data structures
+# such as thread pools.
+# OPTIONAL
+environment:
+  CONCURRENCY: "${APP_CONCURRENCY}"
+
+# A more flexible way to map the annotation types returned by the container
+# endpoint into annotation sets and types in GATE, overriding the default
+# behaviour of using the ELG annotation type as-is for the type, and putting
+# the annotations in the set specified by outputASName.  Keys in this mapping
+# are the annotation types as returned by the endpoint, and the values are
+# GATE-style annotation selector expressions setName:annType exactly as used
+# in the metadata and db-mappings.
+# OPTIONAL
+# annotationTypeMapping:
+#  "/activity/prescription": "Drug:Prescription"

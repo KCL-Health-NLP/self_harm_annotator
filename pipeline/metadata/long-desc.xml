@@ -1,0 +1,12 @@
+<p>Deliberate Self-Harm (DSH) annotator<br/><br/>This annotator marks up mentions of deliberate self-harm (DSH) in clinical texts. The algorithm determines whether a mention is negated or not, whether it is current or historical and whether it is relevant or not, as defined by the parameters of the study. The type of self-harm is also annotated in a normalised form.</p>
+
+<p><button class="btn btn-info" data-toggle="collapse" data-target="#ldAnnotationDetails"><i class="icon-info-sign icon-white"></i> Annotation details</button></p>
+
+<dl class="collapse clearfix" id="ldAnnotationDetails">
+  <dt>Self-harm:Mention</dt>
+  <dd>The annotation that covers each individual word
+    <dl>
+      <dt>string</dt><dd>the text of the mention</dd>
+    </dl>
+  </dd>
+</dl>
