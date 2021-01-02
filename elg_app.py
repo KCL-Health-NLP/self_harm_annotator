@@ -62,7 +62,7 @@ def process_request(self):
         # Convert any exception from the processing code into an ELG internal error
         raise JsonError(status_=500, failure={ 'errors': [
             {'code': 'elg.service.internalError', 'text': 'Internal error during processing: {0}',
-             'params':[traceback.format_exception_only(exc_type, exc_value)[-1]]}
+             'params': [traceback.format_exception_only(exc_type, exc_value)[-1]]}
         ]})
 
 
