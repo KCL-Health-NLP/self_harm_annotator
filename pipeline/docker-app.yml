@@ -1,6 +1,6 @@
 # The docker image that implements this app
 # REQUIRED
-image: "docker-registry.example.com/dsh_annotator:0.1"
+image: dsh_annotator
 
 # The port number on which the container listens for HTTP connections
 # OPTIONAL - default 8080

@@ -12,7 +12,7 @@
   docker-app.yml
   -->
   <annotation-selectors>Self-harm:Mention</annotation-selectors>
-  <additional-annotations></additional-annotations>
+  <additional-annotations/>
   <tags>
     <tag>English</tag>
   </tags>
