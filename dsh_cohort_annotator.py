@@ -813,7 +813,7 @@ def process(pin, check_counts=True, check_temporality=True, heuristic='base', te
     
     print(t1 - t0)
     
-    if test_rows == -1:
+    if test_rows == -1 and os.path.exists(tmp_pout):
         move(tmp_pout, pin)
         print('-- Wrote file:', pin)
         df.to_pickle(pin)
