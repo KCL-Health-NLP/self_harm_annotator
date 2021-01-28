@@ -19,7 +19,7 @@ from evaluate_patient_level import get_brcid_mapping
 from pandas import Timestamp
 from pprint import pprint
 from shutil import copy, move
-from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, classification_report
+from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, classification_report, confusion_matrix
 from time import time
 
 __author__ = "André Bittar"
@@ -733,7 +733,15 @@ def evaluate_patient_level_with_heuristics(pin_gold, pin_sys, attribute='text', 
         k = round(cohen_kappa_score(y_true, y_pred), 2)
         results_dict[heur] = {'p': p, 'r': r, 'f': f, 'k': k, 'sys_n': sys_n, 'sys_%': sys_np}
         report_string += '       kappa       ' + str(k) + '\n'
-        report_string += '====================\n\n'
+        report_string += '\nCONFUSION MATRIX\n'
+        report_string += '----------------\n'
+        
+        pair_labels = [True, False]
+        cm = confusion_matrix(y_true, y_pred, labels=pair_labels)
+        df_cm = pd.DataFrame(cm, index=pair_labels, columns=pair_labels)
+        report_string += df_cm.to_string()
+        
+        report_string += '\n\n====================\n\n'
     
     # select best results
     df_results = pd.DataFrame(results_dict).T.reset_index()
