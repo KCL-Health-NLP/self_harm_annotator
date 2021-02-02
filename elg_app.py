@@ -3,8 +3,8 @@ import traceback
 from dsh_annotator import DSHAnnotator
 from flask import Flask, request
 from flask_json import FlaskJSON, JsonError, json_response, as_json
+import traceback
 from sys import exc_info
-
 
 app = Flask(__name__)
 # Don't add an extra "status" property to JSON responses - this would break the API contract
@@ -18,27 +18,27 @@ json_app = FlaskJSON(app)
 @json_app.invalid_json_error
 def invalid_request_error(e):
     """Generates a valid ELG "failure" response if the request cannot be parsed"""
-    raise JsonError(status_=400, failure={'errors': [
-        {'code': 'elg.request.invalid', 'text': 'Invalid request message'}
-    ]})
+    raise JsonError(status_=400, failure={ 'errors': [
+        { 'code':'elg.request.invalid', 'text':'Invalid request message' }
+    ] })
 
 
 @app.route('/process', methods=['POST'])
 @as_json
-def process_request(self):
+def process_request():
     """
 
     Return:
          - JSON response with all annotations.
     """
 
+    """Main request processing logic - accepts a JSON request and returns a JSON response."""
     data = request.get_json()
     # sanity checks on the request message
     if (data.get('type') != 'text') or ('content' not in data):
         invalid_request_error(None)
 
     content = data['content']
-
     try:
         dsha = DSHAnnotator(verbose=False)
         text_id = 'text_001'
@@ -55,12 +55,11 @@ def process_request(self):
         ann_dict = {'self-harm': ann_list}
 
         return dict(response={'type': 'annotations', 'annotations': ann_dict})
-
-    except Exception:
+    except:
         exc_type, exc_value, exc_traceback = exc_info()
         traceback.print_exc()
         # Convert any exception from the processing code into an ELG internal error
-        raise JsonError(status_=500, failure={ 'errors': [
+        raise JsonError(status_=500, failure={'errors': [
             {'code': 'elg.service.internalError', 'text': 'Internal error during processing: {0}',
              'params': [traceback.format_exception_only(exc_type, exc_value)[-1]]}
         ]})
