@@ -18,21 +18,21 @@ json_app = FlaskJSON(app)
 @json_app.invalid_json_error
 def invalid_request_error(e):
     """Generates a valid ELG "failure" response if the request cannot be parsed"""
-    raise JsonError(status_=400, failure={ 'errors': [
-        { 'code':'elg.request.invalid', 'text':'Invalid request message' }
-    ] })
+    raise JsonError(status_=400, failure={'errors': [
+        {'code': 'elg.request.invalid', 'text': 'Invalid request message'}
+    ]})
 
 
 @app.route('/process', methods=['POST'])
 @as_json
 def process_request():
     """
+    Main request processing logic - accepts a JSON request and returns a JSON response.
 
     Return:
          - JSON response with all annotations.
     """
 
-    """Main request processing logic - accepts a JSON request and returns a JSON response."""
     data = request.get_json()
     # sanity checks on the request message
     if (data.get('type') != 'text') or ('content' not in data):
@@ -49,7 +49,7 @@ def process_request():
             ann = {'start': a['start'],
                    'end': a['end'],
                    'features': {a.get(f, 'NONE') for f in a if f not in ['start', 'end']}
-                }
+                   }
             ann_list.append(ann)
 
         ann_dict = {'self-harm': ann_list}
