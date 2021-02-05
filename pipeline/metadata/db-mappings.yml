@@ -4,8 +4,36 @@
 ##   annotationFeatureName: (the key in the "features" object returned by the endpoint)
 ##     settings for this feature
 
-"Self-harm:Mention":
-  string:
+"self-harm:self-harm":
+  annotator:
+    column: token_string
+    type: VARCHAR(255)
+    sqlType: VARCHAR
+  class:
+    column: token_string
+    type: VARCHAR(255)
+    sqlType: VARCHAR
+  dsh_type:
+    column: token_string
+    type: VARCHAR(255)
+    sqlType: VARCHAR
+  comment:
+    column: token_string
+    type: VARCHAR(255)
+    sqlType: VARCHAR
+  polarity:
+    column: token_string
+    type: VARCHAR(255)
+    sqlType: VARCHAR
+  status:
+    column: token_string
+    type: VARCHAR(255)
+    sqlType: VARCHAR
+  temporality:
+    column: token_string
+    type: VARCHAR(255)
+    sqlType: VARCHAR
+  text:
     column: token_string
     type: VARCHAR(255)
     sqlType: VARCHAR

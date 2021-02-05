@@ -4,7 +4,7 @@ image: dsh_annotator:latest
 
 # The port number on which the container listens for HTTP connections
 # OPTIONAL - default 8080
-portNumber: 8080
+portNumber: 8000
 
 # The URL path at which the container listens for API requests
 # OPTIONAL - default "/process"
@@ -16,7 +16,7 @@ supportsHttp2: false
 
 # Annotation set name into which un-mapped annotation types should be placed
 # OPTIONAL - see "annotation mappings" documentation for details
-outputASName: "Self-harm"
+outputASName: "self-harm"
 
 # Memory settings for the container - numbers accept suffixes k, m or g for
 # kilobytes, megabytes and gigabytes respectively.

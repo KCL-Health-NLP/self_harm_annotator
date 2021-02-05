@@ -12,7 +12,7 @@
   configured more flexibly if you use annotationTypeMapping in the
   docker-app.yml
   -->
-  <annotation-selectors>Self-harm:Mention</annotation-selectors>
+  <annotation-selectors>self-harm:self-harm</annotation-selectors>
   <additional-annotations/>
   <tags>
     <tag>English</tag>

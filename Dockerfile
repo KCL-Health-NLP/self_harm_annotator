@@ -1,4 +1,4 @@
-FROM python:3-slim
+FROM python:3.7-slim
 
 # Install tini and create an unprivileged user
 ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini /sbin/tini
@@ -16,10 +16,10 @@ USER elg:elg
 WORKDIR /elg
 
 # Create a Python virtual environment for the dependencies
-RUN python -mvenv venv && venv/bin/pip --no-cache-dir install -r requirements.txt
-
 # Download English model for spaCy
-RUN venv/bin/python -m spacy download en_core_web_sm
+RUN python -mvenv venv \
+  && venv/bin/pip --no-cache-dir install -r requirements.txt \
+  && venv/bin/python -m spacy download en_core_web_sm
 
 # Install some tools for diagnostics
 USER root

@@ -45,16 +45,25 @@ def process_request():
         annotations = dsha.process_text(content, text_id, write_output=False, verbose=False)[text_id]
         ann_list = []
 
-        for a in annotations:
-            ann = {'start': a['start'],
-                   'end': a['end'],
-                   'features': {a.get(f, 'NONE') for f in a if f not in ['start', 'end']}
+        for a_id in annotations:
+            ann_instance = annotations[a_id]
+            ann = {'start': ann_instance['start'],
+                   'end': ann_instance['end'],
+                   'features': {f: ann_instance.get(f, 'NONE') for f in ann_instance if f not in ['start', 'end']}
                    }
             ann_list.append(ann)
 
         ann_dict = {'self-harm': ann_list}
 
-        return dict(response={'type': 'annotations', 'annotations': ann_dict})
+        response = dict(response={'type': 'annotations', 'annotations': ann_dict})
+
+        print('ANN_DICT:')
+        print(ann_dict, flush=True)
+
+        print('ANN_DICT:')
+        print(response, flush=True)
+
+        return response
     except:
         exc_type, exc_value, exc_traceback = exc_info()
         traceback.print_exc()
