@@ -57,12 +57,6 @@ def process_request():
 
         response = dict(response={'type': 'annotations', 'annotations': ann_dict})
 
-        print('ANN_DICT:')
-        print(ann_dict, flush=True)
-
-        print('ANN_DICT:')
-        print(response, flush=True)
-
         return response
     except:
         exc_type, exc_value, exc_traceback = exc_info()
