@@ -22,19 +22,19 @@ RUN python -mvenv venv \
   && venv/bin/python -m spacy download en_core_web_sm
 
 # Install some tools for diagnostics
-USER root
-RUN apt-get update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    curl \
-    iputils-ping \
-    mlocate \
-    net-tools \
-    procps \
-    wget \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/* \
-  && updatedb
-USER 1001
+#USER root
+#RUN apt-get update \
+#  && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+#    curl \
+#    iputils-ping \
+#    mlocate \
+#    net-tools \
+#    procps \
+#    wget \
+#  && apt-get clean \
+#  && rm -rf /var/lib/apt/lists/* \
+#  && updatedb
+#USER 1001
 
 # Copy in the actual app and entrypoint script - if using this file as a
 # template for your own app, this is where you would copy in anything else your

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!--metadata xmlns="http://gate.ac.uk/ns/pipeline-metadata"//-->
-<metadata>
+<metadata xmlns="http://gate.ac.uk/ns/pipeline-metadata">
   <pipeline-name>Deliberate Self-Harm (DSH) Annotator</pipeline-name>
   <slug>dsh-python</slug>
   <ordering>500</ordering>
@@ -18,3 +17,4 @@
     <tag>English</tag>
   </tags>
 </metadata>
+
