@@ -14,6 +14,8 @@ app.config['JSON_SORT_KEYS'] = False
 
 json_app = FlaskJSON(app)
 
+dsha = DSHAnnotator(verbose=False)
+
 
 @json_app.invalid_json_error
 def invalid_request_error(e):
@@ -40,7 +42,6 @@ def process_request():
 
     content = data['content']
     try:
-        dsha = DSHAnnotator(verbose=False)
         text_id = 'text_001'
         annotations = dsha.process_text(content, text_id, write_output=False, verbose=False)[text_id]
         ann_list = []
