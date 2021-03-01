@@ -145,7 +145,7 @@ def check_prevalence(files, heuristic, cohort='full'):
 
 def evaluate_patient_level(brcid_mapping, files, heuristic='2m', verbose=False):
     """
-    DEPRECATED - use evaluate_patient_level_with_heuristic in dsh_cohort_annotator.py
+    DEPRECATED - use evaluate_patient_level_with_heuristic in sh_cohort_annotator.py
     
     Determine patient-level performance on the gold standard corpus.
     
@@ -213,7 +213,7 @@ def evaluate_patient_level(brcid_mapping, files, heuristic='2m', verbose=False):
 
 def process(heuristic='base'):
     """
-    DEPRECATED - use evaluate_patient_level_with_heuristic in dsh_cohort_annotator.py
+    DEPRECATED - use evaluate_patient_level_with_heuristic in sh_cohort_annotator.py
 
     Run the whole evaluation process with a specific heuristic on the whole cohort.
     NB: gold must use the 'base' heuristic which is 1 true mention to flag a patient

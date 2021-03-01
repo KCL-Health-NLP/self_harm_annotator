@@ -329,7 +329,7 @@ def evaluate_sys(results, sys_results):
 
 def batch_process(main_dir):
     """
-    Run the dsh_annotator on text files and output new XML.
+    Run the sh_annotator on text files and output new XML.
     """
     dsha = SHAnnotator(verbose=False)
     
@@ -765,7 +765,7 @@ def evaluate_patient_level_with_heuristics(pin_gold, pin_sys, attribute='text', 
 
 def process(pin, check_counts=True, check_temporality=True, heuristic='base', test_rows=-1):
     """
-    Run dsh_annotator on a DataFrame that contains the text for each file.
+    Run sh_annotator on a DataFrame that contains the text for each file.
     Outputs True for documents with relevant mention.
     Does not write new XML.
     All saved to the DataFrame.
@@ -828,4 +828,3 @@ if __name__ == '__main__':
     #test(check_temporality=True)
     #df_processed = process('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle', check_counts=True, check_temporality=True, heuristic='2m_diff')
     #batch_process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
-    
