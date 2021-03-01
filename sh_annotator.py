@@ -51,21 +51,21 @@ FWD_OFFSET = 10
 BWD_OFFSET = 10
 
 
-class DSHAnnotator:
+class SHAnnotator:
     """
-    Deliberate Self-Harm (DSH) annotator
+    Self-Harm annotator
     
-    Annotate mentions of deliberate self-harm (DSH) in clinical texts.
+    Annotate mentions of self-harm in clinical texts.
     """
 
     def __init__(self, verbose=False):
         """
-        Create a new DSHAnnotator instance.
+        Create a new SHAnnotator instance.
         
         Arguments:
             - verbose: bool; print all messages.
         """
-        print('DSH annotator')
+        print('SH annotator')
         self.nlp = spacy.load('en_core_web_sm', disable=['ner'])
         self.text = None
         self.verbose = verbose
@@ -729,7 +729,7 @@ class DSHAnnotator:
         """
         with open(path, 'w') as fout:
             for token in doc:
-                string = '{:<10}{:<15}{:<15}{:<15}{:<15}{:<15}{:<15}'.format(token.i, token.text, token.lemma_, token.tag_, dsha.nlp.vocab.strings[token._.dsh] or '_', dsha.nlp.vocab.strings[token._.sem] or '_', token.head.i, token.dep_)
+                string = '{:<10}{:<15}{:<15}{:<15}{:<15}{:<15}{:<15}'.format(token.i, token.text, token.lemma_, token.tag_, sha.nlp.vocab.strings[token._.dsh] or '_', sha.nlp.vocab.strings[token._.sem] or '_', token.head.i, token.dep_)
                 print(string, file=fout)
                 print(string)
         fout.close()
@@ -1171,7 +1171,7 @@ class DateTokenAnnotator(object):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Deliberate Self-Harm (DSH) Annotator')
+    parser = argparse.ArgumentParser(description='Self-Harm Annotator')
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-d', '--input_dir', type=str, nargs=1, help='the path to the directory containing text files to process.', required=False)
     group.add_argument('-f', '--input_file', type=str, nargs=1, help='the path to a text file to process.', required=False)
@@ -1186,23 +1186,23 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    dsha = DSHAnnotator(verbose=args.verbose)
+    sha = SHAnnotator(verbose=args.verbose)
     
     if args.text is not None:
-        dsh_annotations = dsha.process_text(args.text[0], 'text_001', write_output=args.write_output, verbose=args.verbose)
+        dsh_annotations = sha.process_text(args.text[0], 'text_001', write_output=args.write_output, verbose=args.verbose)
     elif args.input_dir is not None:
         if os.path.isdir(args.input_dir[0]):
-            dsh_annotations = dsha.process(args.input_dir[0], write_output=args.write_output)
+            dsh_annotations = sha.process(args.input_dir[0], write_output=args.write_output)
         else:
             print('-- Error: argument -d/--input_dir must be an existing directory.\n')
             parser.print_help()
     elif args.input_file is not None:
         if os.path.isfile(args.input_file[0]):
-            dsh_annotations = dsha.process(args.input_file[0], write_output=args.write_output)
+            dsh_annotations = sha.process(args.input_file[0], write_output=args.write_output)
         else:
             print('-- Error: argument -f/--input_file must be an existing text file.\n')
             parser.print_help()            
     elif args.examples:
         print('-- Running examples...', file=sys.stderr)
         for example in text:
-            dsh_annotations = dsha.process_text(example, 'text_001', write_output=False, verbose=True)
+            dsh_annotations = sha.process_text(example, 'text_001', write_output=False, verbose=True)

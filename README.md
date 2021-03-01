@@ -1,7 +1,7 @@
-Deliberate self-harm (DSH) annotator
-====================================
+Self-harm annotator
+===================
 
-This is a Python application that annotates mentions of deliberate self-harm (DSH) in clinical texts. The algorithm determines whether a mention is negated or not, whether it is current or historical and whether it is relevant or not (e.g. is a hypothetical or asserted mention), as defined by the parameters of the associated study. The type of self-harm is also annotated in a normalised form.
+This is a Python application that annotates mentions of self-harm in clinical texts. The algorithm determines whether a mention is negated or not, whether it is current or historical and whether it is relevant or not (e.g. is a hypothetical or asserted mention), as defined by the parameters of the associated study. The type of self-harm (e.g. overdose, cutting, etc.) is also annotated in a normalised form.
 
 This code exposes an ELG-compliant endpoint and infrastructure for packaging the application into a Docker container.
 
