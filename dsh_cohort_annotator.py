@@ -760,7 +760,7 @@ def evaluate_patient_level_with_heuristics(pin_gold, pin_sys, attribute='text', 
     print(report_string)    
     
     if report_dir is not None:
-        today = str(date.today())
+        today = str(date.today()).replace('-', '')
         label = os.path.basename(os.path.normpath(pin_gold))
         pout = os.path.join(report_dir, 'patient-level_evaluation_report_' + label + '_' + attribute + '_' + today + '.txt')
         fout = open(pout, 'w')
