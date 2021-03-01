@@ -9,5 +9,5 @@ This folder contains the actual Python code and the `Dockerfile` to build the im
 
 ```
 cd pipeline
-zip -r ../dsh_annotator.zip *
+zip -r ../sh_annotator.zip *
 ```
