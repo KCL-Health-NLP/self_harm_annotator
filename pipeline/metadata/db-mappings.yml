@@ -13,7 +13,7 @@
     column: token_string
     type: VARCHAR(255)
     sqlType: VARCHAR
-  dsh_type:
+  sh_type:
     column: token_string
     type: VARCHAR(255)
     sqlType: VARCHAR
