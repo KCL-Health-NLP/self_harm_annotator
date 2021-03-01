@@ -13,7 +13,7 @@ sys.path.append('T:/Andre Bittar/workspace/utils')
 
 from datetime import date
 from db_connection import fetch_dataframe, db_name, server_name
-from dsh_annotator import DSHAnnotator
+from sh_annotator import DSHAnnotator
 from ehost_annotation_reader import convert_file_annotations, get_corpus_files, load_mentions_with_attributes
 from evaluate_patient_level import get_brcid_mapping
 from pandas import Timestamp

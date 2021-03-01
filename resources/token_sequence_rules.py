@@ -310,21 +310,21 @@ RULES = [
         # (deliberate) jump off
         'name': 'JUMP_OFF',
         'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'jump'}, {'LEMMA': {'IN': ['from', 'off', 'out']}}, {'LEMMA': {'NOT_IN': ['one']}}],
-        'avm': {'ALL': {'DSH': 'DSH', 'DSH_TYPE': 'SELF-TRAUMA'}},
+        'avm': {'ALL': {'DSH': 'DSH', 'DSH_TYPE': 'TRAUMA'}},
         'merge': True
     },
     {
         # (deliberate) jump in front of
         'name': 'JUMP_IN_FRONT',
         'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'jump'}, {'LEMMA': 'in'}, {'LEMMA': 'front'}, {'LEMMA': 'of'}],
-        'avm': {'ALL': {'DSH': 'DSH', 'DSH_TYPE': 'SELF-TRAUMA'}},
+        'avm': {'ALL': {'DSH': 'DSH', 'DSH_TYPE': 'TRAUMA'}},
         'merge': True
     },
     {
         # (deliberate) throw herself in front of
         'name': 'THROW_HERSELF',
         'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'throw'}, {'LEMMA': 'herself'}, {'POS': {'IN': ['ADP', 'PART']}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH': 'DSH', 'DSH_TYPE': 'SELF-TRAUMA'}},
+        'avm': {'ALL': {'DSH': 'DSH', 'DSH_TYPE': 'TRAUMA'}},
         'merge': True
     },
     {

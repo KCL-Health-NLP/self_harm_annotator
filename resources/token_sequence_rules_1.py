@@ -235,10 +235,10 @@ RULES_1 = [
         'merge': True
     },
     {
-        # DSH_TYPE: SELF-HITTING
+        # DSH_TYPE: HITTING
         'name': 'DSH_TYPE_SELF-HITTING',
-        'pattern': [{'_': {'HA_TYPE': 'SELF-HITTING'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH_TYPE': 'SELF-HITTING'}},
+        'pattern': [{'_': {'HA_TYPE': 'HITTING'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'HITTING'}},
         'merge': True
     },
     {
@@ -256,45 +256,45 @@ RULES_1 = [
         'merge': True
     },
     {
-        # DSH_TYPE: SELF-CUTTING
+        # DSH_TYPE: CUTTING
         'name': 'DSH_TYPE_SELF-CUTTING',
-        'pattern': [{'_': {'HA_TYPE': 'SELF-CUTTING'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH_TYPE': 'SELF-CUTTING'}},
+        'pattern': [{'_': {'HA_TYPE': 'CUTTING'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'CUTTING'}},
         'merge': True
     },
     {
-        # DSH_TYPE: SELF-STRANGULATION
-        'name': 'DSH_TYPE_SELF-STRANGULATION',
-        'pattern': [{'_': {'HA_TYPE': 'SELF-STRANGULATION'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH_TYPE': 'SELF-STRANGULATION'}},
+        # DSH_TYPE: STRANGULATION
+        'name': 'DSH_TYPE_STRANGULATION',
+        'pattern': [{'_': {'HA_TYPE': 'STRANGULATION'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'STRANGULATION'}},
         'merge': True
     },
     {
         # DSH_TYPE: SELF-BURNING
-        'name': 'DSH_TYPE_SELF-BURNING',
-        'pattern': [{'_': {'HA_TYPE': 'SELF-BURNING'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH_TYPE': 'SELF-BURNING'}},
+        'name': 'DSH_TYPE_BURNING',
+        'pattern': [{'_': {'HA_TYPE': 'BURNING'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'BURNING'}},
         'merge': True
     },
     {
-        # DSH_TYPE: SELF-BITING
-        'name': 'DSH_TYPE_SELF-BITING',
-        'pattern': [{'_': {'HA_TYPE': 'SELF-BITING'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH_TYPE': 'SELF-BITING'}},
+        # DSH_TYPE: BITING
+        'name': 'DSH_TYPE_BITING',
+        'pattern': [{'_': {'HA_TYPE': 'BITING'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'BITING'}},
         'merge': True
     },
     {
-        # DSH_TYPE: SELF-STABBING
-        'name': 'DSH_TYPE_SELF-STABBING',
-        'pattern': [{'_': {'HA_TYPE': 'SELF-STABBING'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH_TYPE': 'SELF-STABBING'}},
+        # DSH_TYPE: STABBING
+        'name': 'DSH_TYPE_STABBING',
+        'pattern': [{'_': {'HA_TYPE': 'STABBING'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'STABBING'}},
         'merge': True
     },
     {
-        # DSH_TYPE: SELF-TRAUMA
-        'name': 'DSH_TYPE_SELF-TRAUMA',
-        'pattern': [{'_': {'HA_TYPE': 'SELF-TRAUMA'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH_TYPE': 'SELF-TRAUMA'}},
+        # DSH_TYPE: TRAUMA
+        'name': 'DSH_TYPE_TRAUMA',
+        'pattern': [{'_': {'HA_TYPE': 'TRAUMA'}, 'OP': '+'}],
+        'avm': {'ALL': {'DSH_TYPE': 'TRAUMA'}},
         'merge': True
     },
     {

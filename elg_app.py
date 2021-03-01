@@ -1,6 +1,6 @@
 import traceback
 
-from dsh_annotator import DSHAnnotator
+from sh_annotator import DSHAnnotator
 from flask import Flask, request
 from flask_json import FlaskJSON, JsonError, json_response, as_json
 import traceback
