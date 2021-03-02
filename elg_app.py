@@ -1,6 +1,6 @@
 import traceback
 
-from sh_annotator import SHAnnotator
+from self_harm_annotator import SHAnnotator
 from flask import Flask, request
 from flask_json import FlaskJSON, JsonError, json_response, as_json
 import traceback

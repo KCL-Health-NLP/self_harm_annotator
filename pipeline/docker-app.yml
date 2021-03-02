@@ -1,6 +1,6 @@
 # The docker image that implements this app
 # REQUIRED
-image: sh_annotator:latest
+image: self_harm_annotator:latest
 
 # The port number on which the container listens for HTTP connections
 # OPTIONAL - default 8080

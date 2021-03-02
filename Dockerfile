@@ -40,7 +40,7 @@ RUN python -mvenv venv \
 # template for your own app, this is where you would copy in anything else your
 # app depends on such as pre-trained model files, etc.
 COPY --chown=elg:elg docker-entrypoint.sh elg_app.py /elg/
-COPY --chown=elg:elg detokenizer.py dsh_annotator.py lexical_annotator.py token_sequence_annotator.py /elg/
+COPY --chown=elg:elg detokenizer.py self_harm_annotator.py lexical_annotator.py token_sequence_annotator.py /elg/
 COPY --chown=elg:elg doc /elg/doc
 COPY --chown=elg:elg examples /elg/examples
 COPY --chown=elg:elg resources /elg/resources
