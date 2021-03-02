@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
     This is a utility script to annotate specific cohorts, e.g. Karyn Ayre's
-    perinatal DSH cohort, Charlotte Cliffe's eating disorder cohort.
+    perinatal SH cohort, Charlotte Cliffe's eating disorder cohort.
     Execution examples are provided in comments in the main() method.
 """
 
@@ -13,13 +13,13 @@ sys.path.append('T:/Andre Bittar/workspace/utils')
 
 from datetime import date
 from db_connection import fetch_dataframe, db_name, server_name
-from dsh_annotator import DSHAnnotator
+from sh_annotator import SHAnnotator
 from ehost_annotation_reader import convert_file_annotations, get_corpus_files, load_mentions_with_attributes
 from evaluate_patient_level import get_brcid_mapping
 from pandas import Timestamp
 from pprint import pprint
 from shutil import copy, move
-from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, classification_report, confusion_matrix
+from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, classification_report
 from time import time
 
 __author__ = "André Bittar"
@@ -32,7 +32,7 @@ __email__ = "andre.bittar@kcl.ac.uk"
 HEURISTICS = ['1m_doc', '2m_doc', '1m_patient', '2m_patient', '2m_diff_doc', '2m_diff_patient', '2m_diff_strict_doc', '2m_diff_strict_patient']
 
 
-def has_DSH_mention(mentions, check_temporality):
+def has_SH_mention(mentions, check_temporality):
     """
     Check if any of the mentions are positive depending on the predefined study
     criteria. e.g. for Karyn's project these are polarty=POSITIVE, 
@@ -67,7 +67,7 @@ def has_DSH_mention(mentions, check_temporality):
     return False
 
 
-def count_true_DSH_mentions(mentions, check_temporality):
+def count_true_SH_mentions(mentions, check_temporality):
     """
     Count the number of positive mentions.
     This is for heuristics that look only at the number of mentions.
@@ -93,7 +93,7 @@ def count_true_DSH_mentions(mentions, check_temporality):
     return count
 
 
-def get_true_DSH_mentions(mentions, check_temporality):
+def get_true_SH_mentions(mentions, check_temporality):
     """
     Get the text of all positive mentions.
     This is for heuristics that compare the text of mentions.
@@ -104,7 +104,7 @@ def get_true_DSH_mentions(mentions, check_temporality):
         polarity = mention.get('polarity', None)
         status = mention.get('status', None)
         text = mention.get('text', None)
-        text += '#' + mention.get('dsh_type', 'SELF-HARM')
+        text += '#' + mention.get('sh_type', 'SELF-HARM')
 
         if not check_temporality:
             if polarity == 'POSITIVE' and status == 'RELEVANT':
@@ -167,9 +167,9 @@ def test(check_temporality):
     """
     Run some test examples.
     """
-    dsha = DSHAnnotator()
+    sha = SHAnnotator()
     
-    texts = ['Psychiatric history: she reports having self-harmed.', 'She has self-harmed in the past.', 'No evidence of cutting herself, but does have DSH. She is self-harming.']    
+    texts = ['Psychiatric history: she reports having self-harmed.', 'She has self-harmed in the past.', 'No evidence of cutting herself, but does have SH. She is self-harming.']    
     
     n = 1
     global_mentions = {}
@@ -177,17 +177,17 @@ def test(check_temporality):
     for text in texts:
         text_id = 'text_' + str(n).zfill(5)
         n += 1
-        mentions = dsha.process_text(text, text_id, verbose=False, write_output=False)
-        print('HAS DSH:', has_DSH_mention(mentions, check_temporality=check_temporality))
+        mentions = sha.process_text(text, text_id, verbose=False, write_output=False)
+        print('HAS SH:', has_SH_mention(mentions, check_temporality=check_temporality))
         global_mentions.update(mentions)
     
     pprint(global_mentions)
 
 
-def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
+def count_sh_mentions_per_patient_train(sys_or_gold, recalculate=False):
     """
     Load gold/train data into a DataFrame and count the number of "true" (positive)
-    DSH mentions per patient
+    SH mentions per patient
     """
     df = pin = None
 
@@ -225,11 +225,11 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
             docid = t_split[9].replace('.txt', '').split('_')[-1]
             text_content = open(t, 'r').read()
             mentions = load_mentions_with_attributes(x)
-            hm = count_true_DSH_mentions(mentions)
-            #hm = has_DSH_mention(mentions)
+            hm = count_true_SH_mentions(mentions)
+            #hm = has_SH_mention(mentions)
             entries.append((t, brcid, docid, text_content, hm))
 
-        df = pd.DataFrame(entries, columns=['file', 'brcid', 'cn_doc_id', 'text_content', 'dsh'])
+        df = pd.DataFrame(entries, columns=['file', 'brcid', 'cn_doc_id', 'text_content', 'sh'])
         
         if sys_or_gold != 'cohort':
             print('-- Saved file:', pin)
@@ -241,8 +241,8 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
     for brcid in df.groupby('brcid'):
         c = 0
         for i, row in brcid[1].iterrows():
-            if row.dsh > 0:
-                c += row.dsh
+            if row.sh > 0:
+                c += row.sh
         results[brcid[0]] = c
 
     return df, results
@@ -250,7 +250,7 @@ def count_dsh_mentions_per_patient_train(sys_or_gold, recalculate=False):
 
 def count_cohort_mentions():
     """
-    Count all positive DSH mentions in the manually annotated cohort documents
+    Count all positive SH mentions in the manually annotated cohort documents
     (in eHOST) format.
     """
     #files = get_corpus_files('Z:/Andre Bittar/Projects/KA_Self-harm/data/text')
@@ -264,11 +264,11 @@ def count_cohort_mentions():
         docid = t_split[8].replace('.txt', '').split('_')[-1]
         text_content = open(t, 'r', encoding='latin-1').read()
         mentions = load_mentions_with_attributes(x)
-        hm = count_true_DSH_mentions(mentions, check_temporality=True)
-        #hm = has_DSH_mention(mentions)
+        hm = count_true_SH_mentions(mentions, check_temporality=True)
+        #hm = has_SH_mention(mentions)
         entries.append((t, brcid, docid, text_content, hm))
 
-    df = pd.DataFrame(entries, columns=['file', 'brcid', 'cn_doc_id', 'text_content', 'dsh'])
+    df = pd.DataFrame(entries, columns=['file', 'brcid', 'cn_doc_id', 'text_content', 'sh'])
     #df.to_pickle('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/test_patient.pickle')
     print('-- Done.', file=sys.stderr)
     
@@ -276,8 +276,8 @@ def count_cohort_mentions():
     for brcid in df.groupby('brcid'):
         c = 0
         for i, row in brcid[1].iterrows():
-            if row.dsh > 0:
-                c += row.dsh
+            if row.sh > 0:
+                c += row.sh
         results[brcid[0]] = c
 
     return df, results
@@ -329,9 +329,9 @@ def evaluate_sys(results, sys_results):
 
 def batch_process(main_dir):
     """
-    Run the dsh_annotator on text files and output new XML.
+    Run the sh_annotator on text files and output new XML.
     """
-    dsha = DSHAnnotator(verbose=False)
+    sha = SHAnnotator(verbose=False)
     
     #main_dir = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text'
     
@@ -343,7 +343,7 @@ def batch_process(main_dir):
     
     for pdir in pdirs:
          pin = os.path.join(main_dir, pdir, 'corpus').replace('\\', '/')
-         _ = dsha.process(pin, write_output=True)
+         _ = sha.process(pin, write_output=True)
          print(i, '/', n, pin)
          i += 1
 
@@ -378,26 +378,26 @@ def process_CC_EE():
     del df_evt
     
     now = str(date.today()).replace('-', '')
-    new_p = 'T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_DSH_new_' + now + '.pickle'
+    new_p = 'T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_SH_new_' + now + '.pickle'
     df_new.to_pickle(new_p)
     
     print('-- Processing...')
     df_new = process(new_p, check_counts=False, check_temporality=False)
     df_new.to_pickle(new_p)
     
-    # output an Excel spreadsheet with flagged patients
-    df_flags = pd.DataFrame(columns=['brcid', 'dsh'])
+    # output an Excel spreasheet with flagged patients
+    df_flags = pd.DataFrame(columns=['brcid', 'sh'])
     for g in df_new.groupby('brcid'):
         brcid = g[0]
         flag = False
         for i, row in g[1].iterrows():
-            if row['dsh_' + now + '_notmp'] == True:
-                tmp = pd.DataFrame({'brcid': [brcid], 'dsh': [True]})
+            if row['sh_' + now + '_notmp'] == True:
+                tmp = pd.DataFrame({'brcid': [brcid], 'sh': [True]})
                 df_flags = pd.concat([df_flags, tmp])
                 flag = True
                 break
         if flag == False:
-            tmp = pd.DataFrame({'brcid': [brcid], 'dsh': [False]})
+            tmp = pd.DataFrame({'brcid': [brcid], 'sh': [False]})
             df_flags = pd.concat([df_flags, tmp])
     
     df_flags.reset_index(drop=True, inplace=True)
@@ -413,7 +413,7 @@ def process_CC_EE_update():
     """
     # Load original data
     print('-- Loading original data...', end='')
-    df = pd.read_pickle('T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_DSH.pickle')
+    df = pd.read_pickle('T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_SH.pickle')
     print('Done.')
     
     # load and store new data for Attachement
@@ -439,7 +439,7 @@ def process_CC_EE_update():
     del df_evt
     
     now = str(date.today()).replace('-', '')
-    new_p = 'T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_DSH_new_' + now + '.pickle'
+    new_p = 'T:/Andre Bittar/Projects/CC_Eating_Disorder/all_text_processed_SH_new_' + now + '.pickle'
     df_new.to_pickle(new_p)
     
     print('-- Processing...')
@@ -449,23 +449,23 @@ def process_CC_EE_update():
     # now merge the latest column from df with the new one from df_new
     latest_key = [t for t in sorted(list(df.columns)) if '_notmp' in t][-1]
     df_tmp = df[['brcid', 'cn_doc_id', 'viewdate', 'text_content', 'age', latest_key]]
-    df_tmp.rename(columns={latest_key: 'dsh_' + now + '_notmp'}, inplace=True)
+    df_tmp.rename(columns={latest_key: 'sh_' + now + '_notmp'}, inplace=True)
     
     # TODO do the merge
     
-    # output an Excel spreadsheet with flagged patients
-    df_flags = pd.DataFrame(columns=['brcid', 'dsh'])
+    # output an Excel spreasheet with flagged patients
+    df_flags = pd.DataFrame(columns=['brcid', 'sh'])
     for g in df_tmp.groupby('brcid'):
         brcid = g[0]
         flag = False
         for i, row in g[1].iterrows():
-            if row['dsh_20200128_notmp'] == True:
-                tmp = pd.DataFrame({'brcid': [brcid], 'dsh': [True]})
+            if row['sh_20200128_notmp'] == True:
+                tmp = pd.DataFrame({'brcid': [brcid], 'sh': [True]})
                 df_flags = pd.concat([df_flags, tmp])
                 flag = True
                 break
         if flag == False:
-            tmp = pd.DataFrame({'brcid': [brcid], 'dsh': [False]})
+            tmp = pd.DataFrame({'brcid': [brcid], 'sh': [False]})
             df_flags = pd.concat([df_flags, tmp])
     
     df_flags.to_excel('T:/Andre Bittar/Projects/CC_Eating_Disorder/flagged_patients_updated_cohort' + now + '.xlsx')
@@ -478,7 +478,7 @@ def load_ehost_to_dataframe(pin, key, attribute='text', df=None, pin_ref=None):
     Load annotations (mention text) from a directory containing eHOST annotations
     into a Pandas DataFrame
     pin, str: the path to the annotated files
-    key, str: a key to name the column in which to store DSH results
+    key, str: a key to name the column in which to store SH results
     df, DataFrame: an existing DataFrame to add further results to
     map_brcids, bool: get a mapping from the gold corpus (True) or from the annotated file names (False)
     """
@@ -523,7 +523,7 @@ def count_flagged_patients(df_processed, key, cohort='restricted', attribute='te
     Apply all filtering heuristics to outputs stored in a DataFrame.
     df_processed: the DataFrame containing the data
     cohort: full or restricted
-    attribute: text or dsh_type
+    attribute: text or sh_type
     split_attribute: True if processing directly from a DataFrame, False if 
                      data is loaded from annotated files (e.g. if called 
                      from within evaluate_patient_level_with_heuristics)
@@ -733,15 +733,7 @@ def evaluate_patient_level_with_heuristics(pin_gold, pin_sys, attribute='text', 
         k = round(cohen_kappa_score(y_true, y_pred), 2)
         results_dict[heur] = {'p': p, 'r': r, 'f': f, 'k': k, 'sys_n': sys_n, 'sys_%': sys_np}
         report_string += '       kappa       ' + str(k) + '\n'
-        report_string += '\nCONFUSION MATRIX\n'
-        report_string += '----------------\n'
-        
-        pair_labels = [True, False]
-        cm = confusion_matrix(y_true, y_pred, labels=pair_labels)
-        df_cm = pd.DataFrame(cm, index=pair_labels, columns=pair_labels)
-        report_string += df_cm.to_string()
-        
-        report_string += '\n\n====================\n\n'
+        report_string += '====================\n\n'
     
     # select best results
     df_results = pd.DataFrame(results_dict).T.reset_index()
@@ -760,7 +752,7 @@ def evaluate_patient_level_with_heuristics(pin_gold, pin_sys, attribute='text', 
     print(report_string)    
     
     if report_dir is not None:
-        today = str(date.today()).replace('-', '')
+        today = str(date.today())
         label = os.path.basename(os.path.normpath(pin_gold))
         pout = os.path.join(report_dir, 'patient-level_evaluation_report_' + label + '_' + attribute + '_' + today + '.txt')
         fout = open(pout, 'w')
@@ -773,7 +765,7 @@ def evaluate_patient_level_with_heuristics(pin_gold, pin_sys, attribute='text', 
 
 def process(pin, check_counts=True, check_temporality=True, heuristic='base', test_rows=-1):
     """
-    Run dsh_annotator on a DataFrame that contains the text for each file.
+    Run sh_annotator on a DataFrame that contains the text for each file.
     Outputs True for documents with relevant mention.
     Does not write new XML.
     All saved to the DataFrame.
@@ -789,28 +781,28 @@ def process(pin, check_counts=True, check_temporality=True, heuristic='base', te
     # temporary save file
     tmp_pout = os.path.join(os.path.dirname(pin), 'tmp_' + now + '.pickle')
     
-    dsha = DSHAnnotator(verbose=False)
+    sha = SHAnnotator(verbose=False)
     #df = pd.read_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
     df = pd.read_pickle(pin)
     if test_rows > 0:
         df = df[0:test_rows]
-    #df['dsh'] = False
+    #df['sh'] = False
     n = len(df)
     
     t0 = time()
     for i, row in df.iterrows():
         docid = row.cn_doc_id
         text = row.text_content
-        mentions = dsha.process_text(text, docid, write_output=False)
+        mentions = sha.process_text(text, docid, write_output=False)
         if check_counts:
             if heuristic in ['base', '2m']:
-                df.at[i, 'dsh_' + now] = count_true_DSH_mentions(mentions, check_temporality=check_temporality)
+                df.at[i, 'sh_' + now] = count_true_SH_mentions(mentions, check_temporality=check_temporality)
             else:
-                text = get_true_DSH_mentions(mentions, check_temporality=check_temporality)
+                text = get_true_SH_mentions(mentions, check_temporality=check_temporality)
                 #print(i, docid, text)
-                df.at[i, 'dsh_' + now] = text
+                df.at[i, 'sh_' + now] = text
         else:
-            df.at[i, 'dsh_' + now] = has_DSH_mention(mentions, check_temporality=check_temporality)
+            df.at[i, 'sh_' + now] = has_SH_mention(mentions, check_temporality=check_temporality)
         if i % 1000 == 0:
             print(i, '/', n)
         if i % 10000 == 0 and test_rows == -1:
@@ -821,7 +813,7 @@ def process(pin, check_counts=True, check_temporality=True, heuristic='base', te
     
     print(t1 - t0)
     
-    if test_rows == -1 and os.path.exists(tmp_pout):
+    if test_rows == -1:
         move(tmp_pout, pin)
         print('-- Wrote file:', pin)
         df.to_pickle(pin)
@@ -830,10 +822,9 @@ def process(pin, check_counts=True, check_temporality=True, heuristic='base', te
 
 
 if __name__ == '__main__':
-    print('-- Check has_DSH_mention() internal settings...', file=sys.stderr)
+    print('-- Check has_SH_mention() internal settings...', file=sys.stderr)
     print('-- Check process() internal settings...', file=sys.stderr)
     print('-- Run one of the two functions...', file=sys.stderr)
     #test(check_temporality=True)
     #df_processed = process('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle', check_counts=True, check_temporality=True, heuristic='2m_diff')
     #batch_process('T:/Andre Bittar/Projects/KA_Self-harm/Adjudication/system_train_dev_patient/files')
-    

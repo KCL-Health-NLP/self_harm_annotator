@@ -6,10 +6,10 @@
 
 SAVED_RULES = [
     {
-         # if she...DSH
-        'name': 'IF_SHE_DSH',
-        'pattern': [{'LEMMA': 'if'}, {'LEMMA': 'she'}, {'LEMMA': {'NOT_IN': ['.', '?', '!', ':', ';']}, '_': {'DSH': {'NOT_IN': ['DSH']}}, 'OP': '+'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH': False}},
+         # if she...SH
+        'name': 'IF_SHE_SH',
+        'pattern': [{'LEMMA': 'if'}, {'LEMMA': 'she'}, {'LEMMA': {'NOT_IN': ['.', '?', '!', ':', ';']}, '_': {'SH': {'NOT_IN': ['SH']}}, 'OP': '+'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
+        'avm': {'ALL': {'SH': False}},
         'merge': False
     }
 ]
@@ -17,23 +17,23 @@ SAVED_RULES = [
 RULES_STATUS = [
     {
          # history of self-harm?
-        'name': 'DSH_QUESTION',
-        'pattern': [{'_': {'DSH': 'DSH'}, 'OP': '+'}, {'LEMMA': '?'}],
-        'avm': {'ALL': {'DSH': False}},
+        'name': 'SH_QUESTION',
+        'pattern': [{'_': {'SH': 'SH'}, 'OP': '+'}, {'LEMMA': '?'}],
+        'avm': {'ALL': {'SH': False}},
         'merge': False
     },
     {
          # he...made suicide attempts
-        'name': 'HE_DSH',
-        'pattern': [{'LOWER': 'he'}, {'LEMMA': {'NOT_IN': ['she', 'her', 'herself', 'zzzzz', '.', '?', '!', ':', ';']}, '_': {'DSH': {'NOT_IN': ['DSH']}}, 'OP': '+'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH': False}},
+        'name': 'HE_SH',
+        'pattern': [{'LOWER': 'he'}, {'LEMMA': {'NOT_IN': ['she', 'her', 'herself', 'zzzzz', '.', '?', '!', ':', ';']}, '_': {'SH': {'NOT_IN': ['SH']}}, 'OP': '+'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
+        'avm': {'ALL': {'SH': False}},
         'merge': False
     },
     {
          # plan to...hang herself
-        'name': 'PLAN_TO_DSH',
-        'pattern': [{'LEMMA': {'IN': ['intend', 'plan']}}, {'LEMMA': 'to'}, {'LEMMA': {'NOT_IN': ['.', '?', '!', ':', ';']}, '_': {'DSH': {'NOT_IN': ['DSH']}}, 'OP': '+'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
-        'avm': {'ALL': {'DSH': False}},
+        'name': 'PLAN_TO_SH',
+        'pattern': [{'LEMMA': {'IN': ['intend', 'plan']}}, {'LEMMA': 'to'}, {'LEMMA': {'NOT_IN': ['.', '?', '!', ':', ';']}, '_': {'SH': {'NOT_IN': ['SH']}}, 'OP': '+'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
+        'avm': {'ALL': {'SH': False}},
         'merge': False
     }
 ]

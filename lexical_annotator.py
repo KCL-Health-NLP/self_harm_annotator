@@ -46,7 +46,7 @@ class LexicalAnnotatorSequence(object):
             - source_attribute: spaCy symbol; the token attribute to match
               on (e.g. LEMMA).
             - target_attribute: spaCy symbol; the token attribute to add the 
-              lexical annotations to (e.g. TAG, or custom attribute LA, DSH).
+              lexical annotations to (e.g. TAG, or custom attribute LA, SH).
             - merge: bool; merge annotated spans into a single span.
         """
         self.nlp = nlp
@@ -141,7 +141,7 @@ class LexicalAnnotator(object):
             - source_attribute: spaCy symbol; the token attribute to match
               on (e.g. LEMMA).
             - target_attribute: spaCy symbol; the token attribute to add the 
-              lexical annotations to (e.g. TAG, or custom attribute LA, DSH).
+              lexical annotations to (e.g. TAG, or custom attribute LA, SH).
             - label: str; the label to add to the tokens' target attribute.
             - name: str; the name of the pipeline component.
             - merge: bool; merge annotated spans into a single span.
@@ -165,7 +165,7 @@ class LexicalAnnotator(object):
         for _, start, end in matches:
             entity = Span(doc, start, end, label=self.nlp.vocab.strings[self.label])
             spans.append(entity)
-            # Copy tense attribute to entity (for DSH annotator)
+            # Copy tense attribute to entity (for SH annotator)
             tense = '_'
             for token in entity:
                 token._.set(self.target_attribute, self.label)
@@ -264,7 +264,7 @@ class LemmaAnnotatorSequence(object):
             - nlp: spaCy Language; a spaCy text processing pipeline instance.
             - pin: str; the input path of a lexical rule file.
             - attribute: spaCy symbol; the token attribute to add the lexical 
-                         annotations to (e.g. TAG, or custom attribute LA, DSH).
+                         annotations to (e.g. TAG, or custom attribute LA, SH).
             - ignore_case: bool; make matching case-insensitive
             - merge: bool; merge annotated spans into a single span.
         """
@@ -357,7 +357,7 @@ class LemmaAnnotator(object):
             - nlp: spaCy Language; a spaCy text processing pipeline instance.
             - lemma_sequences: list; the lemmas to be annotated.
             - attribute: spaCy symbol; the token attribute to add the 
-              lexical annotations to (e.g. TAG, or custom attribute LA, DSH).
+              lexical annotations to (e.g. TAG, or custom attribute LA, SH).
             - label: str; the label to add to the tokens' target attribute.
             - name: str; the name of the pipeline component.
             - merge: bool; merge annotated spans into a single span.
@@ -386,7 +386,7 @@ class LemmaAnnotator(object):
         for _, start, end in matches:
             entity = Span(doc, start, end, label=self.nlp.vocab.strings[self.label])
             spans.append(entity)
-            # Copy tense attribute to entity (for DSH annotator)
+            # Copy tense attribute to entity (for SH annotator)
             tense = '_'
             for token in entity:
                 token._.set(self.attribute, self.label)
@@ -490,7 +490,7 @@ if __name__ == '__main__':
     
     text = 'This patient, made an attempt to commit suicide, but shows signs of self-harm, but denies deliberate ' \
            'self-harm. However, see she has been cutting herself.'
-    pin = 'resources/dsh_lex.txt'
+    pin = 'resources/sh_lex.txt'
     lsa = LexicalAnnotatorSequence(nlp, pin, LOWER, 'is_dsh')
     lsa.load_lexicon()
     nlp = lsa.add_components()

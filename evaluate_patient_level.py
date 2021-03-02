@@ -17,9 +17,9 @@ HEURISTICS = ['1m_doc', '2m_doc', '1m_patient', '2m_patient', '2m_diff_doc', '2m
 
 
 
-def has_DSH_mention(mentions):
+def has_SH_mention(mentions):
     """
-    Check if a given set of annotated mentions contains a true DSH mention,
+    Check if a given set of annotated mentions contains a true SH mention,
     as per the project's definition, namely polarity=POSITIVE, status=RELEVANT,
     temporality=CURRENT
     
@@ -81,7 +81,7 @@ def get_brcid_mapping(pin, pin_ref):
 
 def check_prevalence(files, heuristic, cohort='full'):
     """
-    Determine DSH prevalence by applying the heuristics to a list of annotated 
+    Determine SH prevalence by applying the heuristics to a list of annotated 
     files.
     """
 
@@ -145,7 +145,7 @@ def check_prevalence(files, heuristic, cohort='full'):
 
 def evaluate_patient_level(brcid_mapping, files, heuristic='2m', verbose=False):
     """
-    DEPRECATED - use evaluate_patient_level_with_heuristic in dsh_cohort_annotator.py
+    DEPRECATED - use evaluate_patient_level_with_heuristic in sh_cohort_annotator.py
     
     Determine patient-level performance on the gold standard corpus.
     
@@ -153,12 +153,12 @@ def evaluate_patient_level(brcid_mapping, files, heuristic='2m', verbose=False):
         - brcid_mapping: dict; a dictionary of BRCID mappings
         - files: list; a list of files in a corpus
         - heuristic: str; the heuristic to apply
-              base: at least 1 true mention of DSH
+              base: at least 1 true mention of SH
               2m_diff: at least 2 true mentions with different text
               2m_diff_strict: at least 2 true mentions all with different text
     
     Return:
-        - relevant_brcids: list; the list of BRCIDs for which a true DSH mention was found
+        - relevant_brcids: list; the list of BRCIDs for which a true SH mention was found
     """
 
     if heuristic not in HEURISTICS:
@@ -172,7 +172,7 @@ def evaluate_patient_level(brcid_mapping, files, heuristic='2m', verbose=False):
         mentions = load_mentions_with_attributes(f)
         mentions = convert_file_annotations(mentions)
         if heuristic == 'base':
-            if has_DSH_mention(mentions):
+            if has_SH_mention(mentions):
                 brcid = brcid_mapping.get(f.split('\\')[-1])
                 relevant_brcids.append(brcid)
                 if verbose:
@@ -213,7 +213,7 @@ def evaluate_patient_level(brcid_mapping, files, heuristic='2m', verbose=False):
 
 def process(heuristic='base'):
     """
-    DEPRECATED - use evaluate_patient_level_with_heuristic in dsh_cohort_annotator.py
+    DEPRECATED - use evaluate_patient_level_with_heuristic in sh_cohort_annotator.py
 
     Run the whole evaluation process with a specific heuristic on the whole cohort.
     NB: gold must use the 'base' heuristic which is 1 true mention to flag a patient

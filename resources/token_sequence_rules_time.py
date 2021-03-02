@@ -83,50 +83,50 @@ RULES_TIME = [
     # Temporal attribute transfer rules
     {
          # history of self-harm
-        'name': 'HISTORY_OF_DSH',
-        'pattern': [{'_': {'TIME': 'PAST'}}, {'LEMMA': 'of'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        'name': 'HISTORY_OF_SH',
+        'pattern': [{'_': {'TIME': 'PAST'}}, {'LEMMA': 'of'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'LAST': {'TIME': 'HISTORICAL'}},
         'merge': False
     },
     {
          # history of trying to self-harm
-        'name': 'HISTORY_OF_TRY_TO_DSH',
-        'pattern': [{'_': {'TIME': 'PAST'}}, {'LEMMA': 'of'}, {'POS': 'VERB'}, {'LEMMA': 'to', 'OP': '?'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        'name': 'HISTORY_OF_TRY_TO_SH',
+        'pattern': [{'_': {'TIME': 'PAST'}}, {'LEMMA': 'of'}, {'POS': 'VERB'}, {'LEMMA': 'to', 'OP': '?'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'LAST': {'TIME': 'HISTORICAL'}},
         'merge': False
     },
     {
          # history of self-harm
-        'name': 'HISTORY_DSH',
-        'pattern': [{'_': {'TIME': 'PAST'}}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        'name': 'HISTORY_SH',
+        'pattern': [{'_': {'TIME': 'PAST'}}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {1: {'TIME': 'HISTORICAL'}},
         'merge': False
     },
     {
          # history of taking overdoses
         'name': 'HISTORY_OF_TAKING_OD',
-        'pattern': [{'_': {'TIME': 'PAST'}}, {'LEMMA': 'of'}, {'LEMMA': 'take'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        'pattern': [{'_': {'TIME': 'PAST'}}, {'LEMMA': 'of'}, {'LEMMA': 'take'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'LAST': {'TIME': 'HISTORICAL'}},
         'merge': False
     },
     {
          # she has self-harmed in the past
-        'name': 'DSH_IN_THE_PAST',
-        'pattern': [{'_': {'DSH': 'DSH'}}, {'LEMMA': 'in'}, {'_': {'TIME': 'PAST'}, 'OP': '+'}],
+        'name': 'SH_IN_THE_PAST',
+        'pattern': [{'_': {'SH': 'SH'}}, {'LEMMA': 'in'}, {'_': {'TIME': 'PAST'}, 'OP': '+'}],
         'avm': {0: {'TIME': 'HISTORICAL'}},
         'merge': False
     },
     {
          # she self-harm 5 years ago
-        'name': 'DSH_PAST',
-        'pattern': [{'_': {'DSH': 'DSH'}, 'OP': '+'}, {'_': {'TIME': 'PAST'}, 'OP': '+'}],
+        'name': 'SH_PAST',
+        'pattern': [{'_': {'SH': 'SH'}, 'OP': '+'}, {'_': {'TIME': 'PAST'}, 'OP': '+'}],
         'avm': {0: {'TIME': 'HISTORICAL'}},
         'merge': False
     },
     {
          # she self-harmed over a period of several years in the past
-        'name': 'DSH_NO_V_PAST',
-        'pattern': [{'_': {'DSH': 'DSH'}, 'OP': '+'}, {'POS': {'REGEX': '^[^V]'}, 'OP': '+'}, {'_': {'TIME': 'PAST'}, 'OP': '+'}],
+        'name': 'SH_NO_V_PAST',
+        'pattern': [{'_': {'SH': 'SH'}, 'OP': '+'}, {'POS': {'REGEX': '^[^V]'}, 'OP': '+'}, {'_': {'TIME': 'PAST'}, 'OP': '+'}],
         'avm': {0: {'TIME': 'HISTORICAL'}},
         'merge': False
     }

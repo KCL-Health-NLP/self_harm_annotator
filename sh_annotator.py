@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 
 """
-    Deliberate Self-Harm (DSH) annotator
+    Self-Harm annotator
 
-    This annotator marks up mentions of deliberate self-harm (DSH) in clinical
-    texts. The algorithm determines whether a mention is negated or not,
+    This annotator marks up mentions of self-harm in clinical texts.
+    The algorithm determines whether a mention is negated or not,
     whether it is current or historical and whether it is relevant or not, as 
-    defined by the parameters of the study. The type of self-harm is also annotated
-    in a normalised form.
+    defined by the parameters of the associated study (reference to be provided).
+    The type of self-harm is also annotated in a normalised form.
     Output is in the XML stand-off annotation format that is used
     by the eHOST annotation tool (see https://code.google.com/archive/p/ehost/).
 
     Tag: Self-harm
     Attributes and values:
-        dsh_type - HAIR-PULLING, OVERDOSE, SELF-BITING, SELF-BURNING, 
-                   SELF-CUTTING, SELF-HARM, SELF-HITTING, SELF-STABBING, 
-                   SELF-STRANGULATION, SELF-TRAUMA, SKIN-PICKING, SUICIDALITY
+        sh_type - HAIR-PULLING, OVERDOSE, BITING, BURNING,
+                  CUTTING, SELF-HARM, HITTING, STABBING,
+                  STRANGULATION, TRAUMA, SKIN-PICKING, SUICIDALITY
         polarity - NEGATIVE or POSITIVE
-        status  - RELEVANT or NON-RELEVANT
+        status - RELEVANT or NON-RELEVANT
         temporality - CURRENT or HISTORICAL
 
 """
@@ -51,21 +51,21 @@ FWD_OFFSET = 10
 BWD_OFFSET = 10
 
 
-class DSHAnnotator:
+class SHAnnotator:
     """
-    Deliberate Self-Harm (DSH) annotator
+    Self-Harm annotator
     
-    Annotate mentions of deliberate self-harm (DSH) in clinical texts.
+    Annotate mentions of self-harm in clinical texts.
     """
 
     def __init__(self, verbose=False):
         """
-        Create a new DSHAnnotator instance.
+        Create a new SHAnnotator instance.
         
         Arguments:
             - verbose: bool; print all messages.
         """
-        print('DSH annotator')
+        print('SH annotator')
         self.nlp = spacy.load('en_core_web_sm', disable=['ner'])
         self.text = None
         self.verbose = verbose
@@ -82,8 +82,8 @@ class DSHAnnotator:
 
         # Load lexical annotators
         self.load_lexicon('./resources/history_type_lex.txt', LOWER, 'LA')
-        self.load_lexicon('./resources/dsh_lex.txt', LEMMA, 'DSH')
-        self.load_lexicon('./resources/dsh_type_lex.txt', LEMMA, 'DSH_TYPE')
+        self.load_lexicon('./resources/sh_lex.txt', LEMMA, 'SH')
+        self.load_lexicon('./resources/sh_type_lex.txt', LEMMA, 'SH_TYPE')
         #self.load_lexicon('./resources/time_past_lex.txt', LEMMA, 'TIME')
         self.load_lexicon('./resources/time_past_lex.txt', LOWER, 'TIME')
         self.load_lexicon('./resources/time_present_lex.txt', LEMMA, 'TIME')
@@ -118,7 +118,7 @@ class DSHAnnotator:
             - source_attribute: spaCy symbol; the token attribute to match
               on (e.g. LEMMA).
             - target_attribute: spaCy symbol; the token attribute to add the 
-              lexical annotations to (e.g. TAG, or custom attribute LA, DSH).
+              lexical annotations to (e.g. TAG, or custom attribute LA, SH).
             - merge: bool; merge annotated spans into a single span.
         """
         print(path, source_attribute, target_attribute, merge)
@@ -402,7 +402,7 @@ class DSHAnnotator:
             # and so are irrelevant
             if token.lemma_ == ':':
                 return False
-            if token.pos_[0] == 'N' and not token._.DSH:
+            if token.pos_[0] == 'N' and not token._.SH:
                 if token._.HEDGING == 'HEDGING':
                     return True
             # Deal with merged spans that may not have the correct POS, e.g. suicidal thoughts
@@ -441,7 +441,7 @@ class DSHAnnotator:
             if curr_token.head.lemma_ in ['assumption', 'belief', 'feeling', 'desire', 'dream', 'idea', 'opinion', 'wish', 'view']:
                 return True
 
-        if curr_token.head._.DSH == 'NON_DSH':
+        if curr_token.head._.SH == 'NON_SH':
             # e.g. suicidal thoughts   
             match = re.search('idea(tion)?|intent|thought', curr_token.head.lemma_, flags=re.I)
             return match is not None
@@ -518,7 +518,7 @@ class DSHAnnotator:
                 return True
         return False
     
-    def calculate_dsh_mention_attributes(self, doc, verbose=False):
+    def calculate_sh_mention_attributes(self, doc, verbose=False):
         """
         Using previously added annotations, calculate the attribute values for 
         all detected mentions, and determine whether the document has a history
@@ -533,10 +533,10 @@ class DSHAnnotator:
                                    in the document, else False.
         
         """
-        # Hack: get attributes from window of 5 tokens before DSH mention
+        # Hack: get attributes from window of 5 tokens before SH mention
         has_history_section = False
         for i in range(len(doc)):
-            if doc[i]._.DSH in ['DSH', 'NON_DSH']:
+            if doc[i]._.SH in ['SH', 'NON_SH']:
 
                 # if token is in a history section annotate as historical
                 if doc[i]._.HISTORY == 'HISTORY':
@@ -622,9 +622,9 @@ class DSHAnnotator:
                         if token._.HEDGING == 'HEDGING':
                             doc[i]._.HEDGING = 'HEDGING'
 
-        # Hack: get attributes from window of 5 tokens after DSH mention in the same sentence
+        # Hack: get attributes from window of 5 tokens after SH mention in the same sentence
         for i in range(len(doc)):
-            if doc[i]._.DSH in ['DSH', 'NON_DSH']:
+            if doc[i]._.SH in ['SH', 'NON_SH']:
                 curr_sent = doc[i].sent
                 end = i + FWD_OFFSET
                 if end > curr_sent.start + len(curr_sent):
@@ -653,7 +653,7 @@ class DSHAnnotator:
 
     def merge_spans(self, doc):
         """
-        Merge all longest matching DSH token sequences into single spans.
+        Merge all longest matching SH token sequences into single spans.
         
         Arguments:
             - doc: spaCy Doc; the current Doc object.
@@ -693,9 +693,9 @@ class DSHAnnotator:
         i = 0
         while i < len(doc):
             token = doc[i]
-            if token._.DSH:
+            if token._.SH:
                 start = i
-                while token._.DSH:
+                while token._.SH:
                     i += 1
                     if i == len(doc):
                         print('-- Warning: index is equal to document length:', i, token, len(doc), file=sys.stderr)
@@ -729,7 +729,7 @@ class DSHAnnotator:
         """
         with open(path, 'w') as fout:
             for token in doc:
-                string = '{:<10}{:<15}{:<15}{:<15}{:<15}{:<15}{:<15}'.format(token.i, token.text, token.lemma_, token.tag_, dsha.nlp.vocab.strings[token._.dsh] or '_', dsha.nlp.vocab.strings[token._.sem] or '_', token.head.i, token.dep_)
+                string = '{:<10}{:<15}{:<15}{:<15}{:<15}{:<15}{:<15}'.format(token.i, token.text, token.lemma_, token.tag_, sha.nlp.vocab.strings[token._.sh] or '_', sha.nlp.vocab.strings[token._.sem] or '_', token.head.i, token.dep_)
                 print(string, file=fout)
                 print(string)
         fout.close()
@@ -785,11 +785,11 @@ class DSHAnnotator:
         mentions = {}
         n = 1
         for token in doc:
-            if token._.DSH == 'DSH':
+            if token._.SH == 'SH':
                 mention_id = 'EHOST_Instance_' + str(n)
                 annotator = 'SYSTEM'
                 mclass = 'SELF-HARM'
-                dsh_type = token._.DSH_TYPE
+                sh_type = token._.SH_TYPE
                 comment = None
                 start = token.idx
                 end = token.idx + len(token.text)
@@ -811,7 +811,7 @@ class DSHAnnotator:
                 n += 1
                 mentions[mention_id] = {'annotator': annotator,
                                         'class': mclass,
-                                        'dsh_type': dsh_type,
+                                        'sh_type': sh_type,
                                         'comment': comment,
                                         'end': str(end),
                                         'polarity': polarity,
@@ -820,7 +820,7 @@ class DSHAnnotator:
                                         'temporality': temporality,
                                         'text': text
                                         }
-            elif token._.DSH == 'NON_DSH':
+            elif token._.SH == 'NON_SH':
                 mention_id = 'EHOST_Instance_' + str(n)
                 annotator = 'SYSTEM'
                 mclass = 'SELF-HARM'
@@ -838,7 +838,7 @@ class DSHAnnotator:
                 n += 1
                 mentions[mention_id] = {'annotator': annotator,
                                         'class': mclass,
-                                        'dsh_type': dsh_type,
+                                        'sh_type': sh_type,
                                         'comment': comment,
                                         'end': str(end),
                                         'polarity': polarity,
@@ -900,12 +900,12 @@ class DSHAnnotator:
             mention_class_node.attrib['id'] = annotation['class']
             mention_class_node.text = annotation['text']
 
-            # dsh_type
-            val = annotation.get('dsh_type', 'SELF-HARM')
+            # sh_type
+            val = annotation.get('sh_type', 'SELF-HARM')
             slot_mention_node = ET.SubElement(root, 'stringSlotMention')
             slot_mention_node.attrib['id'] = 'EHOST_Instance_' + str(m)
             mention_slot_node = ET.SubElement(slot_mention_node, 'mentionSlot')
-            mention_slot_node.attrib['id'] = 'dsh_type'
+            mention_slot_node.attrib['id'] = 'sh_type'
             string_mention_value_node = ET.SubElement(slot_mention_node, 'stringSlotMentionValue')
             string_mention_value_node.attrib['value'] = val
             has_slot_mention_node = ET.SubElement(class_mention, 'hasSlotMention')
@@ -1021,7 +1021,7 @@ class DSHAnnotator:
                 if doc is None:
                     return global_mentions
                 
-                self.calculate_dsh_mention_attributes(doc)
+                self.calculate_sh_mention_attributes(doc)
                 
                 doc = self.merge_spans(doc)
                 
@@ -1041,7 +1041,7 @@ class DSHAnnotator:
             if doc is None:
                 return global_mentions
             
-            self.calculate_dsh_mention_attributes(doc)
+            self.calculate_sh_mention_attributes(doc)
             
             doc = self.merge_spans(doc)
             
@@ -1058,7 +1058,7 @@ class DSHAnnotator:
         else:
             print('-- Processing text string:', path, file=sys.stderr)
             doc = self.nlp(path)
-            self.calculate_dsh_mention_attributes(doc)
+            self.calculate_sh_mention_attributes(doc)
 
             doc = self.merge_spans(doc)
 
@@ -1101,7 +1101,7 @@ class DSHAnnotator:
             return global_mentions
         
         doc = self.nlp(text)
-        flag = self.calculate_dsh_mention_attributes(doc)
+        flag = self.calculate_sh_mention_attributes(doc)
         if flag:
             print('-- Found history section in text with id:', text_id)
 
@@ -1171,7 +1171,7 @@ class DateTokenAnnotator(object):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Deliberate Self-Harm (DSH) Annotator')
+    parser = argparse.ArgumentParser(description='Self-Harm Annotator')
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-d', '--input_dir', type=str, nargs=1, help='the path to the directory containing text files to process.', required=False)
     group.add_argument('-f', '--input_file', type=str, nargs=1, help='the path to a text file to process.', required=False)
@@ -1186,23 +1186,23 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    dsha = DSHAnnotator(verbose=args.verbose)
+    sha = SHAnnotator(verbose=args.verbose)
     
     if args.text is not None:
-        dsh_annotations = dsha.process_text(args.text[0], 'text_001', write_output=args.write_output, verbose=args.verbose)
+        sh_annotations = sha.process_text(args.text[0], 'text_001', write_output=args.write_output, verbose=args.verbose)
     elif args.input_dir is not None:
         if os.path.isdir(args.input_dir[0]):
-            dsh_annotations = dsha.process(args.input_dir[0], write_output=args.write_output)
+            sh_annotations = sha.process(args.input_dir[0], write_output=args.write_output)
         else:
             print('-- Error: argument -d/--input_dir must be an existing directory.\n')
             parser.print_help()
     elif args.input_file is not None:
         if os.path.isfile(args.input_file[0]):
-            dsh_annotations = dsha.process(args.input_file[0], write_output=args.write_output)
+            sh_annotations = sha.process(args.input_file[0], write_output=args.write_output)
         else:
             print('-- Error: argument -f/--input_file must be an existing text file.\n')
             parser.print_help()            
     elif args.examples:
         print('-- Running examples...', file=sys.stderr)
         for example in text:
-            dsh_annotations = dsha.process_text(example, 'text_001', write_output=False, verbose=True)
+            sh_annotations = sha.process_text(example, 'text_001', write_output=False, verbose=True)

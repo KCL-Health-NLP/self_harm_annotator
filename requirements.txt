@@ -1,0 +1,4 @@
+Flask==1.1.2
+Flask-JSON==0.3.4
+gunicorn==20.0.4
+spacy==2.1.3

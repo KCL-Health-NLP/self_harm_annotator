@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<metadata xmlns="http://gate.ac.uk/ns/pipeline-metadata">
+  <pipeline-name>Self-Harm Annotator</pipeline-name>
+  <slug>dsh-python</slug>
+  <ordering>500</ordering>
+  <category>general</category>
+  <!--
+  Annotation selectors are of the form setName:type - typically the annotation
+  set name on the left should match the outputASName in docker-app.yml, and the
+  type on the right is the type returned by the API endpoint, but this can be
+  configured more flexibly if you use annotationTypeMapping in the
+  docker-app.yml
+  -->
+  <annotation-selectors>self-harm:self-harm</annotation-selectors>
+  <additional-annotations/>
+  <tags>
+    <tag>English</tag>
+  </tags>
+</metadata>
