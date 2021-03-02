@@ -1,5 +1,5 @@
-# dsh_annotator
+# self-harm annotator
 
-**Deliberate self-harm (DSH) annotator**
+**Self-harm annotator**
 
-Annotates mentions of deliberate self-harm in clinical notes.
+Annotates mentions of self-harm in clinical notes.
