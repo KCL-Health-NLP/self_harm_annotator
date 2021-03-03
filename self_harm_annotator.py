@@ -41,17 +41,11 @@ from xml.parsers.expat import ExpatError
 # store examples outside of main code
 from examples.test_examples import text
 
-__author__ = "André Bittar"
-__copyright__ = "Copyright 2020, André Bittar"
-__credits__ = ["André Bittar"]
-__license__ = "GPL"
-__email__ = "andre.bittar@kcl.ac.uk"
-
 FWD_OFFSET = 10
 BWD_OFFSET = 10
 
 
-class SHAnnotator:
+class SelfHarmAnnotator:
     """
     Self-Harm annotator
     
@@ -60,12 +54,12 @@ class SHAnnotator:
 
     def __init__(self, verbose=False):
         """
-        Create a new SHAnnotator instance.
+        Create a new SelfHarmAnnotator instance.
         
         Arguments:
             - verbose: bool; print all messages.
         """
-        print('SH annotator')
+        print('Self-harm annotator')
         self.nlp = spacy.load('en_core_web_sm', disable=['ner'])
         self.text = None
         self.verbose = verbose
@@ -1186,7 +1180,7 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
     
-    sha = SHAnnotator(verbose=args.verbose)
+    sha = SelfHarmAnnotator(verbose=args.verbose)
     
     if args.text is not None:
         sh_annotations = sha.process_text(args.text[0], 'text_001', write_output=args.write_output, verbose=args.verbose)

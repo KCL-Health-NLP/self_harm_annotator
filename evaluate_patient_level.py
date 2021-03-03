@@ -6,12 +6,6 @@ import pandas as pd
 
 from ehost_annotation_reader import convert_file_annotations, get_corpus_files, load_mentions_with_attributes
 
-__author__ = "André Bittar"
-__copyright__ = "Copyright 2020, André Bittar"
-__credits__ = ["André Bittar"]
-__license__ = "GPL"
-__email__ = "andre.bittar@kcl.ac.uk"
-
 #HEURISTICS = ['base', '2m', '2m_diff', '2m_diff_strict']
 HEURISTICS = ['1m_doc', '2m_doc', '1m_patient', '2m_patient', '2m_diff_doc', '2m_diff_patient', '2m_diff_strict_doc', '2m_diff_strict_patient']
 

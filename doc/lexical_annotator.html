@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>lexical_annotator</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:t%3A%5Candre%20bittar%5Cworkspace%5Cdsh_annotator%5Clexical_annotator.py">t:\andre bittar\workspace\dsh_annotator\lexical_annotator.py</a></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/Andre/workspace/PycharmProjects/self_harm_annotator/lexical_annotator.py">/Users/Andre/workspace/PycharmProjects/self_harm_annotator/lexical_annotator.py</a></font></td></tr></table>
     <p><tt>Lexical&nbsp;Annotators<br>
 &nbsp;<br>
 This&nbsp;is&nbsp;a&nbsp;spaCy&nbsp;pipeline&nbsp;component&nbsp;to&nbsp;add&nbsp;lexical&nbsp;annotations&nbsp;to&nbsp;tokens&nbsp;in&nbsp;<br>
@@ -54,9 +54,7 @@ pipeline&nbsp;is&nbsp;executed.<br>
 <font color="#000000" face="helvetica, arial"><a name="LemmaAnnotator">class <strong>LemmaAnnotator</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#LemmaAnnotator">LemmaAnnotator</a>(nlp,&nbsp;lemma_sequences,&nbsp;attribute,&nbsp;label,&nbsp;name,&nbsp;merge=False)<br>
-&nbsp;<br>
-Lemma&nbsp;Annotator<br>
+<td colspan=2><tt>Lemma&nbsp;Annotator<br>
 &nbsp;<br>
 Initialises&nbsp;a&nbsp;single&nbsp;new&nbsp;spaCy&nbsp;pipeline&nbsp;component&nbsp;that&nbsp;annotates&nbsp;tokens&nbsp;<br>
 according&nbsp;to&nbsp;a&nbsp;word&nbsp;list.&nbsp;Match&nbsp;is&nbsp;only&nbsp;performed&nbsp;on&nbsp;word&nbsp;lemma.<br>&nbsp;</tt></td></tr>
@@ -70,7 +68,7 @@ Arguments:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;nlp:&nbsp;spaCy&nbsp;Language;&nbsp;a&nbsp;spaCy&nbsp;text&nbsp;processing&nbsp;pipeline&nbsp;instance.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;lemma_sequences:&nbsp;list;&nbsp;the&nbsp;lemmas&nbsp;to&nbsp;be&nbsp;annotated.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;attribute:&nbsp;spaCy&nbsp;symbol;&nbsp;the&nbsp;token&nbsp;attribute&nbsp;to&nbsp;add&nbsp;the&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexical&nbsp;annotations&nbsp;to&nbsp;(e.g.&nbsp;TAG,&nbsp;or&nbsp;custom&nbsp;attribute&nbsp;LA,&nbsp;DSH).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexical&nbsp;annotations&nbsp;to&nbsp;(e.g.&nbsp;TAG,&nbsp;or&nbsp;custom&nbsp;attribute&nbsp;LA,&nbsp;SH).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;label:&nbsp;str;&nbsp;the&nbsp;label&nbsp;to&nbsp;add&nbsp;to&nbsp;the&nbsp;tokens'&nbsp;target&nbsp;attribute.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;name:&nbsp;str;&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;pipeline&nbsp;component.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;merge:&nbsp;bool;&nbsp;merge&nbsp;annotated&nbsp;spans&nbsp;into&nbsp;a&nbsp;single&nbsp;span.</tt></dd></dl>
@@ -106,9 +104,7 @@ Data descriptors defined here:<br>
 <font color="#000000" face="helvetica, arial"><a name="LemmaAnnotatorSequence">class <strong>LemmaAnnotatorSequence</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#LemmaAnnotatorSequence">LemmaAnnotatorSequence</a>(nlp,&nbsp;pin,&nbsp;attribute,&nbsp;ignore_case=True,&nbsp;merge=False)<br>
-&nbsp;<br>
-Lemma&nbsp;Annotator&nbsp;Sequence<br>
+<td colspan=2><tt>Lemma&nbsp;Annotator&nbsp;Sequence<br>
 &nbsp;<br>
 Creates&nbsp;a&nbsp;set&nbsp;of&nbsp;new&nbsp;spaCy&nbsp;pipeline&nbsp;components&nbsp;that&nbsp;annotate&nbsp;tokens&nbsp;accoring<br>
 to&nbsp;a&nbsp;word&nbsp;list.&nbsp;Match&nbsp;is&nbsp;only&nbsp;performed&nbsp;on&nbsp;token&nbsp;lemma.<br>&nbsp;</tt></td></tr>
@@ -120,7 +116,7 @@ Arguments:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;nlp:&nbsp;spaCy&nbsp;Language;&nbsp;a&nbsp;spaCy&nbsp;text&nbsp;processing&nbsp;pipeline&nbsp;instance.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;pin:&nbsp;str;&nbsp;the&nbsp;input&nbsp;path&nbsp;of&nbsp;a&nbsp;lexical&nbsp;rule&nbsp;file.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;attribute:&nbsp;spaCy&nbsp;symbol;&nbsp;the&nbsp;token&nbsp;attribute&nbsp;to&nbsp;add&nbsp;the&nbsp;lexical&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;annotations&nbsp;to&nbsp;(e.g.&nbsp;TAG,&nbsp;or&nbsp;custom&nbsp;attribute&nbsp;LA,&nbsp;DSH).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;annotations&nbsp;to&nbsp;(e.g.&nbsp;TAG,&nbsp;or&nbsp;custom&nbsp;attribute&nbsp;LA,&nbsp;SH).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;ignore_case:&nbsp;bool;&nbsp;make&nbsp;matching&nbsp;case-insensitive<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;merge:&nbsp;bool;&nbsp;merge&nbsp;annotated&nbsp;spans&nbsp;into&nbsp;a&nbsp;single&nbsp;span.</tt></dd></dl>
 
@@ -158,9 +154,7 @@ Data descriptors defined here:<br>
 <font color="#000000" face="helvetica, arial"><a name="LexicalAnnotator">class <strong>LexicalAnnotator</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#LexicalAnnotator">LexicalAnnotator</a>(nlp,&nbsp;terms,&nbsp;source_attribute,&nbsp;target_attribute,&nbsp;label,&nbsp;name,&nbsp;merge=False)<br>
-&nbsp;<br>
-Lexical&nbsp;Annotator<br>
+<td colspan=2><tt>Lexical&nbsp;Annotator<br>
 &nbsp;<br>
 Initialises&nbsp;a&nbsp;single&nbsp;new&nbsp;spaCy&nbsp;pipeline&nbsp;component&nbsp;that&nbsp;annotates&nbsp;tokens&nbsp;<br>
 accoring&nbsp;to&nbsp;a&nbsp;word&nbsp;list.&nbsp;Match&nbsp;is&nbsp;only&nbsp;performed&nbsp;on&nbsp;textual&nbsp;surface&nbsp;form.<br>&nbsp;</tt></td></tr>
@@ -176,7 +170,7 @@ Arguments:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;source_attribute:&nbsp;spaCy&nbsp;symbol;&nbsp;the&nbsp;token&nbsp;attribute&nbsp;to&nbsp;match<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;on&nbsp;(e.g.&nbsp;LEMMA).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;target_attribute:&nbsp;spaCy&nbsp;symbol;&nbsp;the&nbsp;token&nbsp;attribute&nbsp;to&nbsp;add&nbsp;the&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexical&nbsp;annotations&nbsp;to&nbsp;(e.g.&nbsp;TAG,&nbsp;or&nbsp;custom&nbsp;attribute&nbsp;LA,&nbsp;DSH).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexical&nbsp;annotations&nbsp;to&nbsp;(e.g.&nbsp;TAG,&nbsp;or&nbsp;custom&nbsp;attribute&nbsp;LA,&nbsp;SH).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;label:&nbsp;str;&nbsp;the&nbsp;label&nbsp;to&nbsp;add&nbsp;to&nbsp;the&nbsp;tokens'&nbsp;target&nbsp;attribute.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;name:&nbsp;str;&nbsp;the&nbsp;name&nbsp;of&nbsp;the&nbsp;pipeline&nbsp;component.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;merge:&nbsp;bool;&nbsp;merge&nbsp;annotated&nbsp;spans&nbsp;into&nbsp;a&nbsp;single&nbsp;span.</tt></dd></dl>
@@ -212,9 +206,7 @@ Data descriptors defined here:<br>
 <font color="#000000" face="helvetica, arial"><a name="LexicalAnnotatorSequence">class <strong>LexicalAnnotatorSequence</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#LexicalAnnotatorSequence">LexicalAnnotatorSequence</a>(nlp,&nbsp;pin,&nbsp;source_attribute,&nbsp;target_attribute,&nbsp;merge=False)<br>
-&nbsp;<br>
-Lexical&nbsp;Annotator&nbsp;Sequence<br>
+<td colspan=2><tt>Lexical&nbsp;Annotator&nbsp;Sequence<br>
 &nbsp;<br>
 Create&nbsp;a&nbsp;set&nbsp;of&nbsp;new&nbsp;pipeline&nbsp;components&nbsp;that&nbsp;annotate&nbsp;tokens&nbsp;according&nbsp;to<br>
 a&nbsp;word&nbsp;list&nbsp;provided&nbsp;in&nbsp;an&nbsp;external&nbsp;file.&nbsp;Match&nbsp;is&nbsp;only&nbsp;performed&nbsp;on&nbsp;textual<br>
@@ -229,7 +221,7 @@ Arguments:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;source_attribute:&nbsp;spaCy&nbsp;symbol;&nbsp;the&nbsp;token&nbsp;attribute&nbsp;to&nbsp;match<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;on&nbsp;(e.g.&nbsp;LEMMA).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;target_attribute:&nbsp;spaCy&nbsp;symbol;&nbsp;the&nbsp;token&nbsp;attribute&nbsp;to&nbsp;add&nbsp;the&nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexical&nbsp;annotations&nbsp;to&nbsp;(e.g.&nbsp;TAG,&nbsp;or&nbsp;custom&nbsp;attribute&nbsp;LA,&nbsp;DSH).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexical&nbsp;annotations&nbsp;to&nbsp;(e.g.&nbsp;TAG,&nbsp;or&nbsp;custom&nbsp;attribute&nbsp;LA,&nbsp;SH).<br>
 &nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;merge:&nbsp;bool;&nbsp;merge&nbsp;annotated&nbsp;spans&nbsp;into&nbsp;a&nbsp;single&nbsp;span.</tt></dd></dl>
 
 <dl><dt><a name="LexicalAnnotatorSequence-add_components"><strong>add_components</strong></a>(self, merge=False)</dt><dd><tt>Add&nbsp;components&nbsp;to&nbsp;the&nbsp;pipeline.<br>
@@ -266,9 +258,7 @@ Data descriptors defined here:<br>
 <font color="#000000" face="helvetica, arial"><a name="TokenSequenceAnnotatorSequence">class <strong>TokenSequenceAnnotatorSequence</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#TokenSequenceAnnotatorSequence">TokenSequenceAnnotatorSequence</a>(nlp,&nbsp;pin)<br>
-&nbsp;<br>
-#&nbsp;TODO&nbsp;implement<br>&nbsp;</tt></td></tr>
+<td colspan=2><tt>#&nbsp;TODO&nbsp;implement<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="TokenSequenceAnnotatorSequence-__init__"><strong>__init__</strong></a>(self, nlp, pin)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
@@ -291,22 +281,5 @@ Data descriptors defined here:<br>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>LEMMA</strong> = 73<br>
-<strong>LOWER</strong> = 66<br>
-<strong>__copyright__</strong> = 'Copyright 2020, André Bittar'<br>
-<strong>__email__</strong> = 'andre.bittar@kcl.ac.uk'<br>
-<strong>__license__</strong> = 'GPL'</td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#7799ee">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Author</strong></big></font></td></tr>
-    
-<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%">André&nbsp;Bittar</td></tr></table><p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#7799ee">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Credits</strong></big></font></td></tr>
-    
-<tr><td bgcolor="#7799ee"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%">['André&nbsp;Bittar']</td></tr></table>
+<strong>LOWER</strong> = 66</td></tr></table>
 </body></html>

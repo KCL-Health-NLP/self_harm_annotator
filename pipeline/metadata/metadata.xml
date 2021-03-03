@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <metadata xmlns="http://gate.ac.uk/ns/pipeline-metadata">
   <pipeline-name>Self-Harm Annotator</pipeline-name>
-  <slug>dsh-python</slug>
+  <slug>self-harm-python</slug>
   <ordering>500</ordering>
   <category>general</category>
   <!--

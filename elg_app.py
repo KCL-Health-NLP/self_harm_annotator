@@ -1,6 +1,6 @@
 import traceback
 
-from self_harm_annotator import SHAnnotator
+from self_harm_annotator import SelfHarmAnnotator
 from flask import Flask, request
 from flask_json import FlaskJSON, JsonError, json_response, as_json
 import traceback
@@ -14,7 +14,7 @@ app.config['JSON_SORT_KEYS'] = False
 
 json_app = FlaskJSON(app)
 
-dsha = SHAnnotator(verbose=False)
+dsha = SelfHarmAnnotator(verbose=False)
 
 
 @json_app.invalid_json_error

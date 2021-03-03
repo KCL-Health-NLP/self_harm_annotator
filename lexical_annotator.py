@@ -20,12 +20,6 @@ from spacy.matcher import PhraseMatcher, Matcher
 from spacy.tokens import Span, Token
 from spacy.symbols import LEMMA, LOWER
 
-__author__ = "André Bittar"
-__copyright__ = "Copyright 2020, André Bittar"
-__credits__ = ["André Bittar"]
-__license__ = "GPL"
-__email__ = "andre.bittar@kcl.ac.uk"
-
 
 class LexicalAnnotatorSequence(object):
     """
@@ -165,7 +159,7 @@ class LexicalAnnotator(object):
         for _, start, end in matches:
             entity = Span(doc, start, end, label=self.nlp.vocab.strings[self.label])
             spans.append(entity)
-            # Copy tense attribute to entity (for SH annotator)
+            # Copy tense attribute to entity (for self-harm annotator)
             tense = '_'
             for token in entity:
                 token._.set(self.target_attribute, self.label)
@@ -386,7 +380,7 @@ class LemmaAnnotator(object):
         for _, start, end in matches:
             entity = Span(doc, start, end, label=self.nlp.vocab.strings[self.label])
             spans.append(entity)
-            # Copy tense attribute to entity (for SH annotator)
+            # Copy tense attribute to entity (for Self-harm annotator)
             tense = '_'
             for token in entity:
                 token._.set(self.attribute, self.label)

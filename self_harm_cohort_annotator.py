@@ -13,7 +13,7 @@ sys.path.append('T:/Andre Bittar/workspace/utils')
 
 from datetime import date
 from db_connection import fetch_dataframe, db_name, server_name
-from self_harm_annotator import SHAnnotator
+from self_harm_annotator import SelfHarmAnnotator
 from ehost_annotation_reader import convert_file_annotations, get_corpus_files, load_mentions_with_attributes
 from evaluate_patient_level import get_brcid_mapping
 from pandas import Timestamp
@@ -21,12 +21,6 @@ from pprint import pprint
 from shutil import copy, move
 from sklearn.metrics import cohen_kappa_score, precision_recall_fscore_support, classification_report
 from time import time
-
-__author__ = "André Bittar"
-__copyright__ = "Copyright 2020, André Bittar"
-__credits__ = ["André Bittar"]
-__license__ = "GPL"
-__email__ = "andre.bittar@kcl.ac.uk"
 
 
 HEURISTICS = ['1m_doc', '2m_doc', '1m_patient', '2m_patient', '2m_diff_doc', '2m_diff_patient', '2m_diff_strict_doc', '2m_diff_strict_patient']
@@ -167,7 +161,7 @@ def test(check_temporality):
     """
     Run some test examples.
     """
-    sha = SHAnnotator()
+    sha = SelfHarmAnnotator()
     
     texts = ['Psychiatric history: she reports having self-harmed.', 'She has self-harmed in the past.', 'No evidence of cutting herself, but does have SH. She is self-harming.']    
     
@@ -331,7 +325,7 @@ def batch_process(main_dir):
     """
     Run the sh_annotator on text files and output new XML.
     """
-    sha = SHAnnotator(verbose=False)
+    sha = SelfHarmAnnotator(verbose=False)
     
     #main_dir = 'Z:/Andre Bittar/Projects/KA_Self-harm/data/text'
     
@@ -765,7 +759,7 @@ def evaluate_patient_level_with_heuristics(pin_gold, pin_sys, attribute='text', 
 
 def process(pin, check_counts=True, check_temporality=True, heuristic='base', test_rows=-1):
     """
-    Run sh_annotator on a DataFrame that contains the text for each file.
+    Run self_harm_annotator on a DataFrame that contains the text for each file.
     Outputs True for documents with relevant mention.
     Does not write new XML.
     All saved to the DataFrame.
@@ -781,7 +775,7 @@ def process(pin, check_counts=True, check_temporality=True, heuristic='base', te
     # temporary save file
     tmp_pout = os.path.join(os.path.dirname(pin), 'tmp_' + now + '.pickle')
     
-    sha = SHAnnotator(verbose=False)
+    sha = SelfHarmAnnotator(verbose=False)
     #df = pd.read_pickle('Z:/Andre Bittar/Projects/KA_Self-harm/data/all_text_processed.pickle')
     df = pd.read_pickle(pin)
     if test_rows > 0:
