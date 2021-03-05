@@ -9,7 +9,7 @@ RULES_1 = [
     {
         # SH and BODY_PART (for coordinated body parts)
         'name': 'SH_AND_BODY_PART',
-        'pattern': [{'_': {'SH': 'SH'}}, {'LEMMA': 'and'}, {'LEMMA': {'IN': ['all', 'both']}, 'OP': '?'}, {'LEMMA': {'IN': ['her', 'his', 'their']}, 'OP': '?'}, {'LEMMA': {'IN': ['left', 'right', 'lower', 'upper']}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}}],
+        'pattern': [{'_': {'SH': 'SH'}}, {'LEMMA': 'and'}, {'LEMMA': {'IN': ['all', 'both']}, 'OP': '?'}, {'LEMMA': 'her', 'OP': '?'}, {'LEMMA': {'IN': ['left', 'right', 'lower', 'upper']}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}}],
         'avm': {'ALL': {'SH': 'SH'}},
         'merge': True
     },
@@ -51,14 +51,14 @@ RULES_1 = [
     {
         # voices telling her to kill herself
         'name': 'TELL_TO_ATTEMPT_TO_SH_SUICIDE',
-        'pattern': [{'LEMMA': {'IN': ['command', 'compell', 'incite', 'say', 'tell', 'urge']}}, {'LEMMA': 'to', 'OP': '?'}, {'LEMMA': {'IN': ['her', 'him', 'them']}}, {'LEMMA': 'to'}, {'POS': 'VERB', 'OP': '?'}, {'POS': 'CCONJ', 'OP': '?'}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
+        'pattern': [{'LEMMA': {'IN': ['command', 'compell', 'incite', 'say', 'tell', 'urge']}}, {'LEMMA': 'to', 'OP': '?'}, {'LEMMA': 'her'}, {'LEMMA': 'to'}, {'POS': 'VERB', 'OP': '?'}, {'POS': 'CCONJ', 'OP': '?'}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
         'avm': {'LAST': {'SH': 'SH', 'HEDGING': 'HEDGING', 'SH_TYPE': 'SUICIDALITY'}},
         'merge': True
     },
     {
         # voices telling her to jump out the window
         'name': 'TELL_TO_ATTEMPT_TO_SH',
-        'pattern': [{'LEMMA': {'IN': ['command', 'compell', 'incite', 'say', 'tell', 'urge']}}, {'LEMMA': 'to', 'OP': '?'}, {'LEMMA': {'IN': ['her', 'him', 'them']}}, {'LEMMA': 'to'}, {'POS': 'VERB', 'OP': '?'}, {'POS': 'CCONJ', 'OP': '?'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
+        'pattern': [{'LEMMA': {'IN': ['command', 'compell', 'incite', 'say', 'tell', 'urge']}}, {'LEMMA': 'to', 'OP': '?'}, {'LEMMA': 'her'}, {'LEMMA': 'to'}, {'POS': 'VERB', 'OP': '?'}, {'POS': 'CCONJ', 'OP': '?'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'LAST': {'SH': 'SH', 'HEDGING': 'HEDGING'}},
         'merge': True
     },

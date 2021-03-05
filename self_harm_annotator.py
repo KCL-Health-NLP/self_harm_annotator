@@ -52,7 +52,7 @@ class SelfHarmAnnotator:
     Annotate mentions of self-harm in clinical texts.
     """
 
-    def __init__(self, verbose=False):
+    def __init__(self, gender='all', verbose=False):
         """
         Create a new SelfHarmAnnotator instance.
         
@@ -61,6 +61,7 @@ class SelfHarmAnnotator:
         """
         print('Self-harm annotator')
         self.nlp = spacy.load('en_core_web_sm', disable=['ner'])
+        self.gender = gender
         self.text = None
         self.verbose = verbose
         
@@ -94,12 +95,21 @@ class SelfHarmAnnotator:
 
         # Load token sequence annotators
         self.load_token_sequence_annotator('history')
-        self.load_token_sequence_annotator('level0')
-        self.load_token_sequence_annotator('level1')
-        self.load_token_sequence_annotator('time')
+        if self.gender == 'fem':
+            self.load_token_sequence_annotator('level0_fem')
+            self.load_token_sequence_annotator('level1_fem')
+            self.load_token_sequence_annotator('time_fem')
+        else:
+            self.load_token_sequence_annotator('level0')
+            self.load_token_sequence_annotator('level1')
+            self.load_token_sequence_annotator('time')
         self.load_token_sequence_annotator('negation')
-        self.load_token_sequence_annotator('status')
+        if self.gender == 'fem':
+            self.load_token_sequence_annotator('status_fem')
+        else:
+            self.load_token_sequence_annotator('status')
         
+        print('-- Gender:', self.gender, file=sys.stderr)
         print('-- Pipeline:', file=sys.stderr)
         print('  -- ' + '\n  -- '.join(self.nlp.pipe_names), file=sys.stderr)
 
@@ -1130,8 +1140,10 @@ class LemmaCorrector(object):
     def __call__(self, doc):
         for token in doc:
             # relevant pronouns for peri-natal study
-            if token.lower_ in ['she', 'her', 'herself', 'themselves']:
+            if token.lemma_ == '-PRON-':
                 token.lemma_ = token.lower_
+            #if token.lower_ in ['she', 'her', 'herself', 'themselves']:
+            #    token.lemma_ = token.lower_
             if token.lower_ == 'overdoses':
                 token.lemma_ = 'overdose'
         return doc
@@ -1171,6 +1183,7 @@ if __name__ == "__main__":
     group.add_argument('-f', '--input_file', type=str, nargs=1, help='the path to a text file to process.', required=False)
     group.add_argument('-t', '--text', type=str, nargs=1, help='a text string to process.', required=False)
     group.add_argument('-e', '--examples', action='store_true', help='run on test examples (no output to file).', required=False)
+    parser.add_argument('-g', '--gender', type=str, nargs=1, default='all', choices=['fem', 'all'], help='apply rules for female gender only, or for all genders (default)', required=False)
     parser.add_argument('-w', '--write_output', action='store_true', help='write output to file.', required=False)
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose mode.', required=False)
     
@@ -1179,8 +1192,11 @@ if __name__ == "__main__":
         sys.exit(0)
     
     args = parser.parse_args()
-    
-    sha = SelfHarmAnnotator(verbose=args.verbose)
+
+    if args.gender is not None:
+        sha = SelfHarmAnnotator(gender=args.gender[0], verbose=args.verbose)
+    else:
+        sha = SelfHarmAnnotator(verbose=args.verbose)
     
     if args.text is not None:
         sh_annotations = sha.process_text(args.text[0], 'text_001', write_output=args.write_output, verbose=args.verbose)

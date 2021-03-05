@@ -41,21 +41,21 @@ RULES_TIME = [
     {
          # when she was 28
         'name': 'WHEN_SHE_WAS_PAST',
-        'pattern': [{'LEMMA': 'when'}, {'LEMMA': {'IN': ['she', 'he', 'they']}}, {'LEMMA': 'be'}, {'POS': 'NUM'}],
+        'pattern': [{'LEMMA': 'when'}, {'LEMMA': 'she'}, {'LEMMA': 'be'}, {'POS': 'NUM'}],
         'avm': {'ALL': {'TIME': 'PAST'}},
         'merge': False
     },
     {
          # when she was a kid
         'name': 'WHEN_SHE_WAS_LIFE_STAGE',
-        'pattern': [{'LEMMA': 'when'}, {'LEMMA': {'IN': ['she', 'he', 'they']}}, {'LEMMA': 'be'}, {'LEMMA': 'a', 'OP': '?'}, {'_': {'TIME': 'LIFE_STAGE'}}],
+        'pattern': [{'LEMMA': 'when'}, {'LEMMA': 'she'}, {'LEMMA': 'be'}, {'LEMMA': 'a', 'OP': '?'}, {'_': {'TIME': 'LIFE_STAGE'}}],
         'avm': {'ALL': {'TIME': 'PAST'}},
         'merge': False
     },
     {
          # in her teens
         'name': 'IN_LIFE_STAGE',
-        'pattern': [{'POS': 'ADP'}, {'LEMMA': {'IN': ['her', 'his', 'their'], 'OP': '?'}}, {'_': {'TIME': 'LIFE_STAGE'}}, {'LEMMA': 'year', 'OP': '?'}],
+        'pattern': [{'POS': 'ADP'}, {'LEMMA': 'her', 'OP': '?'}, {'_': {'TIME': 'LIFE_STAGE'}}, {'LEMMA': 'year', 'OP': '?'}],
         'avm': {'ALL': {'TIME': 'PAST'}},
         'merge': False
     },

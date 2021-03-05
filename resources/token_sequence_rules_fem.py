@@ -104,14 +104,14 @@ RULES = [
     {
         # end her (own) life
         'name': 'END_HER_LIFE',
-        'pattern': [{'LEMMA': {'IN': ['end', 'take']}}, {'LEMMA': {'IN': ['her', 'his', 'their']}}, {'LEMMA': 'own', 'OP': '?'}, {'LEMMA': 'life'}],
+        'pattern': [{'LEMMA': {'IN': ['end', 'take']}}, {'LEMMA': 'her'}, {'LEMMA': 'own', 'OP': '?'}, {'LEMMA': 'life'}],
         'avm': {'ALL': {'LA': 'SUICIDE'}},
         'merge': False
     },
     {
         # kill herself
         'name': 'KILL_HERSELF',
-        'pattern': [{'LEMMA': 'kill'}, {'LEMMA': {'IN': ['herself', 'himself', 'themself']}}],
+        'pattern': [{'LEMMA': 'kill'}, {'LEMMA': 'herself'}],
         'avm': {'ALL': {'LA': 'SUICIDE'}},
         'merge': False
     },
@@ -155,35 +155,35 @@ RULES = [
         # burnt (both) her (upper (left)) arms
         # TODO avoid matching with He punched her back etc.
         'name': 'HARM_ACTION_POSITION_BODY_PART',
-        'pattern': [{'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': {'IN': ['all', 'both']}, 'OP': '?'}, {'LEMMA': {'IN': ['her', 'his', 'their']}}, {'LEMMA': {'IN': ['left', 'right', 'lower', 'upper']}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}, 'POS': 'NOUN'}],
+        'pattern': [{'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': {'IN': ['all', 'both']}, 'OP': '?'}, {'LEMMA': 'her'}, {'LEMMA': {'IN': ['left', 'right', 'lower', 'upper']}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}, 'POS': 'NOUN'}],
         'avm': {'ALL': {'SH': 'SH'}},
         'merge': True
     },
     {
         # burnt herself on the (upper (left)) arm
         'name': 'HARM_ACTION_PP_POSITION_BODY_PART',
-        'pattern': [{'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': {'IN': ['herself', 'himself', 'themself']}}, {'POS': 'ADP'}, {'POS': 'DET'}, {'LEMMA': {'IN': ['left', 'right', 'lower', 'upper']}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}}],
+        'pattern': [{'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'herself'}, {'POS': 'ADP'}, {'POS': 'DET'}, {'LEMMA': {'IN': ['left', 'right', 'lower', 'upper']}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}}],
         'avm': {'ALL': {'SH': 'SH'}},
         'merge': True
     },
     {
         # pull her hair
         'name': 'PULL_HER_HAIR',
-        'pattern': [{'LEMMA': {'IN': ['pull', 'tug', 'yank', 'pulling', 'tugging', 'yanking']}}, {'LEMMA': {'IN': ['her', 'his', 'their']}}, {'LEMMA': 'hair'}],
+        'pattern': [{'LEMMA': {'IN': ['pull', 'tug', 'yank', 'pulling', 'tugging', 'yanking']}}, {'LEMMA': 'her'}, {'LEMMA': 'hair'}],
         'avm': {'ALL': {'SH': 'SH', 'HEDGING': 'UNCERTAIN', 'SH_TYPE': 'HAIR-PULLING'}},
         'merge': True
     },
     {
         # burns on (both) her (upper (left)) arm
         'name': 'HARM_ACTION_PP_HER_POSITION_BODY_PART',
-        'pattern': [{'_': {'LA': 'HARM_ACTION'}}, {'POS': 'ADP'}, {'LEMMA': 'both', 'OP': '?'}, {'LEMMA': {'IN': ['her', 'his', 'their']}}, {'LEMMA': {'IN': ['left', 'right', 'lower', 'upper']}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}}],
+        'pattern': [{'_': {'LA': 'HARM_ACTION'}}, {'POS': 'ADP'}, {'LEMMA': 'both', 'OP': '?'}, {'LEMMA': 'her'}, {'LEMMA': {'IN': ['left', 'right', 'lower', 'upper']}, 'OP': '*'}, {'_': {'LA': 'BODY_PART'}}],
         'avm': {'ALL': {'SH': 'SH'}},
         'merge': True
     },
     {
         # (deliberately) harm herself (deliberately)
         'name': 'HARM_V_HERSELF',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'harm'}, {'LEMMA': {'REGEX': '(her|him|them)self\W?'}}, {'_': {'LA': 'INTENT'}, 'OP': '*'}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'harm'}, {'LEMMA': {'REGEX': '(herself\W?)'}}, {'_': {'LA': 'INTENT'}, 'OP': '*'}],
         'avm': {'ALL': {'SH': 'SH', 'SH_TYPE': 'SELF-HARM'}},
         'merge': True
     },
@@ -197,42 +197,42 @@ RULES = [
     {
         # (deliberately) harm her self (deliberately)
         'name': 'HARM_V_HER_SELF',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'harm'}, {'LEMMA': {'REGEX': 'her|him|them'}}, {'LEMMA': {'REGEX': 'self\W?'}}, {'_': {'LA': 'INTENT'}, 'OP': '*'}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'harm'}, {'LEMMA': 'her'}, {'LEMMA': {'REGEX': 'self\W?'}}, {'_': {'LA': 'INTENT'}, 'OP': '*'}],
         'avm': {'ALL': {'SH': 'SH', 'SH_TYPE': 'SELF-HARM'}},
         'merge': True
     },
     {
         # (deliberately) cut herself (deliberately)
         'name': 'HARM_ACTION_V_HERSELF_1',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': {'IN': ['herself', 'himself', 'themself']}}, {'_': {'LA': 'INTENT'}, 'OP': '*'}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'herself'}, {'_': {'LA': 'INTENT'}, 'OP': '*'}],
         'avm': {'ALL': {'SH': 'SH'}},
         'merge': True
     },
     {
         # (deliberate) cutting of herself
         'name': 'HARM_ACTION_N_HERSELF',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'of'}, {'LEMMA': {'IN': ['herself', 'himself', 'themself']}}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'of'}, {'LEMMA': 'herself'}],
         'avm': {'ALL': {'SH': 'SH'}},
         'merge': True
     },
     {
         # (deliberate) harm to herself
         'name': 'DELIBERATE_HARM_TO_HERSELF',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'harm'}, {'LEMMA': {'IN': ['to', 'toward', 'towards']}}, {'LEMMA': {'REGEX': '(her|him|them)?self\W?'}}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'harm'}, {'LEMMA': {'IN': ['to', 'toward', 'towards']}}, {'LEMMA': {'REGEX': '(her)?self\W?'}}],
         'avm': {'ALL': {'SH': 'SH'}},
         'merge': True
     },
     {
         # deliberately injure herself
         'name': 'DELIBERATELY_INJURE_HERSELF',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '+'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': {'IN': ['herself', 'himself', 'themself']}}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '+'}, {'_': {'LA': 'HARM_ACTION'}}, {'LEMMA': 'herself'}],
         'avm': {'ALL': {'SH': 'SH'}},
         'merge': True
     },
     {
         # deliberate injuries towards herself
         'name': 'DELIBERATE_INJURY',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '+'}, {'LEMMA': {'IN': ['harm', 'injury', 'violence']}, 'POS': 'NOUN'}, {'LEMMA': {'IN': ['to', 'toward', 'towards']}}, {'LEMMA': {'IN': ['herself', 'himself', 'themself']}}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '+'}, {'LEMMA': {'IN': ['harm', 'injury', 'violence']}, 'POS': 'NOUN'}, {'LEMMA': {'IN': ['to', 'toward', 'towards']}}, {'LEMMA': 'herself'}],
         'avm': {'ALL': {'SH': 'SH', 'SH_TYPE': 'SELF-HARM'}},
         'merge': True
     },
@@ -302,7 +302,7 @@ RULES = [
     {
         # she has (deep) (self-) lacerations
         'name': 'SHE_HAS_HARM',
-        'pattern': [{'LEMMA': {'IN': ['she', 'he', 'they']}}, {'LEMMA': 'be', 'OP': '?'}, {'LEMMA': {'IN': ['display', 'evidence', 'have', 'present', 'show']}, 'OP': '+'}, {'POS': 'ADP', 'OP': '?'}, {'POS': 'ADJ', 'OP': '?'}, {'LEMMA': 'self-', 'OP': '?'}, {'_': {'LA': 'HARM_ACTION'}, 'OP': '+'}],
+        'pattern': [{'LEMMA': 'she'}, {'LEMMA': 'be', 'OP': '?'}, {'LEMMA': {'IN': ['display', 'evidence', 'have', 'present', 'show']}, 'OP': '+'}, {'POS': 'ADP', 'OP': '?'}, {'POS': 'ADJ', 'OP': '?'}, {'LEMMA': 'self-', 'OP': '?'}, {'_': {'LA': 'HARM_ACTION'}, 'OP': '+'}],
         'avm': {'LAST': {'SH': 'SH'}},
         'merge': False
     },
@@ -323,14 +323,14 @@ RULES = [
     {
         # (deliberate) throw herself in front of
         'name': 'THROW_HERSELF',
-        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'throw'}, {'LEMMA': {'IN': ['herself', 'himself', 'themself']}}, {'POS': {'IN': ['ADP', 'PART']}, 'OP': '+'}],
+        'pattern': [{'_': {'LA': 'INTENT'}, 'OP': '*'}, {'LEMMA': 'throw'}, {'LEMMA': 'herself'}, {'POS': {'IN': ['ADP', 'PART']}, 'OP': '+'}],
         'avm': {'ALL': {'SH': 'SH', 'SH_TYPE': 'TRAUMA'}},
         'merge': True
     },
     {
         # great risk to herself
         'name': 'RISK_TO_HERSELF',
-        'pattern': [{'LEMMA': {'IN': ['elevate', 'elevated', 'extreme', 'great', 'high', 'intense', 'much', 'serious', 'worry', 'worrying']}}, {'LEMMA': 'risk'}, {'LEMMA': 'to'}, {'LEMMA': {'IN': ['herself', 'himself', 'themself']}}],
+        'pattern': [{'LEMMA': {'IN': ['elevate', 'elevated', 'extreme', 'great', 'high', 'intense', 'much', 'serious', 'worry', 'worrying']}}, {'LEMMA': 'risk'}, {'LEMMA': 'to'}, {'LEMMA': 'herself'}],
         'avm': {'ALL': {'SH': 'SH', 'SH_TYPE': 'SELF-HARM'}},
         'merge': True
     },
@@ -358,7 +358,7 @@ RULES = [
     {
         # violence to self
         'name': 'VIOLENCE_TO_SELF',
-        'pattern': [{'LEMMA': 'violence'}, {'LEMMA': 'to'}, {'LEMMA': {'IN': ['herself', 'himself', 'themself', 'self']}}],
+        'pattern': [{'LEMMA': 'violence'}, {'LEMMA': 'to'}, {'LEMMA': {'IN': ['herself', 'self']}}],
         'avm': {'ALL': {'SH': 'SH', 'SH_TYPE': 'SELF-HARM'}},
         'merge': False
     }

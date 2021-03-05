@@ -1,6 +1,6 @@
 # The docker image that implements this app
 # REQUIRED
-image: self_harm_annotator:latest
+image: slamcloud.azurecr.io/self-harm-annotator:latest
 
 # The port number on which the container listens for HTTP connections
 # OPTIONAL - default 8080
