@@ -13,10 +13,6 @@
     column: token_string
     type: VARCHAR(255)
     sqlType: VARCHAR
-  comment:
-    column: token_string
-    type: VARCHAR(255)
-    sqlType: VARCHAR
   polarity:
     column: token_string
     type: VARCHAR(255)
