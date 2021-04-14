@@ -6,44 +6,44 @@
 
 RULES_NEGATION = [
     {
-        # no DSH
-        'name': 'NO_DSH',
-        'pattern': [{'LEMMA': 'no'}, {'_': {'DSH': 'DSH'}}],
+        # no SH
+        'name': 'NO_SH',
+        'pattern': [{'LEMMA': 'no'}, {'_': {'SH': 'SH'}}],
         'avm': {'LAST': {'NEG': 'NEG'}},
         'merge': True
     },
     {
-        # no discernible evidence/mention/risk/sign/suggestion of DSH
-        'name': 'NO_X_OF_DSH',
-        'pattern': [{'LEMMA': 'no'}, {'POS': {'REGEX': '^V'}, '_': {'DSH': {'NOT_IN': ['DSH']}}, 'OP': '+'}, {'LEMMA': 'of'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        # no discernible evidence/mention/risk/sign/suggestion of SH
+        'name': 'NO_X_OF_SH',
+        'pattern': [{'LEMMA': 'no'}, {'POS': {'REGEX': '^V'}, '_': {'SH': {'NOT_IN': ['SH']}}, 'OP': '+'}, {'LEMMA': 'of'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'LAST': {'NEG': 'NEG'}},
         'merge': True
     },
     {
-        # never DSH
-        'name': 'NEVER_DSH',
-        'pattern': [{'LEMMA': 'never'}, {'POS': {'REGEX': '^V'}, '_': {'DSH': {'NOT_IN': ['DSH']}}, 'OP': '+'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        # never SH
+        'name': 'NEVER_SH',
+        'pattern': [{'LEMMA': 'never'}, {'POS': {'REGEX': '^V'}, '_': {'SH': {'NOT_IN': ['SH']}}, 'OP': '+'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'LAST': {'NEG': 'NEG'}},
         'merge': True
     },
     {
-        # denies DSH
-        'name': 'NEVER_DSH',
-        'pattern': [{'LEMMA': {'IN': ['deny', 'denie']}}, {'POS': 'ADV', 'OP': '*'}, {'LEMMA': {'IN': ['have', 'having']}, 'OP': '?'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        # denies SH
+        'name': 'NEVER_SH',
+        'pattern': [{'LEMMA': {'IN': ['deny', 'denie']}}, {'POS': 'ADV', 'OP': '*'}, {'LEMMA': {'IN': ['have', 'having']}, 'OP': '?'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'LAST': {'NEG': 'NEG'}},
         'merge': True
     },
     {
-        # not DSH
-        'name': 'NEVER_DSH',
-        'pattern': [{'LEMMA': {'IN': ['never', 'not']}}, {'POS': 'ADV', 'OP': '*'}, {'LEMMA': {'IN': ['have', 'having']}, 'OP': '?'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        # not SH
+        'name': 'NEVER_SH',
+        'pattern': [{'LEMMA': {'IN': ['never', 'not']}}, {'POS': 'ADV', 'OP': '*'}, {'LEMMA': {'IN': ['have', 'having']}, 'OP': '?'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'LAST': {'NEG': 'NEG'}},
         'merge': True
     },
     {
-        # unable to ... DSH
-        'name': 'UNABLE_X_DSH',
-        'pattern': [{'LEMMA': 'unable'}, {'LEMMA': 'to'}, {'LEMMA': {'NOT_IN': ['.', '?', '!', ':', ';']}, '_': {'DSH': {'NOT_IN': ['DSH']}}, 'OP': '+'}, {'_': {'DSH': 'DSH'}, 'OP': '+'}],
+        # unable to ... SH
+        'name': 'UNABLE_X_SH',
+        'pattern': [{'LEMMA': 'unable'}, {'LEMMA': 'to'}, {'LEMMA': {'NOT_IN': ['.', '?', '!', ':', ';']}, '_': {'SH': {'NOT_IN': ['SH']}}, 'OP': '+'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'LAST': {'NEG': 'NEG'}},
         'merge': True
     }

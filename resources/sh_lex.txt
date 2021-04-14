@@ -1,0 +1,103 @@
+d.s.h	SH
+D.S.H	SH
+d.s.h.	SH
+D.S.H.	SH
+DSH	SH
+DSH/	SH
+dsh	SH
+dsh/	SH
+o.d	SH
+o.d.	SH
+OD	SH
+overdose	SH
+overdsose	SH
+overdosed	SH
+overdoses	SH
+overdsoses	SH
+overdosing	SH
+parasuicidal	SH
+parasuicidality	SH
+parasuicide	SH
+auto mutilate	SH
+auto mutilating	SH
+auto mutilation	SH
+auto- mutilate	SH
+auto- mutilating	SH
+auto- mutilation	SH
+#self abuse	SH
+#self cut	SH
+#self cutting	SH
+#self destruct	SH
+#self destruction	SH
+#self destructive	SH
+#self harm	SH
+self harmer	SH
+#self harming	SH
+#self hit	SH
+#self immolate	SH
+#self immolating	SH
+#self immolation	SH
+#self injure	SH
+#self injuring	SH
+#self injurious	SH
+#self injury	SH
+#self lacerate	SH
+#self laceration	SH
+#self mutilate	SH
+#self mutilating	SH
+#self mutilation	SH
+#self poison	SH
+#self poisoning	SH
+#self- abuse	SH
+#self- cut	SH
+#self- cutting	SH
+#self- destruct	SH
+#self- destruction	SH
+#self- destructive	SH
+#self- harm	SH
+self- harmer	SH
+#self- harming	SH
+#self- hit	SH
+#self- immolate	SH
+#self- immolating	SH
+#self- immolation	SH
+#self- injure	SH
+#self- injuring	SH
+#self- injurious	SH
+#self- injury	SH
+#self- lacerate	SH
+#self- laceration	SH
+#self- mutilate	SH
+#self- mutilating	SH
+#self- mutilation	SH
+#self- poison	SH
+#self- poisoning	SH
+self-abuse	SH
+self-cut	SH
+self-cutting	SH
+self-destruct	SH
+self-destruction	SH
+self-destructive	SH
+self-harm	SH
+self-harm/	SH
+self-harmer	SH
+self-harming	SH
+self-harming/	SH
+self-hit	SH
+self-hitting	SH
+self-immolate	SH
+self-immolating	SH
+self-immolation	SH
+self-injure	SH
+self-injuring	SH
+self-injurious	SH
+self-injury	SH
+self-lacerate	SH
+self-laceration	SH
+self-mutilate	SH
+self-mutilating	SH
+self-mutilation	SH
+self-poison	SH
+self-poisoning	SH
+selfharm	SH
+selfharm/	SH

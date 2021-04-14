@@ -14,7 +14,7 @@ burning	HARM_ACTION
 chop	HARM_ACTION
 chopping	HARM_ACTION
 cut	HARM_ACTION
-cutting	DSH
+cutting	SH
 cutting	HARM_ACTION
 destruct	HARM_ACTION
 destruction	HARM_ACTION
