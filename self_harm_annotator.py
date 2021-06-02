@@ -108,7 +108,7 @@ class SelfHarmAnnotator:
             self.load_token_sequence_annotator('status_fem')
         else:
             self.load_token_sequence_annotator('status')
-        
+
         print('-- Gender:', self.gender, file=sys.stderr)
         print('-- Pipeline:', file=sys.stderr)
         print('  -- ' + '\n  -- '.join(self.nlp.pipe_names), file=sys.stderr)
@@ -521,7 +521,7 @@ class SelfHarmAnnotator:
             if child.lemma_ in ['the', 'this', 'that', 'her']:
                 return True
         return False
-    
+
     def calculate_sh_mention_attributes(self, doc, verbose=False):
         """
         Using previously added annotations, calculate the attribute values for 
@@ -540,6 +540,11 @@ class SelfHarmAnnotator:
         # Hack: get attributes from window of 5 tokens before SH mention
         has_history_section = False
         for i in range(len(doc)):
+
+            # deal with interrogative sentences first
+            if '?' in doc[i].sent[-1].text:
+                doc[i]._.SH = False
+
             if doc[i]._.SH in ['SH', 'NON_SH']:
 
                 # if token is in a history section annotate as historical
@@ -1105,6 +1110,7 @@ class SelfHarmAnnotator:
             return global_mentions
         
         doc = self.nlp(text)
+
         flag = self.calculate_sh_mention_attributes(doc)
         if flag:
             print('-- Found history section in text with id:', text_id)
