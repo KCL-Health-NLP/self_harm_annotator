@@ -23,8 +23,22 @@ RULES_1 = [
     {
         # attempt to SH
         'name': 'ATTEMPT_TO_SH',
-        'pattern': [{'LEMMA': {'IN': ['attempt', 'try']}}, {'LEMMA': {'IN': ['at', 'to']}}, {'_': {'SH': 'SH'}, 'OP': '+'}],
+        'pattern': [{'LEMMA': {'IN': ['attempt', 'bid', 'try']}}, {'LEMMA': {'IN': ['at', 'to']}}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'LAST': {'SH': 'SH'}},
+        'merge': True
+    },
+    {
+        # attempt to kill herself
+        'name': 'ATTEMPT_TO_SUICIDE',
+        'pattern': [{'LEMMA': {'IN': ['attempt', 'try']}}, {'LEMMA': {'IN': ['at', 'to']}}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
+        'avm': {'LAST': {'SH': 'SH', 'SH_TYPE': 'SUICIDALITY'}},
+        'merge': True
+    },
+    {
+        # want to kill herself
+        'name': 'WANT_TO_SUICIDE',
+        'pattern': [{'LEMMA': {'IN': ['desire', 'want', 'wish']}}, {'LEMMA': 'to'}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
+        'avm': {'LAST': {'SH': 'SH', 'SH_TYPE': 'SUICIDALITY'}},
         'merge': True
     },
     {
@@ -37,14 +51,14 @@ RULES_1 = [
     {
         # attempt to commit suicide
         'name': 'ATTEMPT_TO_COMMIT_SUICIDE',
-        'pattern': [{'LEMMA': {'IN': ['attempt', 'try', 'attempting', 'trying']}}, {'LEMMA': {'IN': ['at', 'to']}}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
+        'pattern': [{'LEMMA': {'IN': ['attempt', 'bid', 'try', 'attempting', 'trying']}}, {'LEMMA': {'IN': ['at', 'to']}}, {'_': {'LA': 'SUICIDE'}, 'OP': '+'}],
         'avm': {'LAST': {'SH': 'SH', 'SH_TYPE': 'SUICIDALITY'}},
         'merge': True
     },
     {
         # attempt to electrocute herself
         'name': 'ATTEMPT_TO_SH',
-        'pattern': [{'LEMMA': {'IN': ['attempt', 'try', 'attempting', 'trying']}}, {'LEMMA': {'IN': ['at', 'to']}}, {'_': {'SH': 'SH'}, 'OP': '+'}],
+        'pattern': [{'LEMMA': {'IN': ['attempt', 'bid', 'try', 'attempting', 'trying']}}, {'LEMMA': {'IN': ['at', 'to']}}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'LAST': {'SH': 'SH'}},
         'merge': True
     },
@@ -92,10 +106,24 @@ RULES_1 = [
         'merge': True
     },
     {
+        # feel like cutting her throat
+        'name': 'FEEL_LIKE_SH',
+        'pattern': [{'LEMMA': 'feel'}, {'LEMMA': {'IN': ['like', 'compel', 'force']}}, {'POS': {'IN': ['ADVP', 'TO']}, 'OP': '?'}, {'_': {'SH': 'SH'}, 'OP':'+'}],
+        'avm': {'LAST': {'SH': 'SH', 'HEDGING': 'HEDGING'}},
+        'merge': False
+    },
+    {
+        # intention to take an overdose
+        'name': 'INTENTION_TO_TAKE_AN_OD',
+        'pattern': [{'_': {'LA': 'INTENT'}}, {'LEMMA': 'to'}, {'_': {'LA': 'OD'}, 'OP': '+'}],
+        'avm': {0: {'SH': False}, 1: {'SH': False}, 'LAST': {'HEDGING': 'HEDGING'}},
+        'merge': True
+    },
+    {
         # plan to self-harm
         'name': 'PLAN_TO_SH',
-        'pattern': [{'_': {'LA': 'INTENT'}}, {'POS': 'ADVP'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
-        'avm': {0: {'SH': False}, 'LAST': {'HEDGING': 'HEDGING'}},
+        'pattern': [{'_': {'LA': 'INTENT'}}, {'POS': {'IN': ['ADVP', 'TO']}}, {'_': {'SH': 'SH'}, 'OP': '+'}],
+        'avm': {0: {'SH': False}, 1: {'SH': False}, 'LAST': {'HEDGING': 'HEDGING'}},
         'merge': True
     },
     {
@@ -150,6 +178,20 @@ RULES_1 = [
         'merge': True
     },
     {
+        # accidentally SH
+        'name': 'ACCIDENTALLY_SH',
+        'pattern': [{'LEMMA': {'IN': ['accidentally', 'unintentionally']}}, {'_': {'SH': 'SH'}, 'OP': '+'}],
+        'avm': {'ALL': {'SH': False}},
+        'merge': True
+    },
+    {
+        # SH accidentally
+        'name': 'SH_ACCIDENTALLY',
+        'pattern': [{'_': {'SH': 'SH'}, 'OP': '+'}, {'LEMMA': {'IN': ['accidentally', 'unintentionally']}}],
+        'avm': {'ALL': {'SH': False}},
+        'merge': True
+    },
+    {
         # Risk (overdose, self-harm, jumping from height, etc.):
         'name': 'SH_HEADING_2',
         'pattern': [{'LEMMA': '('}, {'LEMMA': {'NOT_IN': ['(', ')']}, 'TAG': {'NOT_IN': ['VB', 'VBD' 'VBN', 'VBP', 'VBZ']}, 'OP': '+'}, {'LEMMA': ')'}, {'LEMMA': ':'}],
@@ -171,6 +213,13 @@ RULES_1 = [
         'merge': True
     },
     {
+        # OD AM
+        'name': 'OD_AM_DOSAGE',
+        'pattern': [{'LEMMA': {'IN' : ['od', 'OD', 'o.d.', 'o.d']}}, {'LEMMA': {'IN' : ['am', 'AM', 'a.m.', 'a.m', 'pm', 'PM', 'p.m.', 'p.m']}}],
+        'avm': {'ALL': {'SH': False}},
+        'merge': True
+    },
+    {
         # cut down
         'name': 'CUT_DOWN',
         'pattern': [{'LEMMA': {'IN': ['cut', 'cutting']}}, {'LEMMA': 'down'}],
@@ -180,7 +229,7 @@ RULES_1 = [
     {
         # pick up
         'name': 'PICK_UP',
-        'pattern': [{'LEMMA': {'IN': ['pick', 'picking']}}, {'LEMMA': 'up'}],
+        'pattern': [{'LEMMA': {'IN': ['pick', 'picking']}}, {'LEMMA': {'REGEX': '(her|him|them)sel(f|ves)'}, 'OP': '?'}, {'LEMMA': 'up'}],
         'avm': {'ALL': {'SH': False}},
         'merge': True
     },
@@ -217,6 +266,13 @@ RULES_1 = [
         # a) self-harm
         'name': 'BULLET_SH',
         'pattern': [{'_': {'LA': 'BULLET'}}, {'_': {'SH': 'SH'}, 'OP': '+'}],
+        'avm': {'ALL': {'HEDGING': 'HEDGING'}},
+        'merge': True
+    },
+    {
+        # Self-harm -
+        'name': 'SH_SENTSTART_PUNCT',
+        'pattern': [{'_': {'SH': 'SH'}, 'IS_SENT_START': True}, {'LEMMA': {'IN': ['-', ':']}}],
         'avm': {'ALL': {'HEDGING': 'HEDGING'}},
         'merge': True
     },

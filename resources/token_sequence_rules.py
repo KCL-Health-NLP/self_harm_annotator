@@ -272,6 +272,13 @@ RULES = [
         'merge': False
     },
     {
+        # take an overdose
+        'name': 'TAKE_AN_OD',
+        'pattern': [{'LEMMA': 'take'}, {'LEMMA': {'IN': ['an', 'another']}}, {'LEMMA': {'IN': ['overdose', 'od']}}],
+        'avm': {'ALL': {'LA': 'OD'}, 2: {'SH': 'SH', 'SH_TYPE': 'OVERDOSE'}},
+        'merge': False
+    },
+    {
         # took 12 paracetamol tablets
         'name': 'TAKE_NUM_MED_TABLETS',
         'pattern': [{'LEMMA': 'take'}, {'LEMMA': {'>=': 10}}, {'_': {'LA': 'MED'}}, {'LEMMA': {'IN': ['pill', 'tablet']}}],

@@ -126,7 +126,8 @@ class TokenSequenceAnnotator(object):
             self.add_annotation(doc, matches, name, avm)
 
             if self.verbose:
-                print('  -- Rule ' + name + ': ' + str(len(matches)) + ' matches.', file=sys.stderr)
+                if len(matches) > 0:
+                    print('  -- Rule ' + name + ': ' + str(len(matches)) + ' matches.', file=sys.stderr)
 
         # retain only longest matching spans
         """

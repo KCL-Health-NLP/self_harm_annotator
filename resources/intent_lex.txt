@@ -4,9 +4,14 @@ deliberate	INTENT
 deliberately	INTENT
 intend	INTENT
 intend to	INTENT
+intension	INTENT
+intensional	INTENT
+intensionally	INTENT
+intent	INTENT
 intention	INTENT
 intentional	INTENT
 intentionally	INTENT
+plan	INTENT
 on purpose	INTENT
 purposeful	INTENT
 purposefully	INTENT

@@ -25,6 +25,13 @@ RULES_TIME = [
         'merge': False
     },
     {
+         # 4-5 days ago (for incorrect tokenisation)
+        'name': 'REGEX_NPRESENT_AGO',
+        'pattern': [{'LEMMA': {'REGEX': '.*(day|week|month)'}}, {'LEMMA': 'ago'}],
+        'avm': {'ALL': {'TIME': 'PRESENTT'}},
+        'merge': False
+    },
+    {
          # 2 months ago
         'name': 'NUM_NPRESENT_AGO',
         'pattern': [{'POS': 'NUM'}, {'LEMMA': {'IN': ['day', 'week', 'month']}}, {'LEMMA': 'ago'}],
@@ -35,6 +42,13 @@ RULES_TIME = [
          # at (the) (age) (of) 16
         'name': 'AT_AGE_X',
         'pattern': [{'LEMMA': 'at'}, {'LEMMA': 'the', 'OP': '?'}, {'LEMMA': 'age', 'OP': '?'}, {'LEMMA': 'of', 'OP': '?'}, {'POS': 'NUM'}],
+        'avm': {'ALL': {'TIME': 'PAST'}},
+        'merge': False
+    },
+    {
+         # aged 16
+        'name': 'AGED_X',
+        'pattern': [{'LOWER': 'aged'}, {'POS': 'NUM'}],
         'avm': {'ALL': {'TIME': 'PAST'}},
         'merge': False
     },
@@ -56,6 +70,13 @@ RULES_TIME = [
          # in her teens
         'name': 'IN_LIFE_STAGE',
         'pattern': [{'POS': 'ADP'}, {'LEMMA': {'IN': ['her', 'his', 'their'], 'OP': '?'}}, {'_': {'TIME': 'LIFE_STAGE'}}, {'LEMMA': 'year', 'OP': '?'}],
+        'avm': {'ALL': {'TIME': 'PAST'}},
+        'merge': False
+    },
+    {
+         # as a child
+        'name': 'AS_A_LIFE_STAGE',
+        'pattern': [{'LEMMA': 'as'}, {'LEMMA': 'a'}, {'_': {'TIME': 'LIFE_STAGE'}}],
         'avm': {'ALL': {'TIME': 'PAST'}},
         'merge': False
     },

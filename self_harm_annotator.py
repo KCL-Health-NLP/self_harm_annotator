@@ -751,8 +751,8 @@ class SelfHarmAnnotator:
             - doc: spaCy Doc; the current Doc object
         """
         s = '\n'
-        s += 'PIPELINE:\n-- ' + '\n-- '.join(self.nlp.pipe_names)
-        s += '\n\n'
+        #s += 'PIPELINE:\n-- ' + '\n-- '.join(self.nlp.pipe_names)
+        #s += '\n\n'
         s += '{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}{:<10}'.format('INDEX', 'WORD', 'LEMMA', 'LOWER', 'POS1', 'POS2', 'HEAD', 'DEP')
 
         cext = set()        

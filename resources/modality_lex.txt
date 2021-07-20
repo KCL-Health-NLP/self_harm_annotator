@@ -4,9 +4,11 @@ maybe	MODALITY
 might	MODALITY
 perhaps	MODALITY
 possible	MODALITY
+possibly	MODALITY
 probable	MODALITY
 possibly	MODALITY
 probably	MODALITY
 likely	MODALITY
 plausible	MODALITY
+plausibly	MODALITY
 uncertain	MODALITY

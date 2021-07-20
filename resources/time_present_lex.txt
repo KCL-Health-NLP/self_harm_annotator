@@ -6,4 +6,9 @@ friday	PRESENT
 saturday	PRESENT
 sunday	PRESENT
 current	PRESENT
+currently	PRESENT
+presently	PRESENT
 recent	PRESENT
+recently	PRESENT
+today	PRESENT
+now	PRESENT

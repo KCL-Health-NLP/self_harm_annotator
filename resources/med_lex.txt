@@ -1,9 +1,14 @@
 amitriptyline	MED
+antibiotic	MED
+antibiotics	MED
 aspirin	MED
 cocodamol	MED
+coproxamol	MED
+co-proxamol	MED
 ibuprofen	MED
 neurofen	MED
 nurofen	MED
+nytol	MED
 olanzapine	MED
 paracetamol	MED
 respiradone	MED

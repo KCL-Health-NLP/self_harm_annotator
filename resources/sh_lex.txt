@@ -10,11 +10,16 @@ o.d	SH
 o.d.	SH
 OD	SH
 overdose	SH
+overdoose	SH
 overdsose	SH
 overdosed	SH
 overdoses	SH
+overdooses	SH
 overdsoses	SH
 overdosing	SH
+over dose	SH
+over dosed	SH
+over doses	SH
 parasuicidal	SH
 parasuicidality	SH
 parasuicide	SH

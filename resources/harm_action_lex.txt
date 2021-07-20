@@ -24,6 +24,8 @@ drowning	HARM_ACTION
 electrocute	HARM_ACTION
 electrocuting	HARM_ACTION
 electrocution	HARM_ACTION
+gas	HARM_ACTION
+gassing	HARM_ACTION
 gash	HARM_ACTION
 gouge	HARM_ACTION
 gouging	HARM_ACTION

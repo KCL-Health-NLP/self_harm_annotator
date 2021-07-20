@@ -96,3 +96,8 @@ will	HEDGING
 wish	HEDGING
 wishing	HEDGING
 would	HEDGING
+fear	HEDGING
+afraid	HEDGING
+scare	HEDGING
+scared	HEDGING
+feared	HEDGING
