@@ -104,7 +104,7 @@ RULES = [
     {
         # end her (own) life
         'name': 'END_HER_LIFE',
-        'pattern': [{'LEMMA': {'IN': ['end', 'take']}}, {'LEMMA': {'IN': ['her', 'his', 'their']}}, {'LEMMA': 'own', 'OP': '?'}, {'LEMMA': 'life'}],
+        'pattern': [{'LEMMA': {'IN': ['end', 'ending', 'take', 'taking']}}, {'LEMMA': {'IN': ['her', 'his', 'their']}}, {'LEMMA': 'own', 'OP': '?'}, {'LEMMA': 'life'}],
         'avm': {'ALL': {'LA': 'SUICIDE'}},
         'merge': False
     },
@@ -274,7 +274,7 @@ RULES = [
     {
         # take an overdose
         'name': 'TAKE_AN_OD',
-        'pattern': [{'LEMMA': 'take'}, {'LEMMA': {'IN': ['an', 'another']}}, {'LEMMA': {'IN': ['overdose', 'od']}}],
+        'pattern': [{'LEMMA': 'take'}, {'LEMMA': {'IN': ['an', 'another']}}, {'_': {'LA': 'INTENT'}, 'OP': '?'}, {'LEMMA': {'IN': ['overdose', 'od']}}],
         'avm': {'ALL': {'LA': 'OD'}, 2: {'SH': 'SH', 'SH_TYPE': 'OVERDOSE'}},
         'merge': False
     },
