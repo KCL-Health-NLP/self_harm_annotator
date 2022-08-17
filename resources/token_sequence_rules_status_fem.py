@@ -8,7 +8,7 @@ SAVED_RULES = [
     {
          # if she...SH
         'name': 'IF_SHE_SH',
-        'pattern': [{'LEMMA': 'if'}, {'LEMMA': {'IN': ['she', 'he', 'they']}}, {'LEMMA': {'NOT_IN': ['.', '?', '!', ':', ';']}, '_': {'SH': {'NOT_IN': ['SH']}}, 'OP': '+'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
+        'pattern': [{'LEMMA': 'if'}, {'LEMMA': 'she'}, {'LEMMA': {'NOT_IN': ['.', '?', '!', ':', ';']}, '_': {'SH': {'NOT_IN': ['SH']}}, 'OP': '+'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'ALL': {'SH': False}},
         'merge': False
     }
@@ -25,7 +25,7 @@ RULES_STATUS = [
     {
          # he...made suicide attempts
         'name': 'HE_SH',
-        'pattern': [{'LOWER': 'he'}, {'LEMMA': {'NOT_IN': ['she', 'her', 'herself', 'he', 'him', 'himself', 'they', 'them', 'themself', 'themselves', 'zzzzz', '.', '?', '!', ':', ';']}, '_': {'SH': {'NOT_IN': ['SH']}}, 'OP': '+'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
+        'pattern': [{'LOWER': 'he'}, {'LEMMA': {'NOT_IN': ['she', 'her', 'herself', 'zzzzz', '.', '?', '!', ':', ';']}, '_': {'SH': {'NOT_IN': ['SH']}}, 'OP': '+'}, {'_': {'SH': 'SH'}, 'OP': '+'}],
         'avm': {'ALL': {'SH': False}},
         'merge': False
     },

@@ -21,12 +21,6 @@ import sys
 from spacy.matcher import Matcher
 from spacy.tokens import Span
 
-__author__ = "André Bittar"
-__copyright__ = "Copyright 2020, André Bittar"
-__credits__ = ["André Bittar"]
-__license__ = "GPL"
-__email__ = "andre.bittar@kcl.ac.uk"
-
 # Ad hoc import selection
 
 # This is an ad hoc workaround to avoid trying to overwrite default attributes
@@ -66,17 +60,29 @@ class TokenSequenceAnnotator(object):
         elif name == 'level0':
             from resources.token_sequence_rules import RULES
             self.rules = RULES
+        elif name == 'level0_fem':
+            from resources.token_sequence_rules_fem import RULES
+            self.rules = RULES
         elif name == 'level1':
             from resources.token_sequence_rules_1 import RULES_1
             self.rules = RULES_1
+        elif name == 'level1_fem':
+            from resources.token_sequence_rules_1_fem import RULES_1
+            self.rules = RULES_1
         elif name == 'time':
             from resources.token_sequence_rules_time import RULES_TIME
+            self.rules = RULES_TIME
+        elif name == 'time_fem':
+            from resources.token_sequence_rules_time_fem import RULES_TIME
             self.rules = RULES_TIME
         elif name == 'negation':
             from resources.token_sequence_rules_negation import RULES_NEGATION
             self.rules = RULES_NEGATION
         elif name == 'status':
             from resources.token_sequence_rules_status import RULES_STATUS
+            self.rules = RULES_STATUS
+        elif name == 'status_fem':
+            from resources.token_sequence_rules_status_fem import RULES_STATUS
             self.rules = RULES_STATUS
         elif name == 'history':
             from resources.token_sequence_rules_history import RULES_HISTORY

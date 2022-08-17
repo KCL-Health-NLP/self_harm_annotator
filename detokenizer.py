@@ -14,12 +14,6 @@ import sys
 
 from spacy.symbols import LEMMA, LOWER, ORTH, POS, TAG
 
-__author__ = "André Bittar"
-__copyright__ = "Copyright 2020, André Bittar"
-__credits__ = ["André Bittar"]
-__license__ = "GPL"
-__email__ = "andre.bittar@kcl.ac.uk"
-
 
 class Detokenizer(object):
     """
